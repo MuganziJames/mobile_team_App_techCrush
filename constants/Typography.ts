@@ -7,9 +7,9 @@ const Typography = {
   },
   // Font weights
   weights: {
-    regular: '400',
-    semiBold: '600',
-    medium: '500',
+    regular: "400",
+    semiBold: "600",
+    medium: "500",
   },
   // Letter spacing
   tracking: {

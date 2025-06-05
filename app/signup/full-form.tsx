@@ -9,7 +9,8 @@ import { useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SignUpFullForm() {
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const params = useLocalSearchParams();
+  const email = params.email as string;
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
     color: Colors.black,
     letterSpacing: Typography.tracking.h1,
     marginTop: Layout.spacing.lg,
@@ -239,7 +240,7 @@ const styles = StyleSheet.create({
   },
   link: {
     color: Colors.primary,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
   },
   termsError: {
     color: Colors.errorRed,

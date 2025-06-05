@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
     color: Colors.black,
     letterSpacing: Typography.tracking.h1,
     marginTop: Layout.spacing.lg,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   link: {
     color: Colors.primary,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
   },
   footer: {
     marginTop: 'auto',
@@ -185,6 +185,6 @@ const styles = StyleSheet.create({
   },
   signInLink: {
     color: Colors.primary,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
   },
 }); 

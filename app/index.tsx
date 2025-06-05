@@ -1,10 +1,8 @@
 import Logo from '@/components/ui/Logo';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export default function SplashScreen() {
   useEffect(() => {
@@ -18,8 +16,7 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <Logo size={160} />
-      <Text style={styles.title}>AfriStyle</Text>
+      <Logo size={240} />
     </View>
   );
 }
@@ -30,12 +27,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  title: {
-    marginTop: Layout.spacing.md,
-    fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
-    color: Colors.black,
-    letterSpacing: Typography.tracking.h1,
-  },
+  }
 }); 

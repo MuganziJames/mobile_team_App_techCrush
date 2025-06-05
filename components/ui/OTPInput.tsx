@@ -46,7 +46,9 @@ export default function OTPInput({ length, value, onChange, style }: OTPInputPro
           ]}
         >
           <TextInput
-            ref={ref => inputRefs.current[index] = ref}
+            ref={(ref) => {
+              inputRefs.current[index] = ref;
+            }}
             style={styles.input}
             maxLength={1}
             keyboardType="numeric"
@@ -84,7 +86,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.medium,
+    fontWeight: "500",
     color: Colors.black,
     textAlign: 'center',
   },

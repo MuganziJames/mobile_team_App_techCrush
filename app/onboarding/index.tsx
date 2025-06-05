@@ -11,7 +11,7 @@ import OnboardingScreen5 from './screen5';
 import OnboardingScreen6 from './screen6';
 
 export default function OnboardingIndex() {
-  const [currentScreen, setCurrentScreen] = useState(0);
+  const [currentScreen, setCurrentScreen] = useState<number>(0);
   const screens = [
     <OnboardingScreen4 />,
     <OnboardingScreen5 />,

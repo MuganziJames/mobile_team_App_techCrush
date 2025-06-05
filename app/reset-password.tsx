@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
     color: Colors.black,
     letterSpacing: Typography.tracking.h1,
     marginBottom: Layout.spacing.sm,
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
     color: Colors.black,
     marginBottom: Layout.spacing.sm,
     textAlign: 'center',

@@ -11,7 +11,9 @@ import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 const OTP_LENGTH = 6;
 
 export default function VerifyOTPScreen() {
-  const { email, type } = useLocalSearchParams<{ email: string; type: string }>();
+  const params = useLocalSearchParams();
+  const email = params.email as string;
+  const type = params.type as string;
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(30);
   const [isResending, setIsResending] = useState(false);
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Typography.sizes.h1,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
     color: Colors.black,
     letterSpacing: Typography.tracking.h1,
     marginBottom: Layout.spacing.sm,
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   emailText: {
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
   },
   otpInput: {
     marginTop: Layout.spacing.md,
@@ -156,7 +158,7 @@ const styles = StyleSheet.create({
   },
   resendButton: {
     color: Colors.primary,
-    fontWeight: Typography.weights.semiBold,
+    fontWeight: "600",
   },
   resendDisabled: {
     color: Colors.midGray,
