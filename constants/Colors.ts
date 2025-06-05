@@ -6,7 +6,17 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
-export const Colors = {
+const Colors = {
+  primary: '#E76E2C',    // Primary Orange (buttons, accents)
+  black: '#000000',      // Black (headings)
+  darkGray: '#333333',   // Dark Gray (body text)
+  midGray: '#707070',    // Mid Gray (placeholders / meta)
+  lightGray: '#F4F4F4',  // Light Gray (field fills)
+  errorRed: '#E0544C',   // Error Red (validation)
+  white: '#FFFFFF',      // White
+  disabledBg: '#E76E2C33', // Primary Orange with 20% opacity
+  disabledText: '#FFFFFF66', // White with 40% opacity
+  inactiveDot: '#D4D4D4', // Inactive pagination dot
   light: {
     text: '#11181C',
     background: '#fff',
@@ -24,3 +34,5 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+export default Colors;
