@@ -1,13 +1,16 @@
-import Button from '@/components/ui/Button';
-import Divider from '@/components/ui/Divider';
 import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function SignUpEmailScreen() {
   const [email, setEmail] = useState('');
@@ -45,61 +48,69 @@ export default function SignUpEmailScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Join AfriStyle Today!</Text>
-        <Text style={styles.subtitle}>
-          Explore exclusive, modern and exquisite African Designs at your fingertips.
-        </Text>
-        
-        <View style={styles.form}>
-          <TextField
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            hasError={!!errors.email}
-            errorText={errors.email}
-          />
+        <View style={styles.content}>
+          <Text style={styles.title}>Join AfriStyle Today!</Text>
+          <Text style={styles.subtitle}>
+            Explore exclusive, modern and exquisite African Designs at your fingertips.
+          </Text>
           
-          <Button
-            title="Continue with Email"
-            onPress={handleContinue}
-            style={styles.button}
-          />
-          
-          <Divider label="or Sign Up with" style={styles.divider} />
-          
-          <View style={styles.socialButtons}>
+          <View style={styles.form}>
+            <Text style={styles.fieldLabel}>Email address</Text>
+            <TextField
+              placeholder="youremail@gmail.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              hasError={!!errors.email}
+              errorText={errors.email}
+              style={styles.textInput}
+            />
+            
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleContinue}
+            >
+              <Text style={styles.primaryButtonText}>Continue with Email</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or Sign Up with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+            
             <TouchableOpacity 
-              style={[styles.socialButton, styles.googleButton]}
+              style={styles.socialButton}
               onPress={() => handleSocialSignUp('Google')}
             >
-              <Ionicons name="logo-google" size={20} color={Colors.darkGray} />
-              <Text style={styles.socialButtonText}>Google</Text>
+              <Ionicons name="logo-google" size={20} color="#DB4437" />
+              <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.socialButton, styles.appleButton]}
+              style={styles.socialButton}
               onPress={() => handleSocialSignUp('Apple')}
             >
-              <Ionicons name="logo-apple" size={20} color={Colors.darkGray} />
-              <Text style={styles.socialButtonText}>Apple</Text>
+              <Ionicons name="logo-apple" size={20} color="#000" />
+              <Text style={styles.socialButtonText}>Continue with Apple</Text>
             </TouchableOpacity>
+            
+            <Text style={styles.disclaimer}>
+              By continuing, you agree to the{' '}
+              <Text style={styles.link}>Terms of Service</Text>{' '}
+              and <Text style={styles.link}>Privacy Policy</Text>
+            </Text>
           </View>
           
-          <Text style={styles.disclaimer}>
-            By continuing, you agree to the{' '}
-            <Text style={styles.link}>Terms of Service</Text> and{' '}
-            <Text style={styles.link}>Privacy Policy</Text>.
-          </Text>
-        </View>
-        
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Already have an account?{' '}
-            <Link href="/signin" style={styles.signInLink}>
-              Log in
-            </Link>
-          </Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Already have an account?{' '}
+              <Link href="/signin" style={styles.signInLink}>
+                Log In
+              </Link>
+            </Text>
+            <View style={styles.bottomIndicator} />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -113,78 +124,110 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: Layout.horizontalMargin,
+  },
+  content: {
+    flex: 1,
+    padding: 24,
   },
   title: {
-    fontSize: Typography.sizes.h1,
+    fontSize: 24,
     fontWeight: "600",
     color: Colors.black,
-    letterSpacing: Typography.tracking.h1,
-    marginTop: Layout.spacing.lg,
-    marginBottom: Layout.spacing.xs,
+    textAlign: 'center',
+    marginTop: 24,
   },
   subtitle: {
-    fontSize: Typography.sizes.body,
+    fontSize: 14,
     color: Colors.darkGray,
-    marginBottom: Layout.spacing.lg,
+    textAlign: 'center',
+    marginHorizontal: 24,
+    marginTop: 8,
+    marginBottom: 24,
   },
   form: {
     width: '100%',
-    marginTop: Layout.spacing.md,
+    marginTop: 16,
   },
-  button: {
-    marginTop: Layout.spacing.sm,
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.black,
+    marginBottom: 6,
+  },
+  textInput: {
+    marginBottom: 20,
+  },
+  primaryButton: {
+    backgroundColor: '#E9642C', // Orange color from the design
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  primaryButtonText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 16,
   },
   divider: {
-    marginVertical: Layout.spacing.lg,
-  },
-  socialButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E1E1E1',
+  },
+  dividerText: {
+    color: Colors.darkGray,
+    paddingHorizontal: 16,
+    fontSize: 14,
   },
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: Layout.buttonHeight,
-    borderRadius: Layout.borderRadius,
+    height: 50,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.midGray,
-    paddingHorizontal: Layout.spacing.md,
-    flex: 0.48,
-  },
-  googleButton: {
-    marginRight: Layout.spacing.xs,
-  },
-  appleButton: {
-    marginLeft: Layout.spacing.xs,
+    borderColor: '#E1E1E1',
+    marginBottom: 16,
   },
   socialButtonText: {
-    fontSize: Typography.sizes.body,
-    color: Colors.darkGray,
-    marginLeft: Layout.spacing.xs,
+    fontSize: 16,
+    color: Colors.black,
+    marginLeft: 8,
   },
   disclaimer: {
-    marginTop: Layout.spacing.lg,
-    fontSize: Typography.sizes.caption,
+    marginTop: 8,
+    fontSize: 13,
     color: Colors.darkGray,
     textAlign: 'center',
   },
   link: {
-    color: Colors.primary,
-    fontWeight: "600",
+    color: '#E9642C',
+    fontWeight: "500",
   },
   footer: {
     marginTop: 'auto',
-    paddingVertical: Layout.spacing.lg,
     alignItems: 'center',
+    paddingVertical: 16,
   },
   footerText: {
-    fontSize: Typography.sizes.body,
+    fontSize: 14,
     color: Colors.darkGray,
+    marginBottom: 16,
   },
   signInLink: {
-    color: Colors.primary,
+    color: '#E9642C',
     fontWeight: "600",
+  },
+  bottomIndicator: {
+    width: 134,
+    height: 5,
+    backgroundColor: Colors.black,
+    borderRadius: 3,
   },
 }); 

@@ -1,12 +1,17 @@
-import Button from '@/components/ui/Button';
 import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function SignUpFullForm() {
   const params = useLocalSearchParams();
@@ -23,6 +28,8 @@ export default function SignUpFullForm() {
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,96 +92,133 @@ export default function SignUpFullForm() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Join AfriStyle Today!</Text>
-        <Text style={styles.subtitle}>
-          Explore exclusive, modern and exquisite African Designs at your fingertips.
-        </Text>
-        
-        <View style={styles.form}>
-          <View style={styles.nameRow}>
-            <View style={styles.nameField}>
-              <TextField
-                placeholder="First Name"
-                value={formData.firstName}
-                onChangeText={(text) => handleChange('firstName', text)}
-                hasError={!!errors.firstName}
-                errorText={errors.firstName}
-              />
-            </View>
+        <View style={styles.content}>
+          <Text style={styles.title}>Join AfriStyle Today!</Text>
+          <Text style={styles.subtitle}>
+            Explore exclusive, modern and exquisite African Designs at your fingertips.
+          </Text>
+          
+          <View style={styles.form}>
+            <Text style={styles.fieldLabel}>First name</Text>
+            <TextField
+              placeholder="Adams"
+              value={formData.firstName}
+              onChangeText={(text) => handleChange('firstName', text)}
+              hasError={!!errors.firstName}
+              errorText={errors.firstName}
+              style={styles.textInput}
+            />
             
-            <View style={styles.nameField}>
-              <TextField
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChangeText={(text) => handleChange('lastName', text)}
-                hasError={!!errors.lastName}
-                errorText={errors.lastName}
+            <Text style={styles.fieldLabel}>Last name</Text>
+            <TextField
+              placeholder="Agbaifa"
+              value={formData.lastName}
+              onChangeText={(text) => handleChange('lastName', text)}
+              hasError={!!errors.lastName}
+              errorText={errors.lastName}
+              style={styles.textInput}
+            />
+            
+            <Text style={styles.fieldLabel}>Email address</Text>
+            <TextField
+              placeholder="youremail@gmail.com"
+              value={formData.email}
+              onChangeText={(text) => handleChange('email', text)}
+              keyboardType="email-address"
+              hasError={!!errors.email}
+              errorText={errors.email}
+              style={styles.textInput}
+            />
+            
+            <Text style={styles.fieldLabel}>Phone Number</Text>
+            <View style={styles.phoneInputContainer}>
+              <View style={styles.countryCodeContainer}>
+                <Ionicons name="flag-outline" size={16} color="#666" />
+                <Text style={styles.countryCode}>+1</Text>
+                <Ionicons name="chevron-down" size={16} color="#666" />
+              </View>
+              <TextInput
+                style={styles.phoneInput}
+                placeholder="(+44) 7682 36713"
+                value={formData.phone}
+                onChangeText={(text) => handleChange('phone', text)}
+                keyboardType="phone-pad"
               />
             </View>
+            {!!errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+            
+            <Text style={styles.fieldLabel}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="•••••••••••"
+                value={formData.password}
+                onChangeText={(text) => handleChange('password', text)}
+                secureTextEntry={!passwordVisible}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setPasswordVisible(!passwordVisible)}
+              >
+                <Ionicons 
+                  name={passwordVisible ? "eye-off" : "eye"} 
+                  size={22} 
+                  color="#666" 
+                />
+              </TouchableOpacity>
+            </View>
+            {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            
+            <Text style={styles.fieldLabel}>Confirm Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="•••••••••••"
+                value={formData.confirmPassword}
+                onChangeText={(text) => handleChange('confirmPassword', text)}
+                secureTextEntry={!confirmPasswordVisible}
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon}
+                onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+              >
+                <Ionicons 
+                  name={confirmPasswordVisible ? "eye-off" : "eye"} 
+                  size={22} 
+                  color="#666" 
+                />
+              </TouchableOpacity>
+            </View>
+            {!!errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+            
+            <View style={styles.termsContainer}>
+              <TouchableOpacity
+                style={styles.checkbox}
+                onPress={() => setAgreeToTerms(!agreeToTerms)}
+              >
+                {agreeToTerms && (
+                  <View style={styles.checkboxInner}>
+                    <Ionicons name="checkmark" size={14} color="#fff" />
+                  </View>
+                )}
+              </TouchableOpacity>
+              <Text style={styles.termsText}>
+                By signing up, you agree to our{' '}
+                <Text style={styles.termsLink}>Terms and Conditions</Text> and{' '}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
+              </Text>
+            </View>
+            {!!errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
+            
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitButtonText}>Continue</Text>
+            </TouchableOpacity>
           </View>
           
-          <TextField
-            placeholder="Email"
-            value={formData.email}
-            onChangeText={(text) => handleChange('email', text)}
-            keyboardType="email-address"
-            hasError={!!errors.email}
-            errorText={errors.email}
-          />
-          
-          <TextField
-            placeholder="Phone Number"
-            value={formData.phone}
-            onChangeText={(text) => handleChange('phone', text)}
-            keyboardType="phone-pad"
-            hasError={!!errors.phone}
-            errorText={errors.phone}
-          />
-          
-          <TextField
-            placeholder="Password"
-            value={formData.password}
-            onChangeText={(text) => handleChange('password', text)}
-            secureTextEntry
-            hasError={!!errors.password}
-            errorText={errors.password}
-          />
-          
-          <TextField
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChangeText={(text) => handleChange('confirmPassword', text)}
-            secureTextEntry
-            hasError={!!errors.confirmPassword}
-            errorText={errors.confirmPassword}
-          />
-          
-          <TouchableOpacity 
-            style={styles.checkboxContainer}
-            activeOpacity={0.7}
-            onPress={() => setAgreeToTerms(!agreeToTerms)}
-          >
-            <View style={[styles.checkbox, agreeToTerms && styles.checkboxChecked]}>
-              {agreeToTerms && (
-                <Ionicons name="checkmark" size={16} color={Colors.white} />
-              )}
-            </View>
-            <Text style={styles.checkboxLabel}>
-              I agree to the{' '}
-              <Text style={styles.link}>Terms of Service</Text> and{' '}
-              <Text style={styles.link}>Privacy Policy</Text>
-            </Text>
-          </TouchableOpacity>
-          
-          {errors.terms && (
-            <Text style={styles.termsError}>{errors.terms}</Text>
-          )}
-          
-          <Button
-            title="Continue"
-            onPress={handleSubmit}
-            style={styles.button}
-          />
+          <View style={styles.bottomIndicator} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -188,67 +232,140 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: Layout.horizontalMargin,
+  },
+  content: {
+    flex: 1,
+    padding: 24,
   },
   title: {
-    fontSize: Typography.sizes.h1,
+    fontSize: 24,
     fontWeight: "600",
     color: Colors.black,
-    letterSpacing: Typography.tracking.h1,
-    marginTop: Layout.spacing.lg,
-    marginBottom: Layout.spacing.xs,
+    textAlign: 'center',
+    marginTop: 12,
   },
   subtitle: {
-    fontSize: Typography.sizes.body,
+    fontSize: 14,
     color: Colors.darkGray,
-    marginBottom: Layout.spacing.lg,
+    textAlign: 'center',
+    marginHorizontal: 24,
+    marginTop: 8,
+    marginBottom: 16,
   },
   form: {
     width: '100%',
-    marginTop: Layout.spacing.md,
   },
-  nameRow: {
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.black,
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  textInput: {
+    marginBottom: 4,
+  },
+  phoneInputContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    height: 50,
+    borderColor: '#E1E1E1',
+    borderWidth: 1,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 4,
   },
-  nameField: {
-    width: '48%',
-  },
-  checkboxContainer: {
+  countryCodeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: Layout.spacing.md,
+    paddingHorizontal: 12,
+    borderRightWidth: 1,
+    borderRightColor: '#E1E1E1',
+    width: 80,
+  },
+  countryCode: {
+    fontSize: 14,
+    marginRight: 4,
+    marginLeft: 4,
+  },
+  phoneInput: {
+    flex: 1,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    borderColor: '#E1E1E1',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+  eyeIcon: {
+    paddingHorizontal: 12,
+  },
+  errorText: {
+    color: '#E53935',
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 16,
+    marginBottom: 8,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: Colors.midGray,
-    marginRight: Layout.spacing.xs,
+    borderColor: '#E9642C',
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxChecked: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+  checkboxInner: {
+    width: 20,
+    height: 20,
+    borderRadius: 3,
+    backgroundColor: '#E9642C',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  checkboxLabel: {
+  termsText: {
     flex: 1,
-    fontSize: Typography.sizes.caption,
+    fontSize: 13,
     color: Colors.darkGray,
+    lineHeight: 18,
   },
-  link: {
-    color: Colors.primary,
-    fontWeight: "600",
+  termsLink: {
+    color: '#E9642C',
   },
-  termsError: {
-    color: Colors.errorRed,
-    fontSize: Typography.sizes.caption,
-    marginBottom: Layout.spacing.sm,
-    marginLeft: Layout.spacing.xs,
+  submitButton: {
+    backgroundColor: '#E9642C',
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
   },
-  button: {
-    marginTop: Layout.spacing.sm,
+  submitButtonText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  bottomIndicator: {
+    width: 134,
+    height: 5,
+    backgroundColor: Colors.black,
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 40,
   },
 }); 
