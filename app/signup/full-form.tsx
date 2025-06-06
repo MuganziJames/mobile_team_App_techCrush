@@ -217,8 +217,6 @@ export default function SignUpFullForm() {
               <Text style={styles.submitButtonText}>Continue</Text>
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.bottomIndicator} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -359,13 +357,5 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: '600',
     fontSize: 16,
-  },
-  bottomIndicator: {
-    width: 134,
-    height: 5,
-    backgroundColor: Colors.black,
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginTop: 40,
-  },
+  }
 }); 

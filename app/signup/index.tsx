@@ -109,7 +109,6 @@ export default function SignUpEmailScreen() {
                 Log In
               </Link>
             </Text>
-            <View style={styles.bottomIndicator} />
           </View>
         </View>
       </ScrollView>
@@ -218,16 +217,9 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: Colors.darkGray,
-    marginBottom: 16,
   },
   signInLink: {
     color: '#E9642C',
     fontWeight: "600",
-  },
-  bottomIndicator: {
-    width: 134,
-    height: 5,
-    backgroundColor: Colors.black,
-    borderRadius: 3,
-  },
+  }
 }); 
