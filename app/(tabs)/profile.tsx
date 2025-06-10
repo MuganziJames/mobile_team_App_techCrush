@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   // Orange header with curved bottom
   orangeHeader: {
     backgroundColor: '#E76E2C',
-    borderBottomLeftRadius: 70,
-    borderBottomRightRadius: 70,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
     height: 200, // Restored to 200px to accommodate avatar at y=144
     position: 'relative',
   },

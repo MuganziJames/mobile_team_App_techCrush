@@ -1,3 +1,4 @@
+import { useLike } from '@/contexts/SaveContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -82,9 +83,16 @@ export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { likePost, unlikePost, isPostLiked } = useLike();
 
   const featuredPosts = blogPosts.filter(post => post.featured);
   const popularPosts = blogPosts.slice(0, 4);
+
+  // Filter posts based on search query
+  const filteredPosts = blogPosts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleShowAll = () => {
     setShowAll(true);
@@ -94,12 +102,19 @@ export default function BlogScreen() {
     setShowAll(false);
   };
 
-  const handleBookmark = (postId: number) => {
-    console.log('Bookmark post:', postId);
-  };
-
-  const handleLike = (postId: number) => {
-    console.log('Like post:', postId);
+  const handleLike = async (post: any) => {
+    if (isPostLiked(post.id)) {
+      await unlikePost(post.id);
+    } else {
+      await likePost({
+        id: post.id,
+        title: post.title,
+        date: post.date,
+        image: post.image,
+        category: post.category,
+        likedAt: new Date().toISOString()
+      });
+    }
   };
 
   const handlePostPress = (postId: number) => {
@@ -110,34 +125,83 @@ export default function BlogScreen() {
   };
 
   if (showAll) {
+    const postsToShow = searchQuery ? filteredPosts : blogPosts;
+    
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>All</Text>
-          <TouchableOpacity style={styles.bookmarkButton}>
-            <Ionicons name="bookmark-outline" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {blogPosts.map((post) => (
-            <TouchableOpacity 
-              key={post.id} 
-              style={styles.allPostItem}
-              onPress={() => handlePostPress(post.id)}
-              activeOpacity={0.7}
-            >
-              <Image source={{ uri: post.image }} style={styles.allPostImage} />
-              <View style={styles.allPostContent}>
-                <Text style={styles.allPostTitle}>{post.title}</Text>
-                <Text style={styles.allPostDate}>{post.date}</Text>
-              </View>
+          {/* Header - Now scrollable */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={24} color="#000" />
             </TouchableOpacity>
-          ))}
+            <Text style={styles.headerTitle}>All</Text>
+            <TouchableOpacity 
+              style={styles.likedButton}
+              onPress={() => router.push('/(tabs)/explore')}
+            >
+              <Ionicons name="heart-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="#999"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {postsToShow.length === 0 ? (
+            <View style={styles.noResultsContainer}>
+              <Ionicons name="search-outline" size={60} color="#E0E0E0" />
+              <Text style={styles.noResultsText}>No posts found</Text>
+              <Text style={styles.noResultsSubtext}>
+                Try searching with different keywords
+              </Text>
+            </View>
+          ) : (
+            postsToShow.map((post) => (
+              <View key={post.id} style={styles.allPostItem}>
+                <TouchableOpacity 
+                  style={styles.allPostContent}
+                  onPress={() => handlePostPress(post.id)}
+                  activeOpacity={0.7}
+                >
+                  <Image source={{ uri: post.image }} style={styles.allPostImage} />
+                  <View style={styles.allPostInfo}>
+                    <Text style={styles.allPostTitle}>{post.title}</Text>
+                    <View style={styles.dateContainer}>
+                      <Ionicons name="calendar-outline" size={12} color="#999" />
+                      <Text style={styles.allPostDate}>{post.date}</Text>
+                    </View>
+                    <Text style={styles.allPostCategory}>{post.category}</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.likeButton}
+                  onPress={() => handleLike(post)}
+                >
+                  <Ionicons 
+                    name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
+                    size={24} 
+                    color={isPostLiked(post.id) ? "#FF6B35" : "#999"} 
+                  />
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </SafeAreaView>
@@ -146,39 +210,49 @@ export default function BlogScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Blog</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-
-      {/* Subtitle */}
-      <View style={styles.subtitleContainer}>
-        <Text style={styles.subtitle}>
-          <Text style={styles.subtitleHighlight}>Ideas</Text>
-          <Text> That </Text>
-          <Text style={styles.subtitleHighlight}>Inspire</Text>
-        </Text>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
-          />
-        </View>
-      </View>
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header - Now scrollable */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Blog</Text>
+          <TouchableOpacity 
+            style={styles.likedButton}
+            onPress={() => router.push('/(tabs)/explore')}
+          >
+            <Ionicons name="heart-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Subtitle */}
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>
+            <Text style={styles.subtitleHighlight}>Ideas</Text>
+            <Text> That </Text>
+            <Text style={styles.subtitleHighlight}>Inspire</Text>
+          </Text>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#999"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color="#999" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
         {/* Featured Posts Carousel */}
         <ScrollView
           horizontal
@@ -201,13 +275,17 @@ export default function BlogScreen() {
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{post.title}</Text>
                 <TouchableOpacity
-                  style={styles.likeButton}
+                  style={styles.featuredLikeButton}
                   onPress={(e) => {
                     e.stopPropagation();
-                    handleLike(post.id);
+                    handleLike(post);
                   }}
                 >
-                  <Ionicons name="heart-outline" size={24} color="#fff" />
+                  <Ionicons 
+                    name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
+                    size={24} 
+                    color="#fff" 
+                  />
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -244,11 +322,14 @@ export default function BlogScreen() {
               activeOpacity={0.7}
             >
               <Image source={{ uri: post.image }} style={styles.popularImage} />
-              <View style={styles.popularContent}>
+              <View style={styles.popularInfo}>
                 <Text style={styles.popularTitle} numberOfLines={2}>
                   {post.title}
                 </Text>
-                <Text style={styles.popularDate}>{post.date}</Text>
+                <View style={styles.dateContainer}>
+                  <Ionicons name="calendar-outline" size={12} color="#999" />
+                  <Text style={styles.popularDate}>{post.date}</Text>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
@@ -286,7 +367,7 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 40,
   },
-  bookmarkButton: {
+  likedButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -361,8 +442,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 12,
   },
-  likeButton: {
+  featuredLikeButton: {
     padding: 4,
+    marginRight: 8,
   },
   indicators: {
     flexDirection: 'row',
@@ -418,7 +500,7 @@ const styles = StyleSheet.create({
     height: 80,
     resizeMode: 'cover',
   },
-  popularContent: {
+  popularInfo: {
     flex: 1,
     padding: 12,
     justifyContent: 'space-between',
@@ -429,9 +511,14 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 8,
   },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   popularDate: {
     fontSize: 12,
     color: '#999',
+    marginLeft: 4,
   },
   // All posts view styles
   allPostItem: {
@@ -447,12 +534,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  allPostContent: {
+    flex: 1,
+    flexDirection: 'row',
+  },
   allPostImage: {
     width: 100,
     height: 100,
     resizeMode: 'cover',
   },
-  allPostContent: {
+  allPostInfo: {
     flex: 1,
     padding: 16,
     justifyContent: 'space-between',
@@ -466,8 +557,33 @@ const styles = StyleSheet.create({
   allPostDate: {
     fontSize: 12,
     color: '#999',
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  allPostCategory: {
+    fontSize: 12,
+    color: '#999',
+  },
+  likeButton: {
+    padding: 4,
   },
   bottomSpacing: {
     height: 100,
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 16,
+  },
+  noResultsSubtext: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
   },
 }); 
