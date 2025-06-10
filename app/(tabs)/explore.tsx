@@ -61,7 +61,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 100, // Extra padding for bottom tab bar
+    paddingTop: 8,
+    paddingBottom: 100,
   },
   title: {
     fontSize: 20,

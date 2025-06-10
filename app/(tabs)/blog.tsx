@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: Layout.horizontalMargin,
+    paddingTop: 8, // Reduced top padding to match other screens
     paddingBottom: Layout.spacing.lg + 88, // Extra padding for bottom tab bar
     flex: 1,
   },

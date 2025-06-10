@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,
   },

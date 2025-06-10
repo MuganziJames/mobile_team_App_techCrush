@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E76E2C',
     borderBottomLeftRadius: 120,
     borderBottomRightRadius: 120,
-    height: 200, // Fixed height to ensure avatar positioning works
+    height: 160, // Reduced from 200px to 160px
     position: 'relative',
   },
   // Status bar area (44px on iPhone)
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingVertical: 12,
-    height: 56,
+    paddingVertical: 8, // Reduced from 12px to 8px
+    height: 48, // Reduced from 56px to 48px
   },
   backButton: {
     width: 40,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   // Avatar positioned absolutely at y=144px, horizontally centered
   avatarContainer: {
     position: 'absolute',
-    top: 144, // Top edge at y=144px
+    top: 104, // Reduced from 144px to 104px (160 - 56)
     left: 0,
     right: 0,
     alignItems: 'center', // Horizontally center
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   // Content container with top padding to account for overlapping avatar
   contentContainer: {
     paddingHorizontal: 24,
-    paddingTop: 80, // Space for the overlapping avatar (96px height / 2 + some margin)
+    paddingTop: 60, // Reduced from 80px to 60px
   },
   greeting: {
     fontSize: 18,
