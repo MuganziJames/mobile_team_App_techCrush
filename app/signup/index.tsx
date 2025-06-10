@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: Colors.black,
     textAlign: 'center',
-    marginTop: 24,
+    marginTop: 60,
   },
   subtitle: {
     fontSize: 14,

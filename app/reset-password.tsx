@@ -174,7 +174,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
   },
   backButton: {
     width: 40,

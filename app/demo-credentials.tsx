@@ -2,15 +2,15 @@ import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
-    Alert,
-    Clipboard,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Clipboard,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function DemoCredentialsScreen() {
@@ -132,7 +132,8 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: Colors.black,
-    marginTop: 16,
+    textAlign: 'center',
+    marginTop: 60,
     marginBottom: 8,
   },
   subtitle: {

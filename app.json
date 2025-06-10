@@ -4,12 +4,12 @@
     "slug": "mobile_team_App_techCrush",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/AfriStyle.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "mobileteamapptechcrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/AfriStyle.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/AfriStyle.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
@@ -26,7 +26,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/AfriStyle.png"
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",

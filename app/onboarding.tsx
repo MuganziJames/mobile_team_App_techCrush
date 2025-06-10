@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+    paddingTop: 60,
   },
   skipContainer: {
     alignItems: 'flex-end',

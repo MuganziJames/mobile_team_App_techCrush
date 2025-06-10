@@ -166,7 +166,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingBottom: 8, // Reduced from 16px to 8px
+    paddingTop: 60,
+    paddingBottom: 40, // Reduced from 16px to 8px
     backgroundColor: '#F8F8F8',
   },
   backButton: {
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 8, // Reduced from 24px to 8px
+    paddingTop: 0, // Reduced from 24px to 8px
   },
   settingsContainer: {
     paddingHorizontal: 24,

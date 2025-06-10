@@ -169,14 +169,14 @@ const styles = StyleSheet.create({
   // Orange header with curved bottom
   orangeHeader: {
     backgroundColor: '#E76E2C',
-    borderBottomLeftRadius: 120,
-    borderBottomRightRadius: 120,
-    height: 160, // Reduced from 200px to 160px
+    borderBottomLeftRadius: 70,
+    borderBottomRightRadius: 70,
+    height: 200, // Restored to 200px to accommodate avatar at y=144
     position: 'relative',
   },
   // Status bar area (44px on iPhone)
   statusBarArea: {
-    height: 44,
+    height: 60,
   },
   // Navigation bar with back button, title, and menu
   navBar: {
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingVertical: 8, // Reduced from 12px to 8px
-    height: 48, // Reduced from 56px to 48px
+    paddingVertical: 12, // Restored to 12px
+    height: 56, // Restored to 56px
   },
   backButton: {
     width: 40,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   // Avatar positioned absolutely at y=144px, horizontally centered
   avatarContainer: {
     position: 'absolute',
-    top: 104, // Reduced from 144px to 104px (160 - 56)
+    top: 144, // Exact y position as specified
     left: 0,
     right: 0,
     alignItems: 'center', // Horizontally center
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   // Content container with top padding to account for overlapping avatar
   contentContainer: {
     paddingHorizontal: 24,
-    paddingTop: 60, // Reduced from 80px to 60px
+    paddingTop: 80, // Restored to 80px to account for avatar overlap
   },
   greeting: {
     fontSize: 18,

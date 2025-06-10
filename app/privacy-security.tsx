@@ -164,8 +164,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 0, // Status bar space
-    paddingBottom: 16,
+    paddingTop: 60, // Status bar space
+    paddingBottom: 40,
   },
   backButton: {
     width: 40,

@@ -46,6 +46,9 @@ interface AuthContextProps {
   login: (params: LoginParams) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (params: RegisterParams) => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<AuthResult>;
+  verifyOtp: (otp: string) => Promise<AuthResult>;
+  setNewPassword: (password: string, confirmPassword: string) => Promise<AuthResult>;
 }
 
 // Demo credentials
@@ -228,6 +231,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Logout error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
       }
+    },
+
+    resetPassword: async (email: string): Promise<AuthResult> => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true, message: 'Verification code sent' };
+    },
+
+    verifyOtp: async (otp: string): Promise<AuthResult> => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true, message: 'OTP verified' };
+    },
+
+    setNewPassword: async (password: string, confirmPassword: string): Promise<AuthResult> => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true, message: 'Password reset successful' };
     },
   };
 

@@ -1,11 +1,18 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
-    "esModuleInterop": true,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "moduleResolution": "bundler",
+    "noEmit": true,
     "skipLibCheck": true,
-    "lib": ["es2020", "DOM"],
+    "resolveJsonModule": true,
+    "strict": true,
+    "esModuleInterop": true,
     "paths": {
       "@/*": [
         "./*"
@@ -17,5 +24,9 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "extends": "expo/tsconfig.base"
 }
