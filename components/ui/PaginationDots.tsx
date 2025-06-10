@@ -1,21 +1,20 @@
 import Colors from '@/constants/Colors';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-type PaginationDotsProps = {
-  total: number;
-  current: number;
-  style?: StyleProp<ViewStyle>;
-};
+export interface PaginationDotsProps {
+  count: number;
+  activeIndex: number;
+}
 
-export default function PaginationDots({ total, current, style }: PaginationDotsProps) {
+export default function PaginationDots({ count, activeIndex }: PaginationDotsProps) {
   return (
-    <View style={[styles.container, style]}>
-      {Array.from({ length: total }).map((_, index) => (
+    <View style={styles.container}>
+      {Array.from({ length: count }).map((_, index) => (
         <View
           key={index}
           style={[
             styles.dot,
-            index === current ? styles.activeDot : styles.inactiveDot,
+            index === activeIndex ? styles.activeDot : styles.inactiveDot,
           ]}
         />
       ))}
@@ -26,19 +25,20 @@ export default function PaginationDots({ total, current, style }: PaginationDots
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginHorizontal: 3,
+    marginHorizontal: 4,
   },
   activeDot: {
     backgroundColor: Colors.primary,
+    width: 24,
   },
   inactiveDot: {
-    backgroundColor: Colors.inactiveDot,
+    backgroundColor: Colors.midGray,
   },
 }); 

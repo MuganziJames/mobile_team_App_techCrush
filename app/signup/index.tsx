@@ -4,6 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -15,8 +18,11 @@ import {
 export default function SignUpEmailScreen() {
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ email?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleContinue = () => {
+    Keyboard.dismiss();
+    
     // Basic validation
     const newErrors: { email?: string } = {};
     
@@ -31,15 +37,22 @@ export default function SignUpEmailScreen() {
       return;
     }
     
-    // Proceed to full registration form
-    router.push({
-      pathname: '/signup/full-form',
-      params: { email }
-    });
+    // Simulate loading
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setIsLoading(false);
+      // Proceed to full registration form
+      console.log('Navigating to full-form with email:', email);
+      router.push({
+        pathname: '/signup/full-form',
+        params: { email }
+      });
+    }, 1000);
   };
 
   const handleSocialSignUp = (provider: string) => {
-    console.log(`Sign up with ${provider}`);
+    Alert.alert('Social Sign Up', `${provider} signup is not implemented yet.`);
   };
 
   return (
@@ -67,10 +80,16 @@ export default function SignUpEmailScreen() {
             />
             
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, isLoading && styles.disabledButton]}
               onPress={handleContinue}
+              disabled={isLoading}
+              activeOpacity={0.7}
             >
-              <Text style={styles.primaryButtonText}>Continue with Email</Text>
+              {isLoading ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={styles.primaryButtonText}>Continue with Email</Text>
+              )}
             </TouchableOpacity>
             
             <View style={styles.divider}>
@@ -163,6 +182,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
   primaryButtonText: {
     color: Colors.white,

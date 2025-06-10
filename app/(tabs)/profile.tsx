@@ -1,103 +1,91 @@
-import Button from '@/components/ui/Button';
-import FormField from '@/components/ui/FormField';
-import TopAppBar from '@/components/ui/TopAppBar';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { StatusBar } from 'expo-status-bar';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
-  // Mock user data
-  const user = {
-    fullName: 'Abdul Aziz',
-    username: 'Hey Abdul_Z',
-    dateOfBirth: 'May 22, 2004',
-    email: 'unnuimail@gmail.com',
-    phone: '+1 (123) 456-7890',
-    profilePicture: 'https://i.pravatar.cc/150?img=8',
-    country: 'US (+1)',
-    phoneNumber: '(123) 456-7890',
-  };
-
-  const handleDeleteProfile = () => {
-    Alert.alert(
-      'Delete Profile',
-      'Are you sure you want to delete your profile? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            // Implement delete functionality
-          },
-        },
-      ]
-    );
-  };
+  const { user } = useAuth();
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <TopAppBar 
-        title="My Profile" 
-        rightComponent={<Ionicons name="ellipsis-vertical" size={24} color={Colors.black} />}
-      />
-      
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: user.profilePicture }}
-              style={styles.avatar}
-            />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Profile</Text>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="settings-outline" size={24} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.content}>
+        <View style={styles.profileHeader}>
+          <View style={styles.profileImageContainer}>
+            <View style={styles.profileImage}>
+              <Text style={styles.profileInitials}>
+                {user?.firstName?.charAt(0) || ''}
+                {user?.lastName?.charAt(0) || ''}
+              </Text>
+            </View>
           </View>
-          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.profileName}>{user?.firstName} {user?.lastName}</Text>
+          <Text style={styles.profileEmail}>{user?.email}</Text>
         </View>
-        
-        <View style={styles.formContainer}>
-          <FormField label="Full Name" value={user.fullName} />
-          <FormField label="Date of Birth" value={user.dateOfBirth} />
-          <FormField label="Email address" value={user.email} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Account</Text>
           
-          <View style={styles.phoneSection}>
-            <Text style={styles.sectionLabel}>Phone Number</Text>
-            <View style={styles.phoneRow}>
-              <View style={[styles.fieldContainer, styles.countryField]}>
-                <Text style={styles.fieldValue}>{user.country}</Text>
-              </View>
-              <View style={[styles.fieldContainer, styles.phoneField]}>
-                <Text style={styles.fieldValue}>{user.phoneNumber}</Text>
-              </View>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="person-outline" size={22} color={Colors.primary} />
             </View>
-          </View>
+            <Text style={styles.menuItemText}>Edit Profile</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
           
-          <View style={styles.photoSection}>
-            <Text style={styles.sectionLabel}>Profile Picture</Text>
-            <View style={styles.photoContainer}>
-              <View style={styles.photoPlaceholder}>
-                <Ionicons name="camera" size={24} color={Colors.darkGray} />
-              </View>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="location-outline" size={22} color={Colors.primary} />
             </View>
-          </View>
+            <Text style={styles.menuItemText}>Shipping Addresses</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
           
-          <Button
-            title="Delete Profile"
-            onPress={handleDeleteProfile}
-            style={styles.deleteButton}
-          />
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="card-outline" size={22} color={Colors.primary} />
+            </View>
+            <Text style={styles.menuItemText}>Payment Methods</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="notifications-outline" size={22} color={Colors.primary} />
+            </View>
+            <Text style={styles.menuItemText}>Notifications</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Orders</Text>
+          
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="time-outline" size={22} color={Colors.primary} />
+            </View>
+            <Text style={styles.menuItemText}>Order History</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemIcon}>
+              <Ionicons name="heart-outline" size={22} color={Colors.primary} />
+            </View>
+            <Text style={styles.menuItemText}>Wishlist</Text>
+            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
+          </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -106,94 +94,92 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: Layout.spacing.lg + 88, // Extra padding for bottom tab bar
-  },
   header: {
-    height: Layout.window.height * 0.25,
-    backgroundColor: Colors.primary,
-    borderBottomLeftRadius: 60,
-    borderBottomRightRadius: 60,
-    alignItems: 'center',
-    paddingTop: Layout.spacing.sm,
-  },
-  avatarContainer: {
-    marginTop: Layout.spacing.md,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: Colors.white,
-    overflow: 'hidden',
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-  },
-  username: {
-    marginTop: Layout.spacing.sm,
-    color: Colors.white,
-    fontSize: Typography.sizes.body,
-    fontWeight: '600',
-  },
-  formContainer: {
-    padding: Layout.horizontalMargin,
-    marginTop: Layout.spacing.md,
-  },
-  phoneSection: {
-    marginBottom: Layout.spacing.md,
-  },
-  sectionLabel: {
-    fontSize: Typography.sizes.caption,
-    fontWeight: '500',
-    color: Colors.darkGray,
-    marginBottom: Layout.spacing.xs / 2,
-    marginLeft: Layout.spacing.xs / 2,
-  },
-  phoneRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
   },
-  fieldContainer: {
-    height: Layout.textFieldHeight,
-    backgroundColor: Colors.lightGray,
-    borderWidth: 1,
-    borderColor: Colors.midGray,
-    borderRadius: Layout.borderRadius,
-    justifyContent: 'center',
-    paddingHorizontal: Layout.spacing.sm,
-  },
-  countryField: {
-    width: '30%',
-    marginRight: Layout.spacing.xs,
-  },
-  phoneField: {
-    flex: 1,
-  },
-  fieldValue: {
-    fontSize: Typography.sizes.body,
-    fontWeight: '400',
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
     color: Colors.black,
   },
-  photoSection: {
-    marginBottom: Layout.spacing.md,
-  },
-  photoContainer: {
-    marginVertical: Layout.spacing.xs,
-  },
-  photoPlaceholder: {
-    height: 48,
-    width: '100%',
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.lightGray,
-    borderWidth: 1,
-    borderColor: Colors.midGray,
-    borderRadius: Layout.borderRadius,
+  },
+  content: {
+    flex: 1,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  profileImageContainer: {
+    marginBottom: 12,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  deleteButton: {
-    marginTop: Layout.spacing.md,
-    backgroundColor: Colors.primary,
+  profileInitials: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.black,
+    marginBottom: 4,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: Colors.darkGray,
+  },
+  section: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.black,
+    marginBottom: 16,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  menuItemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.black,
   },
 }); 

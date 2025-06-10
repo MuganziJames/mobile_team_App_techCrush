@@ -1,24 +1,34 @@
-import Button from '@/components/ui/Button';
-import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function ResetPasswordScreen() {
+  const { setNewPassword, isLoading } = useAuth();
+  const params = useLocalSearchParams();
+  const email = params.email as string;
+  
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const handleBack = () => {
-    router.back();
-  };
-
-  const validatePasswords = () => {
+  const validateForm = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
     
     if (!password) {
@@ -31,92 +41,123 @@ export default function ResetPasswordScreen() {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     
-    return newErrors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleResetPassword = () => {
-    const newErrors = validatePasswords();
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  const handleSubmit = async () => {
+    if (!validateForm()) {
       return;
     }
     
-    // Show success modal
-    setShowSuccessModal(true);
-  };
-
-  const handleLoginAfterReset = () => {
-    setShowSuccessModal(false);
-    router.replace('/signin');
+    const result = await setNewPassword(password, confirmPassword);
+    
+    if (result.success) {
+      Alert.alert(
+        'Password Reset Successful',
+        'Your password has been reset successfully. You can now login with your new password.',
+        [
+          { text: 'Login', onPress: () => router.replace('/signin') }
+        ]
+      );
+    } else {
+      Alert.alert('Error', result.message || 'Failed to reset password. Please try again.');
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.content}>
-        <Text style={styles.title}>Reset Your Password</Text>
-        <Text style={styles.subtitle}>
-          Set your new password! Make sure your new password is different from your previous password.
-        </Text>
-        
-        <TextField
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          hasError={!!errors.password}
-          errorText={errors.password}
-          style={styles.input}
-        />
-        
-        <TextField
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          hasError={!!errors.confirmPassword}
-          errorText={errors.confirmPassword}
-          style={styles.input}
-        />
-        
-        <Button
-          title="Set New Password"
-          onPress={handleResetPassword}
-          style={styles.button}
-        />
-      </View>
-      
-      {/* Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        transparent
-        animationType="fade"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.successIconContainer}>
-              <Ionicons name="checkmark-circle" size={60} color={Colors.primary} />
-            </View>
-            
-            <Text style={styles.modalTitle}>Password changed successfully</Text>
-            <Text style={styles.modalSubtitle}>
-              Your password has been reset. You can now log in with your new password.
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color={Colors.black} />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.content}>
+            <Text style={styles.title}>Reset Password</Text>
+            <Text style={styles.subtitle}>
+              Create a new password for your account
             </Text>
             
-            <Button
-              title="Log In"
-              onPress={handleLoginAfterReset}
-              style={styles.modalButton}
-            />
+            <View style={styles.form}>
+              <Text style={styles.label}>New Password</Text>
+              <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="•••••••••••"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!passwordVisible}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity 
+                  style={styles.eyeIcon}
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                >
+                  <Ionicons 
+                    name={passwordVisible ? "eye-off" : "eye"} 
+                    size={22} 
+                    color="#666" 
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+              
+              <Text style={styles.label}>Confirm New Password</Text>
+              <View style={[styles.passwordContainer, errors.confirmPassword && styles.inputError]}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="•••••••••••"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!confirmPasswordVisible}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity 
+                  style={styles.eyeIcon}
+                  onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                >
+                  <Ionicons 
+                    name={confirmPasswordVisible ? "eye-off" : "eye"} 
+                    size={22} 
+                    color="#666" 
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              
+              <View style={styles.passwordRules}>
+                <Text style={styles.passwordRulesTitle}>Password Requirements:</Text>
+                <Text style={styles.passwordRule}>• At least 8 characters</Text>
+                <Text style={styles.passwordRule}>• At least one number or special character</Text>
+              </View>
+              
+              <TouchableOpacity
+                style={[styles.submitButton, isLoading && styles.disabledButton]}
+                onPress={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <Text style={styles.submitButtonText}>Reset Password</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -126,71 +167,103 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   header: {
-    paddingHorizontal: Layout.horizontalMargin,
-    height: 56,
-    justifyContent: 'center',
+    padding: 16,
   },
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
-    padding: Layout.horizontalMargin,
-    paddingTop: Layout.spacing.md,
+    padding: 24,
   },
   title: {
-    fontSize: Typography.sizes.h1,
+    fontSize: 24,
     fontWeight: "600",
     color: Colors.black,
-    letterSpacing: Typography.tracking.h1,
-    marginBottom: Layout.spacing.sm,
+    marginBottom: 12,
   },
   subtitle: {
-    fontSize: Typography.sizes.body,
+    fontSize: 16,
     color: Colors.darkGray,
-    marginBottom: Layout.spacing.lg,
+    marginBottom: 32,
   },
-  input: {
-    marginBottom: Layout.spacing.md,
+  form: {
+    width: '100%',
   },
-  button: {
-    marginTop: Layout.spacing.sm,
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: Colors.black,
+    marginBottom: 8,
   },
-  modalOverlay: {
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: Colors.midGray,
+    marginBottom: 4,
+  },
+  inputError: {
+    borderColor: Colors.errorRed,
+  },
+  passwordInput: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Layout.horizontalMargin,
+    fontSize: 16,
   },
-  modalContent: {
-    width: 320,
-    backgroundColor: Colors.white,
-    borderRadius: Layout.borderRadius,
-    padding: Layout.spacing.lg,
-    alignItems: 'center',
+  eyeIcon: {
+    padding: 4,
   },
-  successIconContainer: {
-    marginBottom: Layout.spacing.md,
+  errorText: {
+    color: Colors.errorRed,
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 16,
   },
-  modalTitle: {
-    fontSize: Typography.sizes.h1,
+  passwordRules: {
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 32,
+  },
+  passwordRulesTitle: {
+    fontSize: 14,
     fontWeight: "600",
     color: Colors.black,
-    marginBottom: Layout.spacing.sm,
-    textAlign: 'center',
+    marginBottom: 8,
   },
-  modalSubtitle: {
-    fontSize: Typography.sizes.body,
+  passwordRule: {
+    fontSize: 14,
     color: Colors.darkGray,
-    marginBottom: Layout.spacing.lg,
-    textAlign: 'center',
+    marginBottom: 4,
   },
-  modalButton: {
-    width: '100%',
+  submitButton: {
+    backgroundColor: Colors.primary,
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: "600",
   },
 }); 

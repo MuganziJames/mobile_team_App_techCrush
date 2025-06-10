@@ -1,87 +1,113 @@
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-type ButtonProps = {
+type ButtonType = 'primary' | 'secondary' | 'tertiary' | 'danger';
+type ButtonSize = 'small' | 'medium' | 'large';
+
+export type ButtonProps = {
   title: string;
   onPress: () => void;
-  variant?: 'filled' | 'outline';
+  type?: ButtonType;
+  size?: ButtonSize;
+  style?: any;
+  textStyle?: any;
   disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
 };
 
-export default function Button({ 
-  title, 
-  onPress, 
-  variant = 'filled', 
-  disabled = false,
+export default function Button({
+  title,
+  onPress,
+  type = 'primary',
+  size = 'medium',
   style,
   textStyle,
+  disabled = false,
 }: ButtonProps) {
-  const buttonStyles = [
-    styles.button,
-    variant === 'outline' ? styles.outlineButton : styles.filledButton,
-    disabled && (variant === 'filled' ? styles.disabledFilledButton : styles.disabledOutlineButton),
-    style,
-  ];
-  
-  const textStyles = [
-    styles.text,
-    variant === 'outline' ? styles.outlineText : styles.filledText,
-    disabled && styles.disabledText,
-    textStyle,
-  ];
-
   return (
-    <TouchableOpacity 
-      style={buttonStyles} 
+    <TouchableOpacity
       onPress={onPress}
+      style={[
+        styles.container,
+        styles[type],
+        styles[size],
+        disabled && styles.disabled,
+        style,
+      ]}
       disabled={disabled}
-      activeOpacity={0.8}
     >
-      <Text style={textStyles}>{title}</Text>
+      <Text style={[styles.text, styles[`${type}Text`], styles[`${size}Text`], textStyle]}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    height: Layout.buttonHeight,
-    borderRadius: Layout.borderRadius,
+  container: {
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 8,
   },
-  filledButton: {
+  // Button types
+  primary: {
     backgroundColor: Colors.primary,
+    borderWidth: 0,
   },
-  outlineButton: {
+  secondary: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.primary,
   },
-  disabledFilledButton: {
-    backgroundColor: Colors.disabledBg,
+  tertiary: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
   },
-  disabledOutlineButton: {
-    borderColor: Colors.disabledBg,
+  danger: {
+    backgroundColor: Colors.errorRed,
+    borderWidth: 0,
   },
+  // Button sizes
+  small: {
+    height: 36,
+    paddingHorizontal: 12,
+  },
+  medium: {
+    height: 48,
+    paddingHorizontal: 16,
+  },
+  large: {
+    height: 56,
+    paddingHorizontal: 24,
+  },
+  // Disabled state
+  disabled: {
+    backgroundColor: 'rgba(204, 204, 204, 0.3)',
+    borderColor: 'rgba(204, 204, 204, 0.5)',
+  },
+  // Text styles
   text: {
-    fontSize: 16,
     fontWeight: '600',
   },
-  filledText: {
+  primaryText: {
     color: Colors.white,
   },
-  outlineText: {
+  secondaryText: {
     color: Colors.primary,
   },
-  disabledText: {
-    color: Colors.disabledText,
+  tertiaryText: {
+    color: Colors.primary,
+  },
+  dangerText: {
+    color: Colors.white,
+  },
+  // Text sizes
+  smallText: {
+    fontSize: 14,
+  },
+  mediumText: {
+    fontSize: 16,
+  },
+  largeText: {
+    fontSize: 18,
   },
 }); 

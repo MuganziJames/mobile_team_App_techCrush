@@ -1,9 +1,14 @@
+import CountryCodePicker, { COUNTRY_CODES } from '@/components/ui/CountryCodePicker';
 import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,6 +19,7 @@ import {
 } from 'react-native';
 
 export default function SignUpFullForm() {
+  const { register, isLoading: authLoading } = useAuth();
   const params = useLocalSearchParams();
   const email = params.email as string;
   
@@ -26,10 +32,31 @@ export default function SignUpFullForm() {
     confirmPassword: '',
   });
   
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    console.log('Email from params:', email);
+    
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [email]);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -70,24 +97,85 @@ export default function SignUpFullForm() {
       newErrors.terms = 'You must agree to the terms and conditions';
     }
     
-    return newErrors;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    const newErrors = validateForm();
+  const handleSubmit = async () => {
+    console.log('Submit button pressed');
+    Keyboard.dismiss();
     
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
     
-    // Submit the form
-    console.log('Form submitted:', formData);
-    // Navigate to success screen or home
+    setIsLoading(true);
+    console.log('Form validation passed, proceeding with registration');
+    
+    try {
+      // Submit the form
+      const fullPhoneNumber = `${selectedCountry.dial_code}${formData.phone}`;
+      
+      console.log('Registering with data:', {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: fullPhoneNumber
+      });
+      
+      const result = await register({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: fullPhoneNumber,
+      });
+      
+      console.log('Registration result:', result);
+      
+      if (result.success) {
+        console.log('Registration successful, navigating to tabs');
+        // Clear form data
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+        });
+        
+        // Navigate to home screen
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 500);
+      } else {
+        // Show error
+        Alert.alert('Registration Failed', result.message || 'Failed to create account');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const goBack = () => {
+    router.back();
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.black} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Create Account</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+      
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -133,13 +221,14 @@ export default function SignUpFullForm() {
             <Text style={styles.fieldLabel}>Phone Number</Text>
             <View style={styles.phoneInputContainer}>
               <View style={styles.countryCodeContainer}>
-                <Ionicons name="flag-outline" size={16} color="#666" />
-                <Text style={styles.countryCode}>+1</Text>
-                <Ionicons name="chevron-down" size={16} color="#666" />
+                <CountryCodePicker
+                  selectedCountry={selectedCountry}
+                  onSelect={setSelectedCountry}
+                />
               </View>
               <TextInput
                 style={styles.phoneInput}
-                placeholder="(+44) 7682 36713"
+                placeholder="7682 36713"
                 value={formData.phone}
                 onChangeText={(text) => handleChange('phone', text)}
                 keyboardType="phone-pad"
@@ -211,10 +300,16 @@ export default function SignUpFullForm() {
             {!!errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
             
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[styles.submitButton, (isLoading || authLoading) && styles.disabledButton]}
               onPress={handleSubmit}
+              disabled={isLoading || authLoading}
+              activeOpacity={0.7}
             >
-              <Text style={styles.submitButtonText}>Continue</Text>
+              {(isLoading || authLoading) ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={styles.submitButtonText}>Create Account</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -227,6 +322,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.black,
+  },
+  headerSpacer: {
+    width: 40,
   },
   scrollContent: {
     flexGrow: 1,
@@ -258,45 +375,36 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.black,
     marginBottom: 6,
-    marginTop: 12,
   },
   textInput: {
-    marginBottom: 4,
+    marginBottom: 16,
   },
   phoneInputContainer: {
     flexDirection: 'row',
-    height: 50,
-    borderColor: '#E1E1E1',
-    borderWidth: 1,
-    borderRadius: 8,
-    overflow: 'hidden',
     marginBottom: 4,
   },
   countryCodeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    borderRightWidth: 1,
-    borderRightColor: '#E1E1E1',
-    width: 80,
-  },
-  countryCode: {
-    fontSize: 14,
-    marginRight: 4,
-    marginLeft: 4,
+    width: '30%',
+    marginRight: 8,
   },
   phoneInput: {
     flex: 1,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: Colors.lightGray,
+    borderWidth: 1,
+    borderColor: Colors.midGray,
     paddingHorizontal: 12,
     fontSize: 16,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 50,
-    borderColor: '#E1E1E1',
+    height: 48,
+    borderColor: Colors.midGray,
     borderWidth: 1,
     borderRadius: 8,
+    backgroundColor: Colors.lightGray,
     marginBottom: 4,
   },
   passwordInput: {
@@ -308,54 +416,58 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   errorText: {
-    color: '#E53935',
+    color: Colors.errorRed,
     fontSize: 12,
-    marginBottom: 8,
+    marginTop: 2,
+    marginBottom: 12,
   },
   termsContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginTop: 16,
     marginBottom: 8,
   },
   checkbox: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#E9642C',
+    borderColor: Colors.midGray,
     marginRight: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   checkboxInner: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     borderRadius: 3,
-    backgroundColor: '#E9642C',
-    justifyContent: 'center',
+    backgroundColor: Colors.primary,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   termsText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: Colors.darkGray,
-    lineHeight: 18,
   },
   termsLink: {
-    color: '#E9642C',
+    color: Colors.primary,
+    fontWeight: '500',
   },
   submitButton: {
-    backgroundColor: '#E9642C',
-    height: 50,
+    backgroundColor: Colors.primary,
+    height: 48,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 24,
   },
+  disabledButton: {
+    opacity: 0.7,
+  },
   submitButtonText: {
     color: Colors.white,
     fontWeight: '600',
     fontSize: 16,
-  }
+  },
 }); 

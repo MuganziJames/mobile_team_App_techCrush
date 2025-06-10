@@ -3,36 +3,38 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = '#E9642C'; // Primary orange
+const tintColorDark = '#FF8C5F';
 
-const Colors = {
-  primary: '#E76E2C',    // Primary Orange (buttons, accents)
-  black: '#000000',      // Black (headings)
-  darkGray: '#333333',   // Dark Gray (body text)
-  midGray: '#707070',    // Mid Gray (placeholders / meta)
-  lightGray: '#F4F4F4',  // Light Gray (field fills)
-  errorRed: '#E0544C',   // Error Red (validation)
-  white: '#FFFFFF',      // White
-  disabledBg: '#E76E2C33', // Primary Orange with 20% opacity
-  disabledText: '#FFFFFF66', // White with 40% opacity
-  inactiveDot: '#D4D4D4', // Inactive pagination dot
+export default {
   light: {
-    text: '#11181C',
+    text: '#000',
     background: '#fff',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#fff',
+    background: '#000',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
   },
+  primary: '#E9642C', // AfriStyle brand orange
+  secondary: '#034B45',
+  white: '#FFFFFF',
+  black: '#000000',
+  lightGray: '#F5F5F5',
+  midGray: '#E1E1E1',
+  darkGray: '#777777',
+  errorRed: '#FF3B30',
+  successGreen: '#34C759',
+  warning: '#FFC107',
+  info: '#2196F3',
+  inactiveDot: '#DDDDDD',
+  background: '#FFFFFF',
+  cardBackground: '#F9F9F9',
+  border: '#E1E1E1',
+  shadow: 'rgba(0, 0, 0, 0.1)',
 };
-
-export default Colors;

@@ -1,107 +1,179 @@
-import Button from '@/components/ui/Button';
-import OTPInput from '@/components/ui/OTPInput';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const OTP_LENGTH = 6;
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function VerifyOTPScreen() {
+  const { verifyOtp, isLoading } = useAuth();
   const params = useLocalSearchParams();
   const email = params.email as string;
-  const type = params.type as string;
-  const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(30);
-  const [isResending, setIsResending] = useState(false);
-
+  
+  const [otp, setOtp] = useState<string[]>(['', '', '', '']);
+  const [focusedInput, setFocusedInput] = useState(0);
+  const inputRefs = useRef<(TextInput | null)[]>([null, null, null, null]);
+  
   useEffect(() => {
-    // Start countdown timer
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [timer]);
-
-  const handleBack = () => {
-    router.back();
-  };
-
-  const handleContinue = () => {
-    if (otp.length !== OTP_LENGTH) return;
-    
-    if (type === 'reset-password') {
-      router.push('/reset-password');
-    } else {
-      // Handle other verification types
-      console.log('Verification complete for:', type);
-    }
-  };
-
-  const handleResendCode = () => {
-    if (timer > 0 || isResending) return;
-    
-    setIsResending(true);
-    
-    // Simulate API call
+    // Focus first input on mount
     setTimeout(() => {
-      setTimer(30);
-      setIsResending(false);
-      console.log('Resending code to:', email);
-    }, 1000);
+      inputRefs.current[0]?.focus();
+    }, 100);
+  }, []);
+
+  const handleOtpChange = (text: string, index: number) => {
+    if (text.length > 1) {
+      // Handle paste of full OTP
+      const otpArray = text.slice(0, 4).split('');
+      const newOtp = [...otp];
+      
+      otpArray.forEach((digit, idx) => {
+        if (idx + index < 4) {
+          newOtp[idx + index] = digit;
+        }
+      });
+      
+      setOtp(newOtp);
+      
+      // Focus last input or move to appropriate next input
+      const nextIndex = Math.min(index + otpArray.length, 3);
+      inputRefs.current[nextIndex]?.focus();
+    } else {
+      // Handle single digit input
+      const newOtp = [...otp];
+      newOtp[index] = text;
+      setOtp(newOtp);
+      
+      // Auto-focus next input
+      if (text && index < 3) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    }
+  };
+
+  const handleBackspace = (index: number) => {
+    if (index > 0 && otp[index] === '') {
+      // If current input is empty, move to previous input
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleSubmit = async () => {
+    const otpString = otp.join('');
+    
+    if (otpString.length !== 4) {
+      Alert.alert('Invalid Code', 'Please enter all 4 digits of the verification code.');
+      return;
+    }
+    
+    const result = await verifyOtp(otpString);
+    
+    if (result.success) {
+      router.push({
+        pathname: '/reset-password',
+        params: { email }
+      });
+    } else {
+      Alert.alert('Error', result.message || 'Invalid verification code. Please try again.');
+    }
+  };
+
+  const handleResendCode = async () => {
+    router.replace({
+      pathname: '/forgot-password'
+    });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.content}>
-        <Text style={styles.title}>Enter Verification Code</Text>
-        <Text style={styles.subtitle}>
-          We have sent a verification code to{' '}
-          <Text style={styles.emailText}>{email}</Text>
-        </Text>
-        
-        <OTPInput
-          length={OTP_LENGTH}
-          value={otp}
-          onChange={setOtp}
-          style={styles.otpInput}
-        />
-        
-        <TouchableOpacity 
-          onPress={handleResendCode} 
-          disabled={timer > 0 || isResending}
-          style={styles.resendContainer}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.resendText}>
-            Didn't get the code?{' '}
-            <Text style={[
-              styles.resendButton,
-              (timer > 0 || isResending) && styles.resendDisabled
-            ]}>
-              {timer > 0 ? `Resend Code (${timer}s)` : 'Resend Code'}
+          <View style={styles.header}>
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color={Colors.black} />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.content}>
+            <Text style={styles.title}>Verification Code</Text>
+            <Text style={styles.subtitle}>
+              Enter the 4-digit verification code sent to {email}
             </Text>
-          </Text>
-        </TouchableOpacity>
-        
-        <Button
-          title="Continue"
-          onPress={handleContinue}
-          disabled={otp.length !== OTP_LENGTH}
-          style={styles.button}
-        />
-      </View>
+            
+            <View style={styles.otpContainer}>
+              {otp.map((digit, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.otpInputWrapper,
+                    focusedInput === index && styles.otpInputWrapperFocused
+                  ]}
+                >
+                  <TextInput
+                    ref={ref => {
+                      inputRefs.current[index] = ref;
+                    }}
+                    style={styles.otpInput}
+                    value={digit}
+                    onChangeText={text => handleOtpChange(text, index)}
+                    keyboardType="number-pad"
+                    maxLength={4} // Allow for paste of full OTP
+                    onFocus={() => setFocusedInput(index)}
+                    onBlur={() => setFocusedInput(-1)}
+                    onKeyPress={({ nativeEvent }) => {
+                      if (nativeEvent.key === 'Backspace') {
+                        handleBackspace(index);
+                      }
+                    }}
+                  />
+                </View>
+              ))}
+            </View>
+            
+            <TouchableOpacity
+              style={[styles.submitButton, isLoading && styles.disabledButton]}
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={Colors.white} />
+              ) : (
+                <Text style={styles.submitButtonText}>Verify Code</Text>
+              )}
+            </TouchableOpacity>
+            
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Didn't receive the code?{' '}
+                <TouchableOpacity onPress={handleResendCode}>
+                  <Text style={styles.resendLink}>Resend Code</Text>
+                </TouchableOpacity>
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -111,59 +183,92 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   header: {
-    paddingHorizontal: Layout.horizontalMargin,
-    height: 56,
-    justifyContent: 'center',
+    padding: 16,
   },
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
-    padding: Layout.horizontalMargin,
-    paddingTop: Layout.spacing.md,
+    padding: 24,
     alignItems: 'center',
   },
   title: {
-    fontSize: Typography.sizes.h1,
+    fontSize: 24,
     fontWeight: "600",
     color: Colors.black,
-    letterSpacing: Typography.tracking.h1,
-    marginBottom: Layout.spacing.sm,
-    alignSelf: 'flex-start',
+    textAlign: 'center',
+    marginBottom: 12,
   },
   subtitle: {
-    fontSize: Typography.sizes.body,
+    fontSize: 16,
     color: Colors.darkGray,
-    marginBottom: Layout.spacing.lg,
-    alignSelf: 'flex-start',
+    textAlign: 'center',
+    marginBottom: 32,
+    maxWidth: '90%',
   },
-  emailText: {
-    fontWeight: "600",
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginBottom: 32,
+  },
+  otpInputWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.midGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  otpInputWrapperFocused: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
   },
   otpInput: {
-    marginTop: Layout.spacing.md,
-    marginBottom: Layout.spacing.lg,
+    width: '100%',
+    height: '100%',
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
   },
-  resendContainer: {
-    marginBottom: Layout.spacing.lg,
+  submitButton: {
+    backgroundColor: Colors.primary,
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
   },
-  resendText: {
-    fontSize: Typography.sizes.caption,
-    color: Colors.darkGray,
+  disabledButton: {
+    opacity: 0.7,
   },
-  resendButton: {
-    color: Colors.primary,
+  submitButtonText: {
+    color: Colors.white,
+    fontSize: 16,
     fontWeight: "600",
   },
-  resendDisabled: {
-    color: Colors.midGray,
+  footer: {
+    marginTop: 32,
   },
-  button: {
-    width: '100%',
+  footerText: {
+    fontSize: 14,
+    color: Colors.darkGray,
+    textAlign: 'center',
+  },
+  resendLink: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
 }); 

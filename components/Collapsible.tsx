@@ -1,45 +1,59 @@
-import { PropsWithChildren, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 
-export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const theme = useColorScheme() ?? 'light';
+type CollapsibleProps = {
+  title: string;
+  children: React.ReactNode;
+  initialExpanded?: boolean;
+};
+
+export default function Collapsible({ title, children, initialExpanded = false }: CollapsibleProps) {
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
+  const theme = useColorScheme() || 'light';
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   return (
-    <ThemedView>
-      <TouchableOpacity
-        style={styles.heading}
-        onPress={() => setIsOpen((value) => !value)}
-        activeOpacity={0.8}>
-        <IconSymbol
-          name="chevron.right"
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.header} onPress={toggleExpand}>
+        <Text style={styles.title}>{title}</Text>
+        <Ionicons
+          name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={18}
-          weight="medium"
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
-          style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
+          color={Colors.darkGray}
         />
-
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
       </TouchableOpacity>
-      {isOpen && <ThemedView style={styles.content}>{children}</ThemedView>}
-    </ThemedView>
+      {isExpanded && <View style={styles.content}>{children}</View>}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: {
+  container: {
+    backgroundColor: Colors.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.midGray,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
+    padding: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.black,
   },
   content: {
-    marginTop: 6,
-    marginLeft: 24,
+    padding: 16,
+    paddingTop: 0,
   },
 });
