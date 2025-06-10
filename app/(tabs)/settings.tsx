@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingTop: 60,
-    paddingBottom: 40, // Reduced from 16px to 8px
+    paddingBottom: 40, 
     backgroundColor: '#F8F8F8',
   },
   backButton: {
