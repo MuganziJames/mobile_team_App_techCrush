@@ -1,25 +1,46 @@
-import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Alert, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
+import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
   const { logout } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = React.useState(false);
   
+  const handleBackPress = () => {
+    router.back();
+  };
+
+  const handleAccountInfo = () => {
+    console.log('Account Information pressed');
+  };
+
+  const handlePrivacySecurity = () => {
+    router.push('/privacy-security');
+  };
+
+  const handlePreference = () => {
+    console.log('Preference pressed');
+  };
+
+  const handleNotification = () => {
+    console.log('Notification pressed');
+  };
+
+  const handleHelpSupport = () => {
+    console.log('Help & Support pressed');
+  };
+
   const handleLogout = () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      'Log Out',
+      'Are you sure you want to log out?',
       [
         {
           text: 'Cancel',
           style: 'cancel'
         },
         {
-          text: 'Sign Out',
+          text: 'Log Out',
           style: 'destructive',
           onPress: () => logout()
         }
@@ -28,182 +49,183 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header - Now scrollable */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000000" />
+          </TouchableOpacity>
+          
+          <Text style={styles.headerTitle}>Settings</Text>
+          
+          <View style={styles.headerSpacer} />
+        </View>
+        {/* Settings Items */}
+        <View style={styles.settingsContainer}>
+          
+          {/* Account Information */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handleAccountInfo}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="person" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.settingText}>Account Information</Text>
+          </TouchableOpacity>
 
-      <ScrollView style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          
-          <View style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="notifications" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Notifications</Text>
+          {/* Privacy and Security */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handlePrivacySecurity}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="shield-checkmark" size={20} color="#FFFFFF" />
             </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: Colors.midGray, true: Colors.primary }}
-              thumbColor={Colors.white}
-            />
-          </View>
-          
-          <View style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="moon" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Dark Mode</Text>
+            <Text style={styles.settingText}>Privacy and Security</Text>
+          </TouchableOpacity>
+
+          {/* Preference */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handlePreference}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="options" size={20} color="#FFFFFF" />
             </View>
-            <Switch
-              value={darkModeEnabled}
-              onValueChange={setDarkModeEnabled}
-              trackColor={{ false: Colors.midGray, true: Colors.primary }}
-              thumbColor={Colors.white}
-            />
-          </View>
+            <Text style={styles.settingText}>Preference</Text>
+          </TouchableOpacity>
+
+          {/* Notification */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handleNotification}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="notifications" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.settingText}>Notification</Text>
+          </TouchableOpacity>
+
+          {/* Help & Support */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handleHelpSupport}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="help-circle" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.settingText}>Help & Support</Text>
+          </TouchableOpacity>
+
+          {/* Log Out */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconContainer}>
+              <Ionicons name="log-out" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.settingText}>Log Out</Text>
+          </TouchableOpacity>
+
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support</Text>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="help-circle" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Help Center</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="chatbox" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Contact Us</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="document-text" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Privacy Policy</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.settingItem}>
-            <View style={styles.settingItemLeft}>
-              <View style={styles.settingItemIcon}>
-                <Ionicons name="document-text" size={22} color={Colors.primary} />
-              </View>
-              <Text style={styles.settingItemText}>Terms of Service</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.darkGray} />
-          </TouchableOpacity>
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Ionicons name="log-out-outline" size={20} color={Colors.white} />
-          <Text style={styles.logoutButtonText}>Sign Out</Text>
-        </TouchableOpacity>
-        
-        <Text style={styles.versionText}>Version 1.0.0</Text>
+        {/* Bottom spacing for tab bar */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F8F8F8',
   },
+  // Header with back button and title
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    backgroundColor: '#F8F8F8',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    alignItems: 'flex-start',
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: '700',
-    color: Colors.black,
+    fontWeight: '600',
+    color: '#000000',
+    flex: 1,
+    textAlign: 'center',
   },
-  content: {
+  headerSpacer: {
+    width: 40, // Balance the back button
+  },
+  scrollView: {
     flex: 1,
   },
-  section: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+  scrollContent: {
+    paddingTop: 24,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.black,
-    marginBottom: 16,
+  settingsContainer: {
+    paddingHorizontal: 24,
   },
+  // Individual setting item
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginBottom: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  settingItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  settingItemIcon: {
+  // Orange circular icon container
+  iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#D85A1F', // Darker orange color
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
-  settingItemText: {
+  settingText: {
     fontSize: 16,
-    color: Colors.black,
+    fontWeight: '500',
+    color: '#000000',
+    flex: 1,
   },
-  logoutButton: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 16,
-    height: 50,
-    borderRadius: 8,
-  },
-  logoutButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  versionText: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginBottom: 32,
+  bottomSpacing: {
+    height: 100, // Space for bottom tab bar
   },
 }); 

@@ -1,79 +1,148 @@
-import ListRow from '@/components/ui/ListRow';
-import ToggleRow from '@/components/ui/ToggleRow';
-import TopAppBar from '@/components/ui/TopAppBar';
-import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Typography from '@/constants/Typography';
-import { Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PrivacySecurityScreen() {
-  // Toggle states
-  const [biometricsEnabled, setBiometricsEnabled] = useState(true);
-  const [faceIdEnabled, setFaceIdEnabled] = useState(false);
-  const [googleAuthEnabled, setGoogleAuthEnabled] = useState(true);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [faceIdEnabled, setFaceIdEnabled] = useState(true);
+  const [googleAuthEnabled, setGoogleAuthEnabled] = useState(false);
+
+  const handleBackPress = () => {
+    router.back();
+  };
+
+  const handleChangePassword = () => {
+    console.log('Change Password pressed');
+  };
+
+  const handleDeactivateAccount = () => {
+    Alert.alert(
+      'Deactivate Account',
+      'Are you sure you want to temporarily deactivate your account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Deactivate', style: 'destructive', onPress: () => console.log('Account deactivated') }
+      ]
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This action cannot be undone. Are you sure you want to permanently delete your account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => console.log('Account deleted') }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
-      <TopAppBar title="Privacy & Security" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       
-      <ScrollView
+      <ScrollView 
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <ToggleRow
-          label="Biometric ID"
-          iconName="finger-print"
-          value={biometricsEnabled}
-          onValueChange={setBiometricsEnabled}
-        />
-        
-        <ToggleRow
-          label="Face ID"
-          iconName="scan"
-          value={faceIdEnabled}
-          onValueChange={setFaceIdEnabled}
-        />
-        
-        <ToggleRow
-          label="Google Authenticator"
-          iconName="shield-checkmark"
-          value={googleAuthEnabled}
-          onValueChange={setGoogleAuthEnabled}
-        />
-        
-        <ListRow
-          label="Change Password"
-          iconName="key"
-          onPress={() => {}}
-        />
-        
-        <View style={styles.helpTextContainer}>
-          <Text style={styles.helpText}>Change your account password to a new one</Text>
+        {/* Header - Scrollable */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000000" />
+          </TouchableOpacity>
+          
+          <Text style={styles.headerTitle}>Privacy & Security</Text>
         </View>
-        
-        <ListRow
-          label="Disable Account"
-          iconName="pause-circle"
-          onPress={() => {}}
-        />
-        
-        <View style={styles.helpTextContainer}>
-          <Text style={styles.helpText}>Your account will be temporarily disabled</Text>
+
+        {/* Settings Items */}
+        <View style={styles.settingsContainer}>
+          
+          {/* Biometric ID */}
+          <View style={styles.settingItem}>
+            <Text style={styles.settingText}>Biometric ID</Text>
+                         <Switch
+               value={biometricEnabled}
+               onValueChange={setBiometricEnabled}
+               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
+               thumbColor={biometricEnabled ? '#FFFFFF' : '#FFFFFF'}
+               ios_backgroundColor="#E0E0E0"
+             />
+          </View>
+
+          {/* Face ID */}
+          <View style={styles.settingItem}>
+            <Text style={styles.settingText}>Face ID</Text>
+                         <Switch
+               value={faceIdEnabled}
+               onValueChange={setFaceIdEnabled}
+               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
+               thumbColor={faceIdEnabled ? '#FFFFFF' : '#FFFFFF'}
+               ios_backgroundColor="#E0E0E0"
+             />
+          </View>
+
+          {/* Google Authenticator */}
+          <View style={styles.settingItem}>
+            <Text style={styles.settingText}>Google Authenticator</Text>
+                         <Switch
+               value={googleAuthEnabled}
+               onValueChange={setGoogleAuthEnabled}
+               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
+               thumbColor={googleAuthEnabled ? '#FFFFFF' : '#FFFFFF'}
+               ios_backgroundColor="#E0E0E0"
+             />
+          </View>
+
+          {/* Change Password */}
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={handleChangePassword}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.settingText}>Change Password</Text>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
+          </TouchableOpacity>
+
+          {/* Deactivate Account */}
+          <TouchableOpacity 
+            style={styles.settingItemWithDescription}
+            onPress={handleDeactivateAccount}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingTextContainer}>
+              <Text style={styles.settingText}>Deactivate Account</Text>
+              <Text style={styles.settingDescription}>
+                Temporarily deactivate your account. Easily reactivate when you're ready.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
+          </TouchableOpacity>
+
+          {/* Delete Account */}
+          <TouchableOpacity 
+            style={styles.settingItemWithDescription}
+            onPress={handleDeleteAccount}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingTextContainer}>
+              <Text style={styles.settingText}>Delete Account</Text>
+              <Text style={styles.settingDescription}>
+                Permanently remove your account and data. Proceed with caution.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#666666" />
+          </TouchableOpacity>
+
         </View>
-        
-        <ListRow
-          label="Delete Account"
-          iconName="trash"
-          onPress={() => {}}
-        />
-        
-        <View style={styles.helpTextContainer}>
-          <Text style={styles.helpText}>Your account will be permanently deleted</Text>
-        </View>
+
+        {/* Bottom spacing for tab bar */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
   );
@@ -82,22 +151,87 @@ export default function PrivacySecurityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(231, 110, 44, 0.1)', // Light orange background
+    backgroundColor: '#F8F8F8',
   },
   scrollView: {
     flex: 1,
   },
-  contentContainer: {
-    padding: Layout.horizontalMargin,
-    paddingBottom: Layout.spacing.lg + 88, // Extra padding for bottom tab bar
+  scrollContent: {
+    paddingTop: 0, // No top padding
   },
-  helpTextContainer: {
-    paddingHorizontal: Layout.spacing.sm + 40, // Align with the label text
-    marginTop: -4,
-    marginBottom: Layout.spacing.sm,
+  // Header - Scrollable
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 0, // Status bar space
+    paddingBottom: 16,
   },
-  helpText: {
-    fontSize: Typography.sizes.caption,
-    color: Colors.darkGray,
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#000000',
+    flex: 1,
+  },
+  settingsContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 24, // Minimal top spacing
+  },
+  // Individual setting item
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginBottom: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  // Setting item with description
+  settingItemWithDescription: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginBottom: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  settingTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  settingText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  settingDescription: {
+    fontSize: 13,
+    color: '#666666',
+    lineHeight: 18,
+  },
+  bottomSpacing: {
+    height: 100, // Space for bottom tab bar
   },
 }); 
