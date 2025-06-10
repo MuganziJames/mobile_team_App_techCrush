@@ -102,6 +102,13 @@ export default function BlogScreen() {
     console.log('Like post:', postId);
   };
 
+  const handlePostPress = (postId: number) => {
+    router.push({
+      pathname: '/blog-detail',
+      params: { id: postId }
+    });
+  };
+
   if (showAll) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -118,13 +125,18 @@ export default function BlogScreen() {
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
           {blogPosts.map((post) => (
-            <View key={post.id} style={styles.allPostItem}>
+            <TouchableOpacity 
+              key={post.id} 
+              style={styles.allPostItem}
+              onPress={() => handlePostPress(post.id)}
+              activeOpacity={0.7}
+            >
               <Image source={{ uri: post.image }} style={styles.allPostImage} />
               <View style={styles.allPostContent}>
                 <Text style={styles.allPostTitle}>{post.title}</Text>
                 <Text style={styles.allPostDate}>{post.date}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
           <View style={styles.bottomSpacing} />
         </ScrollView>
@@ -179,18 +191,26 @@ export default function BlogScreen() {
           }}
         >
           {featuredPosts.map((post) => (
-            <View key={post.id} style={styles.featuredCard}>
+            <TouchableOpacity 
+              key={post.id} 
+              style={styles.featuredCard}
+              onPress={() => handlePostPress(post.id)}
+              activeOpacity={0.9}
+            >
               <Image source={{ uri: post.image }} style={styles.featuredImage} />
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{post.title}</Text>
                 <TouchableOpacity
                   style={styles.likeButton}
-                  onPress={() => handleLike(post.id)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleLike(post.id);
+                  }}
                 >
                   <Ionicons name="heart-outline" size={24} color="#fff" />
                 </TouchableOpacity>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
@@ -217,7 +237,12 @@ export default function BlogScreen() {
 
         <View style={styles.popularGrid}>
           {popularPosts.map((post) => (
-            <View key={post.id} style={styles.popularItem}>
+            <TouchableOpacity 
+              key={post.id} 
+              style={styles.popularItem}
+              onPress={() => handlePostPress(post.id)}
+              activeOpacity={0.7}
+            >
               <Image source={{ uri: post.image }} style={styles.popularImage} />
               <View style={styles.popularContent}>
                 <Text style={styles.popularTitle} numberOfLines={2}>
@@ -225,7 +250,7 @@ export default function BlogScreen() {
                 </Text>
                 <Text style={styles.popularDate}>{post.date}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 

@@ -64,6 +64,7 @@ function RootLayoutNav() {
         <Stack.Screen name="verify-otp" options={{ headerShown: false }} />
         <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen name="privacy-security" options={{ headerShown: false }} />
+        <Stack.Screen name="blog-detail" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
