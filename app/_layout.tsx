@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/contexts/AuthContext';
+import { LookbookProvider } from '@/contexts/LookbookContext';
 import { LikeProvider } from '@/contexts/SaveContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -45,7 +46,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <LikeProvider>
-        <RootLayoutNav />
+        <LookbookProvider>
+          <RootLayoutNav />
+        </LookbookProvider>
       </LikeProvider>
     </AuthProvider>
   );
@@ -68,6 +71,8 @@ function RootLayoutNav() {
         <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen name="privacy-security" options={{ headerShown: false }} />
         <Stack.Screen name="blog-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="style-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="lookbook-folder" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

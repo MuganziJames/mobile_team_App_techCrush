@@ -1,0 +1,210 @@
+import { SavedStyle } from '@/contexts/LookbookContext';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+
+export const exportFolderAsPDF = async (
+  folderName: string,
+  styles: SavedStyle[],
+  folderColor: string
+) => {
+  try {
+    const htmlContent = generatePDFHTML(folderName, styles, folderColor);
+    
+    const { uri } = await Print.printToFileAsync({
+      html: htmlContent,
+      base64: false,
+    });
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Share ${folderName} Lookbook`,
+      });
+    } else {
+      console.log('Sharing is not available on this platform');
+    }
+  } catch (error) {
+    console.error('Error exporting PDF:', error);
+    throw error;
+  }
+};
+
+const generatePDFHTML = (
+  folderName: string,
+  styles: SavedStyle[],
+  folderColor: string
+) => {
+  const stylesHTML = styles.map(style => `
+    <div class="style-item">
+      <img src="${style.image}" alt="${style.title}" class="style-image" />
+      <div class="style-info">
+        <h3 class="style-title">${style.title}</h3>
+        <p class="style-category">${style.category}</p>
+        <div class="style-tags">
+          ${style.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+        </div>
+        <div class="style-color">
+          <div class="color-dot" style="background-color: ${style.color};"></div>
+          <span>${style.color}</span>
+        </div>
+        ${style.notes ? `<div class="style-notes"><strong>Notes:</strong> ${style.notes}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>${folderName} Lookbook</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background-color: #fff;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid ${folderColor};
+          padding-bottom: 20px;
+        }
+        .folder-title {
+          font-size: 28px;
+          font-weight: bold;
+          color: #333;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+        .folder-color {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background-color: ${folderColor};
+        }
+        .subtitle {
+          color: #666;
+          margin: 10px 0 0 0;
+          font-size: 16px;
+        }
+        .styles-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+          margin-top: 20px;
+        }
+        .style-item {
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #fff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .style-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+        }
+        .style-info {
+          padding: 15px;
+        }
+        .style-title {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0 0 5px 0;
+          color: #333;
+        }
+        .style-category {
+          color: #666;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin: 0 0 10px 0;
+        }
+        .style-tags {
+          margin: 10px 0;
+        }
+        .tag {
+          background: #f0f0f0;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          color: #666;
+          margin-right: 5px;
+        }
+        .style-color {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 10px 0;
+          font-size: 14px;
+          color: #333;
+        }
+        .color-dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 1px solid #ddd;
+        }
+        .style-notes {
+          background: #f8f8f8;
+          padding: 10px;
+          border-radius: 6px;
+          margin-top: 10px;
+          font-size: 14px;
+          color: #555;
+          font-style: italic;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e0e0e0;
+          color: #999;
+          font-size: 12px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 class="folder-title">
+          <div class="folder-color"></div>
+          ${folderName}
+        </h1>
+        <p class="subtitle">${styles.length} style${styles.length !== 1 ? 's' : ''} • Generated from AfriStyle</p>
+      </div>
+      
+      <div class="styles-grid">
+        ${stylesHTML}
+      </div>
+      
+      <div class="footer">
+        <p>Generated by AfriStyle • ${new Date().toLocaleDateString()}</p>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+export const shareStyle = async (style: SavedStyle) => {
+  try {
+    if (await Sharing.isAvailableAsync()) {
+      const message = `Check out this style: ${style.title}\n\nCategory: ${style.category}\nTags: ${style.tags.map(tag => `#${tag}`).join(' ')}\n\nShared from AfriStyle`;
+      
+      await Sharing.shareAsync(style.image, {
+        mimeType: 'image/jpeg',
+        dialogTitle: `Share ${style.title}`,
+      });
+    } else {
+      console.log('Sharing is not available on this platform');
+    }
+  } catch (error) {
+    console.error('Error sharing style:', error);
+    throw error;
+  }
+}; 

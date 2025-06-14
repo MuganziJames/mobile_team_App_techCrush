@@ -1,15 +1,16 @@
 import { useLike } from '@/contexts/SaveContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import {
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -241,19 +242,20 @@ Remember that glamour is personal. What makes one person feel glamorous might no
 
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
-  const [liked, setLiked] = useState(false);
   const { likePost, unlikePost, isPostLiked } = useLike();
-  
-  const postId = parseInt(id as string);
-  const post = blogPostsContent[postId as keyof typeof blogPostsContent];
+  const [isSharing, setIsSharing] = useState(false);
 
-  if (!post) {
+  const postId = parseInt(id as string);
+  const post = blogPosts.find(p => p.id === postId);
+  const content = blogPostsContent[postId as keyof typeof blogPostsContent];
+
+  if (!post || !content) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Post not found</Text>
-          <TouchableOpacity onPress={() => router.back()} style={styles.errorBackButton}>
-            <Text style={styles.errorBackButtonText}>Go Back</Text>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -265,35 +267,70 @@ export default function BlogDetailScreen() {
   };
 
   const handleLike = async () => {
-    const blogPost = blogPosts.find(p => p.id === postId);
-    if (!blogPost) return;
-    
-    if (isPostLiked(blogPost.id)) {
-      await unlikePost(blogPost.id);
-      setLiked(false);
+    if (isPostLiked(post.id)) {
+      await unlikePost(post.id);
     } else {
       await likePost({
-        id: blogPost.id,
-        title: blogPost.title,
-        date: blogPost.date,
-        image: blogPost.image,
-        category: blogPost.category,
+        id: post.id,
+        title: post.title,
+        date: post.date,
+        image: post.image,
+        category: post.category,
         likedAt: new Date().toISOString()
       });
-      setLiked(true);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      if (await Sharing.isAvailableAsync()) {
+        const shareContent = `Check out this article: ${post.title}\n\n${content.content.substring(0, 200)}...\n\nRead more on AfriStyle`;
+        
+        await Sharing.shareAsync(post.image, {
+          mimeType: 'image/jpeg',
+          dialogTitle: `Share: ${post.title}`,
+        });
+      } else {
+        console.log('Sharing is not available on this platform');
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    } finally {
+      setIsSharing(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header - Now scrollable */}
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="#000" />
+          <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Blog</Text>
-          <View style={styles.headerSpacer} />
+          
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              style={[styles.headerButton, isSharing && styles.headerButtonDisabled]} 
+              onPress={handleShare}
+              disabled={isSharing}
+            >
+              <Ionicons 
+                name={isSharing ? "hourglass-outline" : "share-outline"} 
+                size={24} 
+                color={isSharing ? "#ccc" : "#fff"} 
+              />
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.headerButton} onPress={handleLike}>
+              <Ionicons 
+                name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
+                size={24} 
+                color={isPostLiked(post.id) ? "#FF6B35" : "#fff"} 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Hero Image */}
@@ -322,7 +359,7 @@ export default function BlogDetailScreen() {
           <Text style={styles.date}>{post.date}</Text>
           
           <View style={styles.contentText}>
-            {post.content.split('\n\n').map((paragraph, index) => (
+            {content.content.split('\n\n').map((paragraph, index) => (
               <Text key={index} style={styles.paragraph}>
                 {paragraph}
               </Text>
@@ -349,16 +386,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingTop: 20,
   },
-  backButton: {
+  headerButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButtonDisabled: {
+    opacity: 0.5,
   },
   scrollView: {
     flex: 1,
@@ -419,21 +458,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
   },
-  errorBackButton: {
+  backButton: {
     width: 100,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorBackButtonText: {
+  backButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
   },
   bottomSpacing: {
     height: 100,
-  },
-  headerSpacer: {
-    flex: 1,
   },
 }); 

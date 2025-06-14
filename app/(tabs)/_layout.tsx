@@ -44,10 +44,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Liked',
+          title: 'Search',
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons 
-              name={focused ? "heart" : "heart-outline"} 
+              name={focused ? "search" : "search-outline"} 
               size={24} 
               color={color} 
             />
@@ -61,6 +61,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons 
               name={focused ? "newspaper" : "newspaper-outline"} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="lookbook"
+        options={{
+          title: 'Lookbook',
+          tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+            <Ionicons 
+              name={focused ? "bookmark" : "bookmark-outline"} 
               size={24} 
               color={color} 
             />
