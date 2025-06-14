@@ -8,6 +8,8 @@ import { useState } from 'react';
 import {
     Alert,
     FlatList,
+    ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -132,55 +134,60 @@ export default function LookbookFolderScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        
-        <View style={styles.headerInfo}>
-          <View style={styles.headerTitle}>
-            <View 
-              style={[styles.folderColorDot, { backgroundColor: folderColor as string }]} 
-            />
-            <Text style={styles.folderName} numberOfLines={1}>
-              {folderName}
-            </Text>
-          </View>
-          <Text style={styles.styleCount}>
-            {folderStyles.length} style{folderStyles.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-        
-        <TouchableOpacity 
-          style={[styles.exportButton, isExporting && styles.exportButtonDisabled]}
-          onPress={handleExport}
-          disabled={isExporting}
-        >
-          <Ionicons 
-            name={isExporting ? "hourglass-outline" : "share-outline"} 
-            size={24} 
-            color={isExporting ? "#999" : "#000"} 
-          />
-        </TouchableOpacity>
-      </View>
-
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
       {folderStyles.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="bookmark-outline" size={80} color="#E0E0E0" />
-          <Text style={styles.emptyTitle}>No Styles Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Save styles from the feed to see them here
-          </Text>
-          <TouchableOpacity 
-            style={styles.browseButton}
-            onPress={() => router.push('/(tabs)/')}
-          >
-            <Text style={styles.browseButtonText}>Browse Styles</Text>
-          </TouchableOpacity>
-        </View>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          {/* Header - scrollable */}
+          <View style={styles.header}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+            
+            <View style={styles.headerInfo}>
+              <View style={styles.headerTitle}>
+                <View 
+                  style={[styles.folderColorDot, { backgroundColor: folderColor as string }]} 
+                />
+                <Text style={styles.folderName} numberOfLines={1}>
+                  {folderName}
+                </Text>
+              </View>
+              <Text style={styles.styleCount}>
+                {folderStyles.length} {folderStyles.length > 1 ? 'styles' : 'style'}
+              </Text>
+            </View>
+            
+            <TouchableOpacity 
+              style={[styles.exportButton, isExporting && styles.exportButtonDisabled]}
+              onPress={handleExport}
+              disabled={isExporting}
+            >
+              <Ionicons 
+                name={isExporting ? "hourglass-outline" : "share-outline"} 
+                size={24} 
+                color={isExporting ? "#999" : "#000"} 
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.emptyContainer}>
+            <Ionicons name="bookmark-outline" size={80} color="#E0E0E0" />
+            <Text style={styles.emptyTitle}>No Styles Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Save styles from the feed to see them here
+            </Text>
+            <TouchableOpacity 
+              style={styles.browseButton}
+              onPress={() => router.push('/(tabs)/')}
+            >
+              <Text style={styles.browseButtonText}>Browse Styles</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       ) : (
         <FlatList
           data={folderStyles}
@@ -190,6 +197,42 @@ export default function LookbookFolderScreen() {
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.stylesContent}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={() => (
+            <View style={styles.header}>
+              <TouchableOpacity 
+                style={styles.backButton}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="chevron-back" size={24} color="#000" />
+              </TouchableOpacity>
+              
+              <View style={styles.headerInfo}>
+                <View style={styles.headerTitle}>
+                  <View 
+                    style={[styles.folderColorDot, { backgroundColor: folderColor as string }]} 
+                  />
+                  <Text style={styles.folderName} numberOfLines={1}>
+                    {folderName}
+                  </Text>
+                </View>
+                <Text style={styles.styleCount}>
+                  {folderStyles.length} {folderStyles.length > 1 ? 'styles' : 'style'}
+                </Text>
+              </View>
+              
+              <TouchableOpacity 
+                style={[styles.exportButton, isExporting && styles.exportButtonDisabled]}
+                onPress={handleExport}
+                disabled={isExporting}
+              >
+                <Ionicons 
+                  name={isExporting ? "hourglass-outline" : "share-outline"} 
+                  size={24} 
+                  color={isExporting ? "#999" : "#000"} 
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         />
       )}
 
@@ -214,21 +257,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    marginBottom: 8,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
   },
   headerInfo: {
     flex: 1,

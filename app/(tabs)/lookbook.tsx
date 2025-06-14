@@ -5,8 +5,9 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import {
     Alert,
-    FlatList,
     Modal,
+    ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TextInput,
@@ -64,63 +65,67 @@ export default function LookbookScreen() {
     }
   };
 
-  const renderFolderCard = ({ item }: { item: any }) => {
-    const folderStyles = getStylesInFolder(item.id);
-    return (
-      <FolderCard
-        folder={item}
-        styles={folderStyles}
-        onPress={handleFolderPress}
-        onDelete={handleDeleteFolder}
-      />
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Lookbook</Text>
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => setShowCreateModal(true)}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>
-          {folders.length} folder{folders.length !== 1 ? 's' : ''} • {' '}
-          {folders.reduce((total, folder) => total + getStylesInFolder(folder.id).length, 0)} styles saved
-        </Text>
-      </View>
-
-      {folders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="folder-outline" size={80} color="#E0E0E0" />
-          <Text style={styles.emptyTitle}>No Folders Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Create your first folder to start organizing your saved styles
-          </Text>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>My Lookbook</Text>
           <TouchableOpacity 
-            style={styles.createFirstButton}
+            style={styles.addButton}
             onPress={() => setShowCreateModal(true)}
           >
-            <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.createFirstButtonText}>Create Folder</Text>
+            <Ionicons name="add" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-      ) : (
-        <FlatList
-          data={folders}
-          renderItem={renderFolderCard}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.foldersContent}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsText}>
+            {folders.length} folder{folders.length !== 1 ? 's' : ''} • {' '}
+            {folders.reduce((total, folder) => total + getStylesInFolder(folder.id).length, 0)} styles saved
+          </Text>
+        </View>
+
+        {folders.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="folder-outline" size={80} color="#E0E0E0" />
+            <Text style={styles.emptyTitle}>No Folders Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Create your first folder to start organizing your saved styles
+            </Text>
+            <TouchableOpacity 
+              style={styles.createFirstButton}
+              onPress={() => setShowCreateModal(true)}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+              <Text style={styles.createFirstButtonText}>Create Folder</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.foldersContainer}>
+            {folders.map((folder, index) => {
+              const folderStyles = getStylesInFolder(folder.id);
+              return (
+                <View key={folder.id} style={[
+                  styles.folderWrapper,
+                  index % 2 === 0 ? styles.leftFolder : styles.rightFolder
+                ]}>
+                  <FolderCard
+                    folder={folder}
+                    styles={folderStyles}
+                    onPress={handleFolderPress}
+                    onDelete={handleDeleteFolder}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
 
       <Modal
         visible={showCreateModal}
@@ -129,6 +134,7 @@ export default function LookbookScreen() {
         onRequestClose={() => setShowCreateModal(false)}
       >
         <SafeAreaView style={styles.modalContainer}>
+          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
           <View style={styles.modalHeader}>
             <TouchableOpacity 
               onPress={() => setShowCreateModal(false)}
@@ -207,14 +213,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
   },
   headerTitle: {
     fontSize: 24,
@@ -231,7 +244,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 16,
   },
   statsText: {
     fontSize: 14,
@@ -242,6 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    minHeight: 400,
   },
   emptyTitle: {
     fontSize: 24,
@@ -271,12 +285,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  foldersContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
+  foldersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 8,
   },
-  row: {
-    justifyContent: 'space-between',
+  folderWrapper: {
+    width: '50%',
+    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  leftFolder: {
+    paddingRight: 8,
+  },
+  rightFolder: {
+    paddingLeft: 8,
   },
   modalContainer: {
     flex: 1,

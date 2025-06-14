@@ -3,14 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -254,7 +254,7 @@ export default function BlogScreen() {
         </View>
 
         {/* Featured Posts Carousel */}
-        <ScrollView
+      <ScrollView
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
