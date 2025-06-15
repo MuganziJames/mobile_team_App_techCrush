@@ -1,9 +1,11 @@
+import { auth } from '@/app/FirebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword } from 'firebase/auth';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 // Types
-interface User {
+interface User {  
   id: string;
   email: string;
   firstName: string;
@@ -50,18 +52,6 @@ interface AuthContextProps {
   verifyOtp: (otp: string) => Promise<AuthResult>;
   setNewPassword: (password: string, confirmPassword: string) => Promise<AuthResult>;
 }
-
-// Demo credentials
-const DEMO_USER: User = {
-  id: 'demo-123',
-  email: 'demo@example.com',
-  firstName: 'Demo',
-  lastName: 'User',
-  phone: '+1234567890'
-};
-
-const DEMO_PASSWORD = 'password123';
-const DEMO_TOKEN = 'demo-token-123456';
 
 // Context
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -120,44 +110,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        // For demo purposes - simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
         
-        // Check if using demo credentials
-        if (email.toLowerCase() === DEMO_USER.email && password === DEMO_PASSWORD) {
-          console.log('Demo login successful');
-          
-          // Store authentication data
-          await AsyncStorage.setItem('user_token', DEMO_TOKEN);
-          await AsyncStorage.setItem('user', JSON.stringify(DEMO_USER));
-          
-          setState({
-            user: DEMO_USER,
-            token: DEMO_TOKEN,
-            isLoading: false,
-            isSignout: false,
-          });
-          
-          return {
-            success: true,
-            user: DEMO_USER,
-            token: DEMO_TOKEN
-          };
+        if (!user) {
+          throw new Error('No user returned from login');
         }
-        
-        // In a real app, this would be an API call
-        // For demo, we'll reject any non-demo credentials
-        setState(prev => ({ ...prev, isLoading: false }));
-        return {
-          success: false,
-          message: 'Invalid credentials. Try using demo@example.com with password123'
+
+        const userData: User = {
+          id: user.uid,
+          email: user.email || '',
+          firstName: '', // These will need to be fetched from your database
+          lastName: '',  // These will need to be fetched from your database
         };
-      } catch (error) {
+
+        // Store authentication data
+        await AsyncStorage.setItem('user_token', user.uid);
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+
+        setState({
+          user: userData,
+          token: user.uid,
+          isLoading: false,
+          isSignout: false,
+        });
+
+        console.log('User logged in:', user);
+        return { 
+          success: true, 
+          message: 'Login successful',
+          user: userData,
+          token: user.uid
+        };
+      } catch (error: any) {
         console.error('Login error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: false,
-          message: 'An error occurred during login'
+          message: error.message || 'An error occurred during login'
         };
       }
     },
@@ -168,44 +158,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        // For demo purposes - simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const userCredential = await createUserWithEmailAndPassword(auth, params.email, params.password);
+        const user = userCredential.user;
         
-        // For demo, create a simulated user
+        if (!user) {
+          throw new Error('Failed to create user');
+        }
+        
         const newUser: User = {
-          id: 'user-' + Math.random().toString(36).substring(2, 9),
-          email: params.email,
+          id: user.uid,
+          email: user.email || '',
           firstName: params.firstName,
           lastName: params.lastName,
-          phone: params.phone
+          phone: params.phone || ''
         };
         
-        const token = 'token-' + Math.random().toString(36).substring(2, 15);
-        
         // Store authentication data
-        await AsyncStorage.setItem('user_token', token);
+        await AsyncStorage.setItem('user_token', user.uid);
         await AsyncStorage.setItem('user', JSON.stringify(newUser));
         
         setState({
           user: newUser,
-          token: token,
+          token: user.uid,
           isLoading: false,
           isSignout: false,
         });
         
         console.log('Registration successful:', { newUser });
-        
+      
         return {
           success: true,
           user: newUser,
-          token: token
+          token: user.uid
         };
-      } catch (error) {
+      } catch (error: any) {
         console.error('Registration error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: false,
-          message: 'An error occurred during registration'
+          message: error.message || 'An error occurred during registration'
         };
       }
     },
@@ -214,6 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
+        await signOut(auth);
         // Clear stored data
         await AsyncStorage.removeItem('user_token');
         await AsyncStorage.removeItem('user');
@@ -234,18 +226,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 
     resetPassword: async (email: string): Promise<AuthResult> => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true, message: 'Verification code sent' };
+      try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true, message: 'Password reset email sent' };
+      } catch (error: any) {
+        return { 
+          success: false, 
+          message: error.message || 'Failed to send password reset email' 
+        };
+      }
     },
 
     verifyOtp: async (otp: string): Promise<AuthResult> => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true, message: 'OTP verified' };
+      // Implement OTP verification logic here
+      return { success: false, message: 'OTP verification not implemented' };
     },
 
     setNewPassword: async (password: string, confirmPassword: string): Promise<AuthResult> => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true, message: 'Password reset successful' };
+      if (password !== confirmPassword) {
+        return { success: false, message: 'Passwords do not match' };
+      }
+
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          return { success: false, message: 'No user is currently signed in' };
+        }
+
+        await updatePassword(user, password);
+        return { success: true, message: 'Password updated successfully' };
+      } catch (error: any) {
+        return { 
+          success: false, 
+          message: error.message || 'Failed to update password' 
+        };
+      }
     },
   };
 
