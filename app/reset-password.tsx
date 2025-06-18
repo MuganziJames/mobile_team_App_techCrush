@@ -4,23 +4,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function ResetPasswordScreen() {
   const { setNewPassword, isLoading } = useAuth();
   const params = useLocalSearchParams();
   const email = params.email as string;
+  const resetToken = params.resetToken as string;
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,7 +51,7 @@ export default function ResetPasswordScreen() {
       return;
     }
     
-    const result = await setNewPassword(password, confirmPassword);
+    const result = await setNewPassword(email, password, resetToken);
     
     if (result.success) {
       Alert.alert(

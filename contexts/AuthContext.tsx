@@ -1,13 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import authService from '../api/auth.service';
+import { User as ApiUser } from '../api/types';
 
-// Types
+// Types - Updated to match API
 interface User {  
-  id: string;
+  _id: string;
+  name: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  // Legacy compatibility
+  id?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
 }
 
@@ -16,6 +19,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   isSignout: boolean;
+  isAuthenticated: boolean;
 }
 
 interface LoginParams {
@@ -24,11 +28,9 @@ interface LoginParams {
 }
 
 interface RegisterParams {
+  name: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
 }
 
 interface AuthResult {
@@ -43,16 +45,31 @@ interface AuthContextProps {
   token: string | null;
   isLoading: boolean;
   isSignout: boolean;
+  isAuthenticated: boolean;
   login: (params: LoginParams) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (params: RegisterParams) => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
-  verifyOtp: (otp: string) => Promise<AuthResult>;
-  setNewPassword: (password: string, confirmPassword: string) => Promise<AuthResult>;
+  verifyOtp: (email: string, resetToken: string) => Promise<AuthResult>;
+  setNewPassword: (email: string, newPassword: string, resetToken: string) => Promise<AuthResult>;
 }
 
 // Context
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+// Helper function to convert API user to local user format
+const convertApiUserToUser = (apiUser: ApiUser): User => {
+  const nameParts = apiUser.name.split(' ');
+  return {
+    _id: apiUser._id,
+    name: apiUser.name,
+    email: apiUser.email,
+    // Legacy compatibility
+    id: apiUser._id,
+    firstName: nameParts[0] || '',
+    lastName: nameParts.slice(1).join(' ') || '',
+  };
+};
 
 // Provider
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -61,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token: null,
     isLoading: true,
     isSignout: false,
+    isAuthenticated: false,
   });
 
   // Load token and user from storage on mount
@@ -68,30 +86,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const bootstrapAsync = async () => {
       try {
         console.log('Bootstrapping auth state...');
-        const token = await AsyncStorage.getItem('user_token');
-        const userString = await AsyncStorage.getItem('user');
         
-        if (token && userString) {
-          const user = JSON.parse(userString);
+        // Use auth service to bootstrap authentication
+        const { user: apiUser, token } = await authService.bootstrapAuth();
+        
+        if (token && apiUser) {
+          const user = convertApiUserToUser(apiUser);
           console.log('Restored auth state:', { user });
           setState({
-            ...state,
-            token,
             user,
+            token,
             isLoading: false,
+            isSignout: false,
+            isAuthenticated: true,
           });
         } else {
-          console.log('No stored auth state found');
+          console.log('No valid auth state found');
           setState({
-            ...state,
+            user: null,
+            token: null,
             isLoading: false,
+            isSignout: false,
+            isAuthenticated: false,
           });
         }
       } catch (e) {
         console.error('Failed to load auth state:', e);
         setState({
-          ...state,
+          user: null,
+          token: null,
           isLoading: false,
+          isSignout: false,
+          isAuthenticated: false,
         });
       }
     };
@@ -102,45 +128,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Auth actions
   const authContext: AuthContextProps = {
     ...state,
+    
     login: async ({ email, password }: LoginParams): Promise<AuthResult> => {
       console.log('Login attempt:', { email });
       
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        // Mock authentication - replace with your actual auth logic
-        if (email && password) {
-          const userData: User = {
-            id: 'mock-user-id',
-            email: email,
-            firstName: 'John',
-            lastName: 'Doe',
-          };
-
-          // Store authentication data
-          await AsyncStorage.setItem('user_token', 'mock-token');
-          await AsyncStorage.setItem('user', JSON.stringify(userData));
-
+        const result = await authService.login({ email, password });
+        
+        if (result.success && result.user && result.token) {
+          const user = convertApiUserToUser(result.user);
+          
           setState({
-            user: userData,
-            token: 'mock-token',
+            user,
+            token: result.token,
             isLoading: false,
             isSignout: false,
+            isAuthenticated: true,
           });
 
-          console.log('User logged in:', userData);
+          console.log('User logged in:', user);
           return { 
             success: true, 
-            message: 'Login successful',
-            user: userData,
-            token: 'mock-token'
+            message: result.message,
+            user,
+            token: result.token
           };
         } else {
-          throw new Error('Invalid email or password');
+          throw new Error(result.message || 'Login failed');
         }
       } catch (error: any) {
         console.error('Login error:', error);
-        setState(prev => ({ ...prev, isLoading: false }));
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          isAuthenticated: false 
+        }));
         return {
           success: false,
           message: error.message || 'An error occurred during login'
@@ -154,33 +178,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        // Mock registration - replace with your actual auth logic
-        const newUser: User = {
-          id: 'mock-user-id',
-          email: params.email,
-          firstName: params.firstName,
-          lastName: params.lastName,
-          phone: params.phone || ''
-        };
+        const result = await authService.register(params);
         
-        // Store authentication data
-        await AsyncStorage.setItem('user_token', 'mock-token');
-        await AsyncStorage.setItem('user', JSON.stringify(newUser));
-        
-        setState({
-          user: newUser,
-          token: 'mock-token',
-          isLoading: false,
-          isSignout: false,
-        });
-        
-        console.log('Registration successful:', { newUser });
-      
-        return {
-          success: true,
-          user: newUser,
-          token: 'mock-token'
-        };
+        if (result.success) {
+          console.log('Registration successful');
+          setState(prev => ({ ...prev, isLoading: false }));
+          
+          return {
+            success: true,
+            message: result.message,
+            user: result.user ? convertApiUserToUser(result.user) : undefined
+          };
+        } else {
+          throw new Error(result.message || 'Registration failed');
+        }
       } catch (error: any) {
         console.error('Registration error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
@@ -193,39 +204,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     logout: async () => {
       console.log('Logout initiated');
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState(prev => ({ ...prev, isLoading: true, isSignout: true }));
       
       try {
-        // Clear stored authentication data
-        await AsyncStorage.removeItem('user_token');
-        await AsyncStorage.removeItem('user');
+        await authService.logout();
         
         setState({
           user: null,
           token: null,
           isLoading: false,
-          isSignout: true,
+          isSignout: false,
+          isAuthenticated: false,
         });
         
-        console.log('User logged out successfully');
-        router.replace('/');
+        console.log('Logout successful');
       } catch (error) {
         console.error('Logout error:', error);
-        setState(prev => ({ ...prev, isLoading: false }));
+        // Still clear state even if API call fails
+        setState({
+          user: null,
+          token: null,
+          isLoading: false,
+          isSignout: false,
+          isAuthenticated: false,
+        });
       }
     },
 
     resetPassword: async (email: string): Promise<AuthResult> => {
-      console.log('Password reset requested for:', email);
+      console.log('Reset password attempt:', { email });
       
       try {
-        // Mock password reset
+        const result = await authService.forgotPassword({ email });
+        
         return {
-          success: true,
-          message: 'Password reset email sent successfully'
+          success: result.success,
+          message: result.message
         };
       } catch (error: any) {
-        console.error('Password reset error:', error);
+        console.error('Reset password error:', error);
         return {
           success: false,
           message: error.message || 'An error occurred during password reset'
@@ -233,42 +250,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    verifyOtp: async (otp: string): Promise<AuthResult> => {
-      console.log('OTP verification:', otp);
+    verifyOtp: async (email: string, resetToken: string): Promise<AuthResult> => {
+      console.log('Verify OTP attempt:', { email });
       
       try {
-        // Mock OTP verification
+        const result = await authService.verifyResetToken({ email, resetToken });
+        
         return {
-          success: true,
-          message: 'OTP verified successfully'
+          success: result.success,
+          message: result.message
         };
       } catch (error: any) {
-        console.error('OTP verification error:', error);
+        console.error('Verify OTP error:', error);
         return {
           success: false,
-          message: error.message || 'Invalid OTP'
+          message: error.message || 'An error occurred during OTP verification'
         };
       }
     },
 
-    setNewPassword: async (password: string, confirmPassword: string): Promise<AuthResult> => {
-      console.log('Setting new password');
+    setNewPassword: async (email: string, newPassword: string, resetToken: string): Promise<AuthResult> => {
+      console.log('Set new password attempt:', { email });
       
       try {
-        if (password !== confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
+        const result = await authService.changePassword({ 
+          email, 
+          newPassword, 
+          resetToken 
+        });
         
-        // Mock password update
         return {
-          success: true,
-          message: 'Password updated successfully'
+          success: result.success,
+          message: result.message
         };
       } catch (error: any) {
-        console.error('Set password error:', error);
+        console.error('Set new password error:', error);
         return {
           success: false,
-          message: error.message || 'An error occurred while setting password'
+          message: error.message || 'An error occurred while setting new password'
         };
       }
     }

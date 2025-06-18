@@ -4,17 +4,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function VerifyOTPScreen() {
@@ -78,12 +78,12 @@ export default function VerifyOTPScreen() {
       return;
     }
     
-    const result = await verifyOtp(otpString);
+    const result = await verifyOtp(email, otpString);
     
     if (result.success) {
       router.push({
         pathname: '/reset-password',
-        params: { email }
+        params: { email, resetToken: otpString }
       });
     } else {
       Alert.alert('Error', result.message || 'Invalid verification code. Please try again.');
