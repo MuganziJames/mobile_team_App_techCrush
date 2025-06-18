@@ -28,6 +28,7 @@ export default function VerifyOTPScreen() {
   // Use a single string for the OTP instead of an array
   const [otpValue, setOtpValue] = useState('');
   const inputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Focus the input when the component mounts
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function VerifyOTPScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 40}
       >
         <View style={styles.header}>
           <TouchableOpacity 
@@ -100,10 +101,15 @@ export default function VerifyOTPScreen() {
         </View>
         
         <ScrollView 
+          ref={scrollViewRef}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
+          onContentSizeChange={() => {
+            // Scroll to bottom when keyboard appears
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }}
         >
           <View style={styles.content}>
             <Text style={styles.title}>Verification Code</Text>
@@ -157,6 +163,9 @@ export default function VerifyOTPScreen() {
                 <Text style={styles.resendLink}>Resend Code</Text>
               </TouchableOpacity>
             </View>
+            
+            {/* Extra padding at the bottom to ensure content is visible above keyboard */}
+            <View style={styles.extraPadding} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -185,12 +194,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
+    paddingTop: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: Dimensions.get('window').height - 200,
   },
   title: {
     fontSize: 28,
@@ -277,6 +289,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
+    marginBottom: 20,
   },
   footerText: {
     fontSize: 16,
@@ -289,4 +302,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textDecorationLine: 'underline',
   },
+  extraPadding: {
+    height: 150, // Extra padding at the bottom
+  }
 }); 
