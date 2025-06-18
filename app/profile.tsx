@@ -7,6 +7,10 @@ import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 
 export default function ProfileScreen() {
   const { user } = useAuth();
 
+  const handleBackPress = () => {
+    router.back();
+  };
+
   const handleMenuPress = () => {
     // Handle menu press
     router.push('/settings');
@@ -37,7 +41,13 @@ export default function ProfileScreen() {
           
           {/* Navigation bar */}
           <View style={styles.navBar}>
-            <View style={styles.backButton} />
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={handleBackPress}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000000" />
+            </TouchableOpacity>
             
             <Text style={styles.headerTitle}>My Profile</Text>
             

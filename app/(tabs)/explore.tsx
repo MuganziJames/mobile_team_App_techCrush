@@ -3,136 +3,136 @@ import { Style, useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
-// Sample style data (same as feed)
+// Sample style data - African Fashion Collection (same as feed)
 const allStyles: Style[] = [
   {
     id: 1,
-    title: 'Elegant Evening Dress',
-    image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=600&fit=crop',
+    title: 'Elegant Ankara Evening Gown',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
     category: 'Evening Wear',
-    tags: ['elegant', 'formal', 'black'],
-    color: '#000000',
-    description: 'A stunning black evening dress perfect for formal occasions. This sophisticated piece features a sleek silhouette that flatters every figure, making it ideal for galas, dinner parties, and special events. The timeless design ensures you\'ll look effortlessly elegant.'
+    tags: ['elegant', 'formal', 'ankara', 'african'],
+    color: '#8B4513',
+    description: 'A stunning Ankara evening gown that celebrates African heritage with modern elegance. This sophisticated piece features traditional African prints with contemporary tailoring, perfect for formal occasions, cultural events, and celebrations that honor African beauty and craftsmanship.'
   },
   {
     id: 2,
-    title: 'Casual Summer Outfit',
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=600&fit=crop',
+    title: 'Kente Casual Chic',
+    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
     category: 'Casual',
-    tags: ['summer', 'casual', 'comfortable'],
-    color: '#87CEEB',
-    description: 'Light and breezy summer outfit perfect for warm weather adventures. This comfortable ensemble combines style with practicality, featuring breathable fabrics and a relaxed fit that\'s perfect for beach days, picnics, or casual outings with friends.'
+    tags: ['kente', 'casual', 'comfortable', 'african'],
+    color: '#DAA520',
+    description: 'Light and stylish casual wear featuring authentic Kente patterns. This comfortable ensemble combines traditional African textiles with modern cuts, perfect for cultural events, everyday wear, or any occasion where you want to showcase your African pride with contemporary flair.'
   },
   {
     id: 3,
-    title: 'Professional Business Look',
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=600&fit=crop',
+    title: 'Professional Dashiki Look',
+    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=600&fit=crop',
     category: 'Business',
-    tags: ['professional', 'business', 'formal'],
+    tags: ['professional', 'dashiki', 'formal', 'african'],
     color: '#2F4F4F',
-    description: 'Sharp and professional business attire that commands respect in the boardroom. This polished look features clean lines and sophisticated tailoring, perfect for important meetings, presentations, and networking events. Confidence meets style.'
+    description: 'Sharp and professional business attire featuring modern Dashiki elements. This polished look combines traditional African aesthetics with contemporary tailoring, perfect for boardroom meetings, professional events, and showcasing cultural pride in corporate settings.'
   },
   {
     id: 4,
-    title: 'Bohemian Chic Style',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=600&fit=crop',
+    title: 'Bohemian Mudcloth Style',
+    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=600&fit=crop',
     category: 'Bohemian',
-    tags: ['boho', 'artistic', 'free-spirited'],
-    color: '#DEB887',
-    description: 'Free-spirited bohemian style with artistic flair and creative expression. This look embraces flowing fabrics, earthy tones, and unique accessories that tell a story. Perfect for music festivals, art galleries, or any occasion where you want to express your creative soul.'
+    tags: ['boho', 'mudcloth', 'artistic', 'african'],
+    color: '#8B4513',
+    description: 'Free-spirited bohemian style featuring authentic African mudcloth patterns. This artistic look embraces traditional African textiles with flowing silhouettes, perfect for creative events, cultural festivals, or expressing your connection to African artistic heritage.'
   },
   {
     id: 5,
-    title: 'Sporty Athleisure',
-    image: 'https://images.unsplash.com/photo-1506629905607-d9c297d3d45b?w=400&h=600&fit=crop',
+    title: 'Sporty African Print Athleisure',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
     category: 'Athleisure',
-    tags: ['sporty', 'comfortable', 'active'],
+    tags: ['sporty', 'african print', 'active', 'comfortable'],
     color: '#FF6347',
-    description: 'Comfortable athleisure wear designed for active lifestyles without compromising on style. This versatile outfit transitions seamlessly from gym to street, featuring moisture-wicking fabrics and trendy cuts that keep you looking fresh all day long.'
+    description: 'Dynamic athleisure wear featuring vibrant African prints and modern athletic cuts. This versatile outfit seamlessly blends traditional African patterns with contemporary sportswear, perfect for active lifestyles while celebrating African design heritage.'
   },
   {
     id: 6,
-    title: 'Vintage Inspired Look',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=600&fit=crop',
+    title: 'Vintage African Inspired',
+    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=600&fit=crop',
     category: 'Vintage',
-    tags: ['vintage', 'retro', 'classic'],
+    tags: ['vintage', 'retro', 'african', 'classic'],
     color: '#8B4513',
-    description: 'Classic vintage-inspired outfit with timeless appeal that never goes out of style. This carefully curated look draws inspiration from fashion\'s golden eras, featuring authentic details and quality craftsmanship that celebrates the elegance of bygone times.'
+    description: 'Classic vintage-inspired outfit celebrating African fashion heritage. This timeless look draws from traditional African garments reinterpreted for modern wear, featuring authentic patterns and quality craftsmanship that honors the rich history of African fashion.'
   },
   {
     id: 7,
-    title: 'Modern Minimalist',
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop',
+    title: 'Modern African Minimalist',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
     category: 'Minimalist',
-    tags: ['minimal', 'clean', 'modern'],
+    tags: ['minimal', 'clean', 'modern', 'african'],
     color: '#F5F5F5',
-    description: 'Clean and modern minimalist style that proves less is more. This sophisticated approach to fashion focuses on quality over quantity, featuring neutral colors, simple silhouettes, and impeccable tailoring that creates maximum impact with minimal effort.'
+    description: 'Clean and modern minimalist style with subtle African influences. This sophisticated approach combines neutral tones with carefully chosen African-inspired details, creating maximum impact through thoughtful design that celebrates African aesthetics with contemporary elegance.'
   },
   {
     id: 8,
-    title: 'Street Style Edge',
-    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=600&fit=crop',
+    title: 'Afrocentric Street Style',
+    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
     category: 'Street Style',
-    tags: ['edgy', 'urban', 'trendy'],
+    tags: ['afrocentric', 'urban', 'trendy', 'african'],
     color: '#696969',
-    description: 'Edgy street style with urban flair that captures the pulse of city fashion. This bold look combines unexpected elements and contemporary trends, perfect for making a statement while navigating the urban jungle with confidence and attitude.'
+    description: 'Bold Afrocentric street style that celebrates African culture in urban settings. This contemporary look combines traditional African elements with modern streetwear trends, perfect for making a cultural statement while navigating city life with confidence and pride.'
   },
   {
     id: 9,
-    title: 'Romantic Floral Dress',
-    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=600&fit=crop',
+    title: 'African Print Romantic Dress',
+    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=600&fit=crop',
     category: 'Romantic',
-    tags: ['romantic', 'floral', 'feminine'],
+    tags: ['romantic', 'african print', 'feminine', 'floral'],
     color: '#FFB6C1',
-    description: 'Dreamy romantic floral dress that embodies feminine grace and natural beauty. This enchanting piece features delicate floral patterns and flowing fabrics that dance with every step, perfect for garden parties, brunch dates, or any occasion that calls for a touch of romance.'
+    description: 'Dreamy romantic dress featuring beautiful African floral prints. This enchanting piece combines traditional African textile artistry with feminine silhouettes, perfect for special occasions, cultural celebrations, or any moment that calls for romantic African elegance.'
   },
   {
     id: 10,
-    title: 'Punk Rock Rebellion',
-    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=600&fit=crop',
+    title: 'Afropunk Rebellion',
+    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=600&fit=crop',
     category: 'Punk',
-    tags: ['punk', 'rebellious', 'alternative'],
+    tags: ['afropunk', 'rebellious', 'alternative', 'african'],
     color: '#8B0000',
-    description: 'Bold punk rock style that challenges conventions and embraces rebellion. This fierce look features leather, studs, and attitude, perfect for concerts, alternative events, or whenever you want to express your non-conformist spirit and rock the world with your unique style.'
+    description: 'Bold Afropunk style that merges African heritage with rebellious spirit. This fierce look combines traditional African elements with punk aesthetics, perfect for music festivals, alternative events, or expressing your unique blend of cultural pride and non-conformist attitude.'
   },
   {
     id: 11,
-    title: 'Tropical Paradise Vibes',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=600&fit=crop',
+    title: 'Tropical African Paradise',
+    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=600&fit=crop',
     category: 'Resort',
-    tags: ['tropical', 'vacation', 'colorful'],
+    tags: ['tropical', 'vacation', 'colorful', 'african'],
     color: '#00CED1',
-    description: 'Vibrant tropical-inspired outfit that brings vacation vibes wherever you go. This colorful ensemble features bold prints and breezy fabrics that capture the essence of paradise, perfect for beach vacations, pool parties, or adding a splash of sunshine to your everyday wardrobe.'
+    description: 'Vibrant tropical-inspired outfit featuring authentic African prints and colors. This colorful ensemble captures the essence of African paradise with bold patterns and breezy fabrics, perfect for beach vacations, resort wear, or bringing African sunshine to your wardrobe.'
   },
   {
     id: 12,
-    title: 'Gothic Elegance',
-    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=600&fit=crop',
+    title: 'African Gothic Elegance',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
     category: 'Gothic',
-    tags: ['gothic', 'dark', 'mysterious'],
+    tags: ['gothic', 'dark', 'mysterious', 'african'],
     color: '#2F2F2F',
-    description: 'Mysterious gothic elegance that embraces the beauty of darkness. This dramatic look combines rich textures, deep colors, and intricate details to create an aura of sophisticated mystery, perfect for evening events or expressing your darker aesthetic sensibilities.'
+    description: 'Mysterious gothic elegance with African influences. This dramatic look combines rich African textiles with dark, sophisticated styling to create an aura of cultural mystery, perfect for evening events or expressing your unique blend of African heritage and gothic aesthetics.'
   },
   {
     id: 13,
-    title: 'Preppy Academia Style',
-    image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop',
+    title: 'Afrocentric Academia Style',
+    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
     category: 'Preppy',
-    tags: ['preppy', 'academic', 'classic'],
+    tags: ['preppy', 'academic', 'classic', 'african'],
     color: '#8B4513',
-    description: 'Classic preppy academia style that channels intellectual sophistication. This timeless look features traditional patterns, quality fabrics, and scholarly charm, perfect for campus life, library sessions, or any setting where intelligence meets impeccable style and refined taste.'
+    description: 'Classic academic style celebrating African intellectual heritage. This sophisticated look features traditional African elements with scholarly charm, perfect for academic settings, cultural institutions, or any environment where African intelligence meets impeccable style and cultural pride.'
   }
 ];
 

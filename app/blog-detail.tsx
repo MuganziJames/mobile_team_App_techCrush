@@ -4,13 +4,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,58 +20,58 @@ const { width } = Dimensions.get('window');
 const blogPosts = [
   {
     id: 1,
-    title: 'The Fashionistas Guide to Style and Sophistication.',
+    title: 'The African Fashionista\'s Guide to Style and Cultural Pride.',
     date: 'Jan 23, 2025',
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=300&fit=crop',
-    category: 'Fashion'
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=300&fit=crop',
+    category: 'African Fashion'
   },
   {
     id: 2,
-    title: 'AI-Powered Fashion: Trends, Tips, and Inspiration.',
+    title: 'Modern African Fashion: Traditions Meet Contemporary Style.',
     date: 'Mar 25, 2025',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop',
-    category: 'Technology'
+    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=300&fit=crop',
+    category: 'Culture'
   },
   {
     id: 3,
-    title: 'Fashion Fails & Wins.',
+    title: 'Ankara, Kente & Beyond: African Print Fashion Guide.',
     date: 'Jan 03, 2025',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=300&fit=crop',
-    category: 'Fashion'
+    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=300&fit=crop',
+    category: 'African Fashion'
   },
   {
     id: 4,
-    title: 'Embracing Individuality.',
+    title: 'Celebrating African Heritage Through Fashion.',
     date: 'Jun 01, 2025',
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=300&fit=crop',
-    category: 'Lifestyle'
+    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=300&fit=crop',
+    category: 'Culture'
   },
   {
     id: 5,
-    title: 'Style Sanctuary: A Haven for Fashion Lovers.',
+    title: 'African Fashion Week: Runway to Street Style.',
     date: 'Mar 05, 2025',
-    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=300&fit=crop',
-    category: 'Fashion'
+    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=300&fit=crop',
+    category: 'African Fashion'
   },
   {
     id: 6,
-    title: 'The Latest Trends, News, and Must-Haves.',
+    title: 'Traditional Meets Modern: African Fashion Trends.',
     date: 'Apr 23, 2025',
-    image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=300&fit=crop',
     category: 'Trends'
   },
   {
     id: 7,
-    title: 'The Fashion Scene: Where Style Meets Culture.',
+    title: 'African Textile Heritage: Stories in Every Thread.',
     date: 'Feb 15, 2025',
-    image: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=300&fit=crop',
     category: 'Culture'
   },
   {
     id: 8,
-    title: 'Gloss & Glam',
+    title: 'African Beauty & Fashion: Celebrating Natural Elegance',
     date: 'Feb 17, 2025',
-    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=300&fit=crop',
     category: 'Beauty'
   }
 ];
@@ -79,10 +79,10 @@ const blogPosts = [
 // Full blog post content data
 const blogPostsContent = {
   1: {
-    title: 'The Fashionistas Guide to Style and Sophistication.',
+    title: 'The African Fashionista\'s Guide to Style and Cultural Pride.',
     date: 'Jan 23, 2025',
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=300&fit=crop',
-    content: `Fashion is more than just clothing; it's a form of self-expression, a way to communicate who you are without saying a word. In today's fast-paced world, staying stylish while maintaining sophistication can seem challenging, but with the right approach, it becomes an art form.
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=300&fit=crop',
+    content: `African fashion is more than just clothing; it's a celebration of heritage, a form of cultural expression, and a way to honor the rich traditions of the African continent while embracing contemporary style. In today's global fashion landscape, African-inspired designs are gaining recognition for their vibrant patterns, quality craftsmanship, and cultural significance.
 
 The key to sophisticated fashion lies in understanding the fundamentals: quality over quantity, fit over trends, and confidence over conformity. When you invest in well-made pieces that fit you perfectly, you create a foundation for a wardrobe that will serve you for years to come.
 

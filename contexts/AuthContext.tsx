@@ -1,7 +1,5 @@
-import { auth } from '@/app/FirebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updatePassword } from 'firebase/auth';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 // Types
@@ -110,38 +108,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        if (!user) {
-          throw new Error('No user returned from login');
+        // Mock authentication - replace with your actual auth logic
+        if (email && password) {
+          const userData: User = {
+            id: 'mock-user-id',
+            email: email,
+            firstName: 'John',
+            lastName: 'Doe',
+          };
+
+          // Store authentication data
+          await AsyncStorage.setItem('user_token', 'mock-token');
+          await AsyncStorage.setItem('user', JSON.stringify(userData));
+
+          setState({
+            user: userData,
+            token: 'mock-token',
+            isLoading: false,
+            isSignout: false,
+          });
+
+          console.log('User logged in:', userData);
+          return { 
+            success: true, 
+            message: 'Login successful',
+            user: userData,
+            token: 'mock-token'
+          };
+        } else {
+          throw new Error('Invalid email or password');
         }
-
-        const userData: User = {
-          id: user.uid,
-          email: user.email || '',
-          firstName: '', // These will need to be fetched from your database
-          lastName: '',  // These will need to be fetched from your database
-        };
-
-        // Store authentication data
-        await AsyncStorage.setItem('user_token', user.uid);
-        await AsyncStorage.setItem('user', JSON.stringify(userData));
-
-        setState({
-          user: userData,
-          token: user.uid,
-          isLoading: false,
-          isSignout: false,
-        });
-
-        console.log('User logged in:', user);
-        return { 
-          success: true, 
-          message: 'Login successful',
-          user: userData,
-          token: user.uid
-        };
       } catch (error: any) {
         console.error('Login error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
@@ -158,28 +154,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, params.email, params.password);
-        const user = userCredential.user;
-        
-        if (!user) {
-          throw new Error('Failed to create user');
-        }
-        
+        // Mock registration - replace with your actual auth logic
         const newUser: User = {
-          id: user.uid,
-          email: user.email || '',
+          id: 'mock-user-id',
+          email: params.email,
           firstName: params.firstName,
           lastName: params.lastName,
           phone: params.phone || ''
         };
         
         // Store authentication data
-        await AsyncStorage.setItem('user_token', user.uid);
+        await AsyncStorage.setItem('user_token', 'mock-token');
         await AsyncStorage.setItem('user', JSON.stringify(newUser));
         
         setState({
           user: newUser,
-          token: user.uid,
+          token: 'mock-token',
           isLoading: false,
           isSignout: false,
         });
@@ -189,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return {
           success: true,
           user: newUser,
-          token: user.uid
+          token: 'mock-token'
         };
       } catch (error: any) {
         console.error('Registration error:', error);
@@ -200,13 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
     },
-    
+
     logout: async () => {
+      console.log('Logout initiated');
       setState(prev => ({ ...prev, isLoading: true }));
       
       try {
-        await signOut(auth);
-        // Clear stored data
+        // Clear stored authentication data
         await AsyncStorage.removeItem('user_token');
         await AsyncStorage.removeItem('user');
         
@@ -217,8 +207,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isSignout: true,
         });
         
-        // Navigate to the sign-in screen
-        router.replace('/signin');
+        console.log('User logged out successfully');
+        router.replace('/');
       } catch (error) {
         console.error('Logout error:', error);
         setState(prev => ({ ...prev, isLoading: false }));
@@ -226,42 +216,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 
     resetPassword: async (email: string): Promise<AuthResult> => {
+      console.log('Password reset requested for:', email);
+      
       try {
-        await sendPasswordResetEmail(auth, email);
-        return { success: true, message: 'Password reset email sent' };
+        // Mock password reset
+        return {
+          success: true,
+          message: 'Password reset email sent successfully'
+        };
       } catch (error: any) {
-        return { 
-          success: false, 
-          message: error.message || 'Failed to send password reset email' 
+        console.error('Password reset error:', error);
+        return {
+          success: false,
+          message: error.message || 'An error occurred during password reset'
         };
       }
     },
 
     verifyOtp: async (otp: string): Promise<AuthResult> => {
-      // Implement OTP verification logic here
-      return { success: false, message: 'OTP verification not implemented' };
-    },
-
-    setNewPassword: async (password: string, confirmPassword: string): Promise<AuthResult> => {
-      if (password !== confirmPassword) {
-        return { success: false, message: 'Passwords do not match' };
-      }
-
+      console.log('OTP verification:', otp);
+      
       try {
-        const user = auth.currentUser;
-        if (!user) {
-          return { success: false, message: 'No user is currently signed in' };
-        }
-
-        await updatePassword(user, password);
-        return { success: true, message: 'Password updated successfully' };
+        // Mock OTP verification
+        return {
+          success: true,
+          message: 'OTP verified successfully'
+        };
       } catch (error: any) {
-        return { 
-          success: false, 
-          message: error.message || 'Failed to update password' 
+        console.error('OTP verification error:', error);
+        return {
+          success: false,
+          message: error.message || 'Invalid OTP'
         };
       }
     },
+
+    setNewPassword: async (password: string, confirmPassword: string): Promise<AuthResult> => {
+      console.log('Setting new password');
+      
+      try {
+        if (password !== confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+        
+        // Mock password update
+        return {
+          success: true,
+          message: 'Password updated successfully'
+        };
+      } catch (error: any) {
+        console.error('Set password error:', error);
+        return {
+          success: false,
+          message: error.message || 'An error occurred while setting password'
+        };
+      }
+    }
   };
 
   return (

@@ -15,8 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.mobile_team_App_techCrush",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.anonymous.mobile_team_App_techCrush"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,8 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mobile_team_App_techCrush",
-      "googleServicesFile": "../google-services.json"
+      "package": "com.anonymous.mobile_team_App_techCrush"
     },
     "web": {
       "bundler": "metro",
@@ -35,8 +33,6 @@
     "plugins": [
       "expo-router",
       "expo-splash-screen",
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
       [
         "expo-build-properties",
         {

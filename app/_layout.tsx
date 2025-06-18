@@ -8,11 +8,10 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import './FirebaseConfig';
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -74,6 +73,7 @@ function RootLayoutNav() {
         <Stack.Screen name="blog-detail" options={{ headerShown: false }} />
         <Stack.Screen name="style-detail" options={{ headerShown: false }} />
         <Stack.Screen name="lookbook-folder" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

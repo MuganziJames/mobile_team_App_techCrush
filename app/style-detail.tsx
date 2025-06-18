@@ -18,16 +18,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
-// Sample style data (same as feed)
+// Sample style data - African Fashion Collection (same as feed)
 const sampleStyles = [
   {
     id: 1,
-    title: 'Elegant Evening Dress',
-    image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=600&fit=crop',
+    title: 'Elegant Ankara Evening Gown',
+    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
     category: 'Evening Wear',
-    tags: ['elegant', 'formal', 'black'],
-    color: '#000000',
-    description: 'A stunning black evening dress perfect for formal occasions. This sophisticated piece features a sleek silhouette that flatters every figure, making it ideal for galas, dinner parties, and special events. The timeless design ensures you\'ll look effortlessly elegant.'
+    tags: ['elegant', 'formal', 'ankara', 'african'],
+    color: '#8B4513',
+    description: 'A stunning Ankara evening gown that celebrates African heritage with modern elegance. This sophisticated piece features traditional African prints with contemporary tailoring, perfect for formal occasions, cultural events, and celebrations that honor African beauty and craftsmanship.'
   },
   {
     id: 2,
