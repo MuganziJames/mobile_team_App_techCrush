@@ -31,7 +31,6 @@ const onboardingData = [
 
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showDemoInfo, setShowDemoInfo] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const handleSkip = () => {
@@ -49,9 +48,7 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleDemoPress = () => {
-    router.replace('/demo-credentials');
-  };
+
 
   const renderItem = ({ item }: { item: typeof onboardingData[0] }) => (
     <View style={styles.slide}>
@@ -96,22 +93,6 @@ export default function OnboardingScreen() {
           onPress={handleNext}
           style={styles.button}
         />
-        
-        <TouchableOpacity 
-          style={styles.demoButton}
-          onPress={handleDemoPress}
-        >
-          <Text style={styles.demoButtonText}>Demo Login Info</Text>
-        </TouchableOpacity>
-        
-        {showDemoInfo && (
-          <View style={styles.demoInfoCard}>
-            <Text style={styles.demoTitle}>Demo Credentials:</Text>
-            <Text style={styles.demoText}>Email: <Text style={styles.demoHighlight}>user@example.com</Text></Text>
-            <Text style={styles.demoText}>Password: <Text style={styles.demoHighlight}>password123</Text></Text>
-            <Text style={styles.demoNote}>* You can also create a new account</Text>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -168,44 +149,5 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     marginTop: 24,
-  },
-  demoButton: {
-    marginTop: 16,
-    padding: 8,
-  },
-  demoButtonText: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  demoInfoCard: {
-    backgroundColor: '#FFFAF0',
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    borderRadius: 8,
-    padding: 16,
-    marginTop: 12,
-    width: '100%',
-  },
-  demoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.black,
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginBottom: 4,
-  },
-  demoHighlight: {
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  demoNote: {
-    fontSize: 12,
-    color: Colors.midGray,
-    marginTop: 8,
-    fontStyle: 'italic',
   },
 }); 

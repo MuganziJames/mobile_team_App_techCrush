@@ -128,11 +128,11 @@ AfriStyle/
    npm run web
    ```
 
-### Demo Credentials
+### Testing
 
-For testing purposes, use these demo credentials:
-- **Email**: `demo@example.com`
-- **Password**: `password123`
+The app now uses real authentication with the TechCrush API. You can:
+- **Create a new account** through the signup flow
+- **Login with existing credentials** if you have an account
 
 ## 📱 App Features & Screens
 

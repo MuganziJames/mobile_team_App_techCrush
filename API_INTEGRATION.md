@@ -83,12 +83,13 @@ npx expo install axios @react-native-async-storage/async-storage
    - Close and reopen app
    - Should automatically restore authentication state
 
-### 2. Demo Credentials
-For testing purposes, you can use:
-- **Email**: `demo@example.com`
-- **Password**: `password123`
+### 2. Testing Authentication
+To test the authentication system:
+1. **Create a new account** using the signup flow
+2. **Login with your credentials** 
+3. **Test password reset** using the forgot password flow
 
-*(Note: These need to be registered first via the registration flow)*
+*(Note: The API uses real user accounts, so you need to register first)*
 
 ## 🔒 Security Features
 

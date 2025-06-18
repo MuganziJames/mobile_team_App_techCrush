@@ -4,16 +4,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Keyboard,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -80,13 +80,7 @@ export default function SignInScreen() {
     }
   };
 
-  const handleSocialSignIn = (provider: string) => {
-    Alert.alert('Social Sign In', `${provider} sign in is not implemented yet.`);
-  };
 
-  const handleDemoMode = () => {
-    router.replace('/demo-credentials');
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -156,44 +150,6 @@ export default function SignInScreen() {
                 <Text style={styles.signInButtonText}>Sign In</Text>
               )}
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.demoButton}
-              onPress={handleDemoMode}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="information-circle-outline" size={20} color={Colors.primary} />
-              <Text style={styles.demoButtonText}>Use Demo Credentials</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-            
-            <View style={styles.socialButtons}>
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => handleSocialSignIn('Google')}
-              >
-                <Ionicons name="logo-google" size={24} color="#DB4437" />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => handleSocialSignIn('Apple')}
-              >
-                <Ionicons name="logo-apple" size={24} color="#000" />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => handleSocialSignIn('Facebook')}
-              >
-                <Ionicons name="logo-facebook" size={24} color="#3b5998" />
-              </TouchableOpacity>
-            </View>
           </View>
           
           <View style={styles.footer}>
@@ -304,52 +260,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     fontWeight: "600",
-  },
-  demoButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 50,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  demoButtonText: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 8,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.midGray,
-  },
-  dividerText: {
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginHorizontal: 16,
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  socialButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: Colors.midGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 12,
   },
   footer: {
     marginTop: 'auto',

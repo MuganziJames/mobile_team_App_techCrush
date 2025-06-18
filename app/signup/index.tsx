@@ -1,18 +1,16 @@
 import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Keyboard,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Keyboard,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function SignUpEmailScreen() {
@@ -51,9 +49,7 @@ export default function SignUpEmailScreen() {
     }, 1000);
   };
 
-  const handleSocialSignUp = (provider: string) => {
-    Alert.alert('Social Sign Up', `${provider} signup is not implemented yet.`);
-  };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,28 +86,6 @@ export default function SignUpEmailScreen() {
               ) : (
                 <Text style={styles.primaryButtonText}>Continue with Email</Text>
               )}
-            </TouchableOpacity>
-            
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or Sign Up with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.socialButton}
-              onPress={() => handleSocialSignUp('Google')}
-            >
-              <Ionicons name="logo-google" size={20} color="#DB4437" />
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.socialButton}
-              onPress={() => handleSocialSignUp('Apple')}
-            >
-              <Ionicons name="logo-apple" size={20} color="#000" />
-              <Text style={styles.socialButtonText}>Continue with Apple</Text>
             </TouchableOpacity>
             
             <Text style={styles.disclaimer}>
@@ -190,36 +164,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: '600',
     fontSize: 16,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E1E1E1',
-  },
-  dividerText: {
-    color: Colors.darkGray,
-    paddingHorizontal: 16,
-    fontSize: 14,
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E1E1E1',
-    marginBottom: 16,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    color: Colors.black,
-    marginLeft: 8,
   },
   disclaimer: {
     marginTop: 8,
