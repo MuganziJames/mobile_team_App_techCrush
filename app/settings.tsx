@@ -31,37 +31,26 @@ export default function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    console.log('Logout button pressed'); // Add debug log
+    console.log('Logout button pressed');
     
-    // For web compatibility, use window.confirm instead of Alert.alert
-    if (typeof window !== 'undefined') {
-      // Web environment
-      const confirmed = window.confirm('Are you sure you want to log out?');
-      if (confirmed) {
-        console.log('User confirmed logout (web)'); // Add debug log
-        performLogout();
-      }
-    } else {
-      // Mobile environment
-      Alert.alert(
-        'Log Out',
-        'Are you sure you want to log out?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel'
-          },
-          {
-            text: 'Log Out',
-            style: 'destructive',
-            onPress: () => {
-              console.log('User confirmed logout (mobile)'); // Add debug log
-              performLogout();
-            }
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => {
+            console.log('User confirmed logout');
+            performLogout();
           }
-        ]
-      );
-    }
+        }
+      ]
+    );
   };
 
   const performLogout = async () => {

@@ -1,8 +1,9 @@
 // API Types for TechCrush Authentication
 export interface User {
-  _id: string;
+  id: number;
   name: string;
   email: string;
+  role?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -34,8 +35,9 @@ export interface ChangePasswordBody {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  user: User;
+  data: User;
+  message: string;
+  status: boolean;
 }
 
 export interface ApiError {

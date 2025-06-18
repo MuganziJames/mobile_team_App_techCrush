@@ -103,6 +103,7 @@ export const clearAuthData = async () => {
     await AsyncStorage.removeItem('accessToken');
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('session_cookies');
+    await AsyncStorage.removeItem('isAuthenticated');
     delete apiClient.defaults.headers.common['Authorization'];
   } catch (error) {
     console.error('Error clearing auth data:', error);

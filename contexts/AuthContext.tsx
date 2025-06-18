@@ -1,14 +1,16 @@
+import { router } from 'expo-router';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import authService from '../api/auth.service';
 import { User as ApiUser } from '../api/types';
 
 // Types - Updated to match API
 interface User {  
-  _id: string;
+  id: number;
   name: string;
   email: string;
+  role?: string;
   // Legacy compatibility
-  id?: string;
+  _id?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -61,11 +63,12 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 const convertApiUserToUser = (apiUser: ApiUser): User => {
   const nameParts = apiUser.name.split(' ');
   return {
-    _id: apiUser._id,
+    id: apiUser.id,
     name: apiUser.name,
     email: apiUser.email,
+    role: apiUser.role,
     // Legacy compatibility
-    id: apiUser._id,
+    _id: apiUser.id.toString(),
     firstName: nameParts[0] || '',
     lastName: nameParts.slice(1).join(' ') || '',
   };
@@ -218,6 +221,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         
         console.log('Logout successful');
+        
+        // Navigate to splash screen which will redirect to onboarding
+        router.replace('/');
       } catch (error) {
         console.error('Logout error:', error);
         // Still clear state even if API call fails
@@ -228,6 +234,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isSignout: false,
           isAuthenticated: false,
         });
+        
+        // Navigate even if logout API call fails
+        router.replace('/');
       }
     },
 

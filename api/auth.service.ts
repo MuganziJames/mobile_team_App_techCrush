@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import apiClient, { clearAuthData, setAuthToken } from './axios';
+import apiClient, { clearAuthData } from './axios';
 import {
     ApiResponse,
     ChangePasswordBody,
@@ -36,19 +36,30 @@ class AuthService {
     try {
       const response = await apiClient.post<LoginResponse>('/login', data);
       
-      const { accessToken, user } = response.data;
+      console.log('Login API response:', response.data);
       
-      // Store token and user data
-      await setAuthToken(accessToken);
+      const { data: user, message, status } = response.data;
+      
+      // Validate response
+      if (!status) {
+        throw new Error(message || 'Login failed');
+      }
+      
+      if (!user || !user.id) {
+        throw new Error('No user data received from server');
+      }
+      
+      // Store user data (no token needed as API uses HTTP-only cookies)
       await AsyncStorage.setItem('user', JSON.stringify(user));
+      await AsyncStorage.setItem('isAuthenticated', 'true');
       
-      console.log('Login successful:', { user, token: accessToken });
+      console.log('Login successful:', { user, message });
       
       return {
         success: true,
-        message: 'Login successful',
+        message: message || 'Login successful',
         user,
-        token: accessToken
+        token: 'cookie-auth' // Placeholder since API uses cookies
       };
     } catch (error: any) {
       console.error('Login error:', error);
@@ -145,14 +156,27 @@ class AuthService {
   // Check authentication status
   async authCheck(): Promise<{ success: boolean; user?: User; message?: string }> {
     try {
-      const response = await apiClient.get<User>('/auth');
+      const response = await apiClient.get<{ data: User; message: string; status: boolean }>('/auth');
+      
+      const { data: user, status, message } = response.data;
+      
+      // Validate response
+      if (!status) {
+        throw new Error(message || 'Authentication failed');
+      }
+      
+      // Validate user data before storing
+      if (!user || !user.id) {
+        throw new Error('Invalid user data received from server');
+      }
       
       // Store/update user data
-      await AsyncStorage.setItem('user', JSON.stringify(response.data));
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      await AsyncStorage.setItem('isAuthenticated', 'true');
       
       return {
         success: true,
-        user: response.data
+        user: user
       };
     } catch (error: any) {
       console.error('Auth check error:', error);
@@ -170,23 +194,21 @@ class AuthService {
   // Bootstrap auth - run at app startup
   async bootstrapAuth(): Promise<{ user: User | null; token: string | null }> {
     try {
-      // Get stored token
-      const token = await AsyncStorage.getItem('accessToken');
+      // Check if user was authenticated (for cookie-based auth)
+      const isAuthenticated = await AsyncStorage.getItem('isAuthenticated');
+      const storedUser = await AsyncStorage.getItem('user');
       
-      if (!token) {
-        console.log('No stored token found');
+      if (!isAuthenticated || !storedUser) {
+        console.log('No stored authentication found');
         return { user: null, token: null };
       }
       
-      // Set token in axios headers
-      await setAuthToken(token);
-      
-      // Verify token with server
+      // Try to verify authentication with server
       const authResult = await this.authCheck();
       
       if (authResult.success && authResult.user) {
         console.log('Bootstrap auth successful:', authResult.user);
-        return { user: authResult.user, token };
+        return { user: authResult.user, token: 'cookie-auth' };
       } else {
         console.log('Bootstrap auth failed - clearing stored data');
         await clearAuthData();
