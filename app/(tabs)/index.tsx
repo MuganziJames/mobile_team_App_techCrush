@@ -204,18 +204,12 @@ export default function FeedScreen() {
           >
             <Ionicons name="search-outline" size={24} color={Colors.black} />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.headerIcon}
-            onPress={() => router.push('/settings')}
-          >
-            <Ionicons name="settings-outline" size={24} color={Colors.black} />
-          </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.welcomeSection}>
         <Text style={styles.welcomeText}>
-          Welcome back, {user?.firstName || 'User'}!
+          Welcome back, {user?.name?.split(' ')[0] || 'User'}!
         </Text>
         <Text style={styles.subText}>
           Discover new styles and save them to your lookbook

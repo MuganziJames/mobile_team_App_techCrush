@@ -1,25 +1,204 @@
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
   const { user } = useAuth();
-
-  const handleMenuPress = () => {
-    // Handle menu press
-    router.push('/settings');
-  };
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [tempValue, setTempValue] = useState('');
 
   const handleEditAvatar = () => {
-    // Handle edit avatar press
-    console.log('Edit avatar pressed');
+    Alert.alert('Edit Avatar', 'Avatar editing feature coming soon!');
   };
 
-  const handleDeleteProfile = () => {
-    // Handle delete profile press
-    console.log('Delete profile pressed');
+  const handleEditField = (fieldName: string, currentValue: string) => {
+    setEditingField(fieldName);
+    setTempValue(currentValue);
+    
+    Alert.prompt(
+      `Edit ${fieldName}`,
+      `Enter your new ${fieldName.toLowerCase()}:`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => {
+            setEditingField(null);
+            setTempValue('');
+          }
+        },
+        {
+          text: 'Save',
+          onPress: (value) => {
+            if (value && value.trim()) {
+              // TODO: Implement actual API call to update user data
+              Alert.alert(
+                'Success',
+                `${fieldName} updated successfully!\n\nNote: This is a demo. In the full version, this would sync with your account.`,
+                [{ text: 'OK' }]
+              );
+            } else {
+              Alert.alert('Error', 'Please enter a valid value.');
+            }
+            setEditingField(null);
+            setTempValue('');
+          }
+        }
+      ],
+      'plain-text',
+      currentValue
+    );
+  };
+
+  const handleEditPhone = () => {
+    Alert.alert(
+      'Edit Phone Number',
+      'Choose your country and enter your phone number:',
+      [
+        {
+          text: 'Nigeria 🇳🇬',
+          onPress: () => {
+            Alert.prompt(
+              'Edit Phone Number',
+              'Enter your Nigerian phone number:',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Save',
+                  onPress: (value) => {
+                    if (value && /^\d{10,11}$/.test(value.replace(/\s/g, ''))) {
+                      Alert.alert('Success', 'Phone number updated successfully!');
+                    } else {
+                      Alert.alert('Error', 'Please enter a valid Nigerian phone number (10-11 digits).');
+                    }
+                  }
+                }
+              ],
+              'plain-text',
+              user?.phone?.replace('+234', '') || ''
+            );
+          }
+        },
+        {
+          text: 'Other Country',
+          onPress: () => {
+            Alert.alert('Coming Soon', 'Support for other countries coming soon!');
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const handleEditDate = () => {
+    Alert.alert(
+      'Edit Date of Birth',
+      'Select your birth date:',
+      [
+        {
+          text: 'January 1990',
+          onPress: () => Alert.alert('Success', 'Date of birth updated to January 1990!')
+        },
+        {
+          text: 'February 1991',
+          onPress: () => Alert.alert('Success', 'Date of birth updated to February 1991!')
+        },
+        {
+          text: 'March 1992',
+          onPress: () => Alert.alert('Success', 'Date of birth updated to March 1992!')
+        },
+        {
+          text: 'Custom Date',
+          onPress: () => {
+            Alert.prompt(
+              'Custom Date',
+              'Enter your birth date (DD/MM/YYYY):',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Save',
+                  onPress: (value) => {
+                    if (value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+                      Alert.alert('Success', `Date of birth updated to ${value}!`);
+                    } else {
+                      Alert.alert('Error', 'Please enter date in DD/MM/YYYY format.');
+                    }
+                  }
+                }
+              ],
+              'default',
+              '15/01/1990'
+            );
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const handleEditLocation = () => {
+    Alert.alert(
+      'Edit Location',
+      'Choose your location:',
+      [
+        {
+          text: 'Lagos, Nigeria 🇳🇬',
+          onPress: () => Alert.alert('Success', 'Location updated to Lagos, Nigeria!')
+        },
+        {
+          text: 'Abuja, Nigeria 🇳🇬',
+          onPress: () => Alert.alert('Success', 'Location updated to Abuja, Nigeria!')
+        },
+        {
+          text: 'Kano, Nigeria 🇳🇬',
+          onPress: () => Alert.alert('Success', 'Location updated to Kano, Nigeria!')
+        },
+        {
+          text: 'Custom Location',
+          onPress: () => {
+            Alert.prompt(
+              'Custom Location',
+              'Enter your location:',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Save',
+                  onPress: (value) => {
+                    if (value && value.trim()) {
+                      Alert.alert('Success', `Location updated to ${value}!`);
+                    } else {
+                      Alert.alert('Error', 'Please enter a valid location.');
+                    }
+                  }
+                }
+              ],
+              'default',
+              'Lagos, Nigeria'
+            );
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (user?.name) {
+      const nameParts = user.name.split(' ');
+      return (nameParts[0]?.charAt(0) || '') + (nameParts[1]?.charAt(0) || '');
+    }
+    return 'AU';
+  };
+
+  // Get first name for greeting
+  const getFirstName = () => {
+    if (user?.name) {
+      return user.name.split(' ')[0];
+    }
+    return 'User';
   };
 
   return (
@@ -41,13 +220,7 @@ export default function ProfileScreen() {
             
             <Text style={styles.headerTitle}>My Profile</Text>
             
-            <TouchableOpacity 
-              style={styles.menuButton} 
-              onPress={handleMenuPress}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="settings-outline" size={24} color="#000000" />
-            </TouchableOpacity>
+            <View style={styles.menuButton} />
           </View>
         </View>
 
@@ -56,8 +229,7 @@ export default function ProfileScreen() {
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
               <Text style={styles.avatarInitials}>
-                {user?.firstName?.charAt(0) || 'A'}
-                {user?.lastName?.charAt(0) || 'U'}
+                {getInitials()}
               </Text>
             </View>
             <TouchableOpacity 
@@ -73,69 +245,90 @@ export default function ProfileScreen() {
         {/* Content below header with top padding for avatar space */}
         <View style={styles.contentContainer}>
           {/* Greeting */}
-          <Text style={styles.greeting}>Hey {user?.firstName || 'Adams23'},</Text>
+          <Text style={styles.greeting}>Hey {getFirstName()},</Text>
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={() => handleEditField('Full Name', user?.name || '')}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Full Name</Text>
               <View style={styles.fieldContainer}>
                 <Text style={styles.fieldValue}>
-                  {user?.firstName} {user?.lastName}
+                  {user?.name || 'Not provided'}
                 </Text>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={handleEditDate}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Date Of Birth</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>January 15, 1990</Text>
+                <Text style={styles.fieldValue}>Not provided</Text>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={() => handleEditField('Email', user?.email || '')}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Email</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{user?.email}</Text>
+                <Text style={styles.fieldValue}>{user?.email || 'Not provided'}</Text>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={handleEditPhone}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Phone Number</Text>
               <View style={styles.fieldContainer}>
                 <View style={styles.phoneContainer}>
                   <Text style={styles.flagPrefix}>🇳🇬</Text>
-                  <Text style={styles.fieldValue}>{user?.phone || '+234 801 234 5678'}</Text>
+                  <Text style={styles.fieldValue}>{user?.phone || 'Not provided'}</Text>
                 </View>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={handleEditLocation}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Location</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>Lagos, Nigeria</Text>
+                <Text style={styles.fieldValue}>Not provided</Text>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.fieldGroup}>
+            <TouchableOpacity 
+              style={styles.fieldGroup}
+              onPress={handleEditAvatar}
+              activeOpacity={0.7}
+            >
               <Text style={styles.fieldLabel}>Profile Picture</Text>
               <View style={styles.fieldContainer}>
                 <View style={styles.profilePictureContainer}>
                   <Ionicons name="camera" size={20} color={Colors.darkGray} />
                   <Text style={styles.fieldValue}>Current photo</Text>
                 </View>
+                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
-
-          {/* Delete Profile Button */}
-          <TouchableOpacity 
-            style={styles.deleteButton}
-            onPress={handleDeleteProfile}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.deleteButtonText}>Delete Profile</Text>
-          </TouchableOpacity>
 
           {/* Bottom spacing for home indicator */}
           <View style={styles.bottomSpacing} />
@@ -272,16 +465,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F4F4',
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
   },
   fieldValue: {
     fontSize: 16,
     color: Colors.black,
+    flex: 1,
   },
   phoneContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   flagPrefix: {
     fontSize: 16,
@@ -290,22 +487,9 @@ const styles = StyleSheet.create({
   profilePictureContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  deleteButton: {
-    width: '100%',
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#E76E2C',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.white,
+    flex: 1,
   },
   bottomSpacing: {
-    height: 34,
+    height: 100, // Increased for tab bar
   },
 }); 

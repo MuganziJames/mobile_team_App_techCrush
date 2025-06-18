@@ -45,19 +45,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="explore"
-          options={{
-            title: 'Search',
-            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
-              <Ionicons 
-                name={focused ? "search" : "search-outline"} 
-                size={24} 
-                color={color} 
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="blog"
           options={{
             title: 'Blog',
@@ -90,6 +77,25 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
               <Ionicons 
                 name={focused ? "person" : "person-outline"} 
+                size={24} 
+                color={color} 
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            href: null, // Hide from tab bar
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+              <Ionicons 
+                name={focused ? "settings" : "settings-outline"} 
                 size={24} 
                 color={color} 
               />

@@ -54,8 +54,10 @@ export default function SignUpEmailScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView 
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
           <Text style={styles.title}>Join AfriStyle Today!</Text>
@@ -114,8 +116,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 50, // Extra space for keyboard
   },
   content: {
     flex: 1,

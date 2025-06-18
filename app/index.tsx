@@ -2,33 +2,51 @@ import Logo from '@/components/ui/Logo';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function SplashScreen() {
   const { user, isLoading } = useAuth();
+  const hasNavigated = useRef(false);
+  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    if (!isLoading) {
-      // Check if user is already logged in
-      const timer = setTimeout(() => {
-        if (user) {
-          // User is logged in, go to main app
-          router.replace('/(tabs)');
-        } else {
-          // User is not logged in, go to onboarding
-          router.replace('/onboarding');
-        }
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+    // Prevent multiple navigations
+    if (hasNavigated.current) {
+      return;
     }
+
+    // Wait for auth to finish loading
+    if (isLoading) {
+      return;
+    }
+
+    // Add a small delay for smooth transition
+    const timer = setTimeout(() => {
+      if (!hasNavigated.current) {
+        hasNavigated.current = true;
+        setShowLoader(false);
+        
+        // Small additional delay before navigation to prevent flicker
+        setTimeout(() => {
+          if (user) {
+            // User is logged in, go to main app
+            router.replace('/(tabs)');
+          } else {
+            // User is not logged in, go to onboarding
+            router.replace('/onboarding');
+          }
+        }, 200);
+      }
+    }, 1800);
+    
+    return () => clearTimeout(timer);
   }, [user, isLoading]);
 
   return (
     <View style={styles.container}>
       <Logo size={240} />
-      {isLoading && (
+      {(isLoading || showLoader) && (
         <ActivityIndicator 
           style={styles.loader} 
           color={Colors.primary} 

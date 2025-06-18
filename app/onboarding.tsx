@@ -50,6 +50,8 @@ export default function OnboardingScreen() {
 
 
 
+
+
   const renderItem = ({ item }: { item: typeof onboardingData[0] }) => (
     <View style={styles.slide}>
       <View style={styles.iconContainer}>
@@ -62,8 +64,9 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.skipContainer}>
-        <TouchableOpacity onPress={handleSkip}>
+      <View style={styles.topContainer}>
+        <View style={styles.backButton} />
+        <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>
@@ -104,9 +107,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingTop: 60,
   },
-  skipContainer: {
-    alignItems: 'flex-end',
+  topContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
+  },
+  backButton: {
+    padding: 8,
+  },
+  skipButton: {
+    padding: 8,
   },
   skipText: {
     color: Colors.primary,

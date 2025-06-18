@@ -77,11 +77,23 @@ export default function SignUpFullForm() {
     if (!formData.lastName) newErrors.lastName = 'Last name is required';
     if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+    } else {
+      // Check for common email typos
+      const email = formData.email.trim().toLowerCase();
+      const emailDomain = email.split('@')[1];
+      
+      if (emailDomain && emailDomain.length < 4) {
+        newErrors.email = 'Please check your email domain - it seems too short';
+      }
     }
     
-    if (!formData.phone) newErrors.phone = 'Phone number is required';
+    if (!formData.phone) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\d{7,15}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number (7-15 digits)';
+    }
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -149,8 +161,34 @@ export default function SignUpFullForm() {
           router.replace('/(tabs)');
         }, 500);
       } else {
-        // Show error
-        Alert.alert('Registration Failed', result.message || 'Failed to create account');
+        // Check if it's a duplicate registration error
+        if (result.message?.toLowerCase().includes('already exists') || 
+            result.message?.toLowerCase().includes('already registered') ||
+            result.message?.toLowerCase().includes('user already exists') ||
+            result.message?.toLowerCase().includes('email already') ||
+            result.message?.toLowerCase().includes('duplicate')) {
+          Alert.alert(
+            '🚫 Account Already Exists', 
+            `An account with the email "${formData.email}" is already registered.\n\n` +
+            '✅ You can sign in with your existing account\n' +
+            '📧 Or use a different email address\n' +
+            '🔑 Forgot your password? Use "Forgot Password" on the sign-in screen',
+            [
+              { text: 'Use Different Email', style: 'cancel' },
+              { 
+                text: 'Sign In Instead', 
+                style: 'default',
+                onPress: () => router.replace('/signin') 
+              }
+            ]
+          );
+        } else {
+          // Show other errors with more helpful messaging
+          Alert.alert(
+            'Registration Failed', 
+            result.message || 'Unable to create account. Please check your information and try again.'
+          );
+        }
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -238,10 +276,15 @@ export default function SignUpFullForm() {
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
-                placeholder="•••••••••••"
+                placeholder="Create a password"
+                placeholderTextColor="#999"
                 value={formData.password}
                 onChangeText={(text) => handleChange('password', text)}
                 secureTextEntry={!passwordVisible}
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="newPassword"
+                autoComplete="password-new"
               />
               <TouchableOpacity 
                 style={styles.eyeIcon}
@@ -260,10 +303,15 @@ export default function SignUpFullForm() {
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
-                placeholder="•••••••••••"
+                placeholder="Confirm your password"
+                placeholderTextColor="#999"
                 value={formData.confirmPassword}
                 onChangeText={(text) => handleChange('confirmPassword', text)}
                 secureTextEntry={!confirmPasswordVisible}
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="newPassword"
+                autoComplete="password-new"
               />
               <TouchableOpacity 
                 style={styles.eyeIcon}
@@ -345,10 +393,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 150, // Extra space for keyboard
   },
   content: {
-    flex: 1,
     padding: 24,
+    paddingBottom: 100, // Additional bottom padding for better scrolling
   },
   title: {
     fontSize: 24,

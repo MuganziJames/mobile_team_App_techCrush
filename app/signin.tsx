@@ -114,11 +114,15 @@ export default function SignInScreen() {
               <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="•••••••••••"
+                  placeholder="Enter your password"
+                  placeholderTextColor="#999"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!passwordVisible}
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="password"
+                  autoComplete="password"
                 />
                 <TouchableOpacity 
                   style={styles.eyeIcon}

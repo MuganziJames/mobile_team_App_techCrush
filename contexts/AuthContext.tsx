@@ -210,7 +210,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isLoading: true, isSignout: true }));
       
       try {
+        console.log('Calling logout API...');
         await authService.logout();
+        console.log('Logout API completed successfully');
         
         setState({
           user: null,
@@ -220,10 +222,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isAuthenticated: false,
         });
         
-        console.log('Logout successful');
+        console.log('Auth state cleared, navigating to signin...');
         
-        // Navigate to splash screen which will redirect to onboarding
-        router.replace('/');
+        // Navigate directly to signin screen
+        setTimeout(() => {
+          router.replace('/signin');
+          console.log('Navigation to signin completed');
+        }, 100);
+        
       } catch (error) {
         console.error('Logout error:', error);
         // Still clear state even if API call fails
@@ -235,8 +241,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isAuthenticated: false,
         });
         
+        console.log('Auth state cleared after error, navigating to signin...');
         // Navigate even if logout API call fails
-        router.replace('/');
+        setTimeout(() => {
+          router.replace('/signin');
+          console.log('Navigation to signin completed after error');
+        }, 100);
       }
     },
 
