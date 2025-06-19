@@ -30,7 +30,7 @@ export interface VerifyResetTokenBody {
 
 export interface ChangePasswordBody {
   email: string;
-  newPassword: string;
+  password: string;
   resetToken: string;
 }
 

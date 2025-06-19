@@ -294,7 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const result = await authService.changePassword({ 
           email, 
-          newPassword, 
+          password: newPassword, 
           resetToken 
         });
         
