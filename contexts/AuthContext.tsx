@@ -117,7 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         }
       } catch (e) {
-        console.error('Failed to load auth state:', e);
+        console.error('Auth check error:', e);
+        // Clear any stale auth data
         setState({
           user: null,
           token: null,
@@ -227,7 +228,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('Calling logout API...');
         await authService.logout();
         console.log('Logout API completed successfully');
-        
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        // Always clear state even if API call fails
         setState({
           user: null,
           token: null,
@@ -243,39 +247,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           router.replace('/signin');
           console.log('Navigation to signin completed');
         }, 100);
-        
-      } catch (error) {
-        console.error('Logout error:', error);
-        // Still clear state even if API call fails
-        setState({
-          user: null,
-          token: null,
-          isLoading: false,
-          isSignout: false,
-          isAuthenticated: false,
-        });
-        
-        console.log('Auth state cleared after error, navigating to signin...');
-        // Navigate even if logout API call fails
-        setTimeout(() => {
-          router.replace('/signin');
-          console.log('Navigation to signin completed after error');
-        }, 100);
       }
     },
 
     resetPassword: async (email: string): Promise<AuthResult> => {
-      console.log('Reset password attempt:', { email });
+      console.log('Reset password for:', email);
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         const result = await authService.forgotPassword({ email });
-        
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: result.success,
           message: result.message
         };
       } catch (error: any) {
         console.error('Reset password error:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: false,
           message: error.message || 'An error occurred during password reset'
@@ -284,17 +272,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 
     verifyOtp: async (email: string, resetToken: string): Promise<AuthResult> => {
-      console.log('Verify OTP attempt:', { email });
+      console.log('Verify OTP for:', email);
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         const result = await authService.verifyResetToken({ email, resetToken });
-        
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: result.success,
           message: result.message
         };
       } catch (error: any) {
         console.error('Verify OTP error:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: false,
           message: error.message || 'An error occurred during OTP verification'
@@ -303,7 +293,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
 
     setNewPassword: async (email: string, newPassword: string, resetToken: string): Promise<AuthResult> => {
-      console.log('Set new password attempt:', { email });
+      console.log('Set new password for:', email);
+      setState(prev => ({ ...prev, isLoading: true }));
       
       try {
         const result = await authService.changePassword({ 
@@ -311,19 +302,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password: newPassword, 
           resetToken 
         });
-        
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: result.success,
           message: result.message
         };
       } catch (error: any) {
         console.error('Set new password error:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
         return {
           success: false,
           message: error.message || 'An error occurred while setting new password'
         };
       }
-    }
+    },
   };
 
   return (

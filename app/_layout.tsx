@@ -8,7 +8,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -24,10 +24,21 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // Load fonts without SpaceMono to avoid the download error
+  // Load only required icon fonts, skip SpaceMono to avoid the download error
   const [loaded, error] = useFonts({
-    ...FontAwesome.font,
-    ...Ionicons.font,
+    ...Platform.select({
+      ios: {
+        ...Ionicons.font,
+        ...FontAwesome.font,
+      },
+      android: {
+        // On Android, we'll use the pre-loaded system fonts
+      },
+      default: {
+        ...Ionicons.font,
+        ...FontAwesome.font,
+      }
+    })
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -35,15 +46,33 @@ export default function RootLayout() {
     if (error) {
       console.error("Font loading error:", error);
       // Continue with app initialization even if fonts fail
-      SplashScreen.hideAsync().catch(console.error);
+      SplashScreen.hideAsync().catch(e => {
+        console.warn('Error hiding splash screen:', e);
+      });
     }
   }, [error]);
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync().catch(console.error);
+      SplashScreen.hideAsync().catch(e => {
+        console.warn('Error hiding splash screen:', e);
+      });
     }
   }, [loaded]);
+
+  // Continue with app initialization after a short delay even if font loading fails
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!loaded && error) {
+        console.log('Proceeding with app initialization despite font loading error');
+        SplashScreen.hideAsync().catch(e => {
+          console.warn('Error hiding splash screen:', e);
+        });
+      }
+    }, 2000); // 2 second timeout
+    
+    return () => clearTimeout(timer);
+  }, [loaded, error]);
 
   if (!loaded && !error) {
     return null;

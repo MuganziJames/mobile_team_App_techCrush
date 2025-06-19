@@ -1,10 +1,10 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import Typography from '@/constants/Typography';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import SafeIcon from './SafeIcon';
 
 type TopAppBarProps = {
   title: string;
@@ -34,7 +34,7 @@ export default function TopAppBar({
         onPress={handleBackPress}
         activeOpacity={0.7}
       >
-        <Ionicons name="chevron-back" size={24} color={Colors.black} />
+        <SafeIcon name="chevron-back" size={24} color={Colors.black} />
       </TouchableOpacity>
       
       <Text style={styles.title}>{title}</Text>

@@ -1,5 +1,5 @@
+import SafeIcon from '@/components/ui/SafeIcon';
 import Colors from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -64,7 +64,7 @@ export default function TermsScreen() {
           onPress={() => router.back()}
           accessibilityLabel="Go back"
         >
-          <Ionicons name="chevron-back" size={24} color={Colors.black} />
+          <SafeIcon name="chevron-back" size={24} color={Colors.black} />
         </TouchableOpacity>
       </View>
       
