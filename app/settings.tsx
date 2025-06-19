@@ -15,7 +15,7 @@ export default function SettingsScreen() {
   };
 
   const handlePrivacySecurity = () => {
-    router.push('/privacy-security');
+    router.push('/privacy-settings');
   };
 
   const handlePreference = () => {

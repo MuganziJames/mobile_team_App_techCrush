@@ -72,10 +72,12 @@ function RootLayoutNav() {
         <Stack.Screen name="verify-otp" options={{ headerShown: false }} />
         <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen name="privacy-security" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy-settings" options={{ headerShown: false }} />
         <Stack.Screen name="blog-detail" options={{ headerShown: false }} />
         <Stack.Screen name="style-detail" options={{ headerShown: false }} />
         <Stack.Screen name="lookbook-folder" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="terms" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

@@ -1,47 +1,95 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function PrivacySecurityScreen() {
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [faceIdEnabled, setFaceIdEnabled] = useState(true);
-  const [googleAuthEnabled, setGoogleAuthEnabled] = useState(false);
+export default function PrivacyPolicyScreen() {
+  const sections = [
+    {
+      heading: '1. Information We Collect',
+      body: `We may collect the following types of information:
+
+a. Personal Information
+• Name, email address, and phone number
+• Gender, age, or location (if you provide them)
+• Payment information (processed securely via third-party providers)
+
+b. Usage Data
+• Device type and operating system
+• App activity logs (e.g., login, browsing, purchases)
+• IP address and device identifiers
+
+c. User-Generated Content
+• Photos, reviews, posts, or other content you voluntarily upload to the app`
+    },
+    {
+      heading: '2. How We Use Your Information',
+      body: `We use your data to:
+• Create and manage your account
+• Personalize your experience
+• Process payments and deliver services
+• Provide customer support
+• Improve and develop our app features
+• Send updates, promotions, or app-related notifications`
+    },
+    {
+      heading: '3. How We Share Your Information',
+      body: `We do not sell your personal data. However, we may share your data with:
+• Service providers (e.g., payment processors, hosting services)
+• Analytics tools to help improve our app (e.g., Google Analytics, Firebase)
+• Legal authorities, if required by law or to protect our rights`
+    },
+    {
+      heading: '4. Data Security',
+      body: `We use industry-standard security measures to protect your information, including:
+• Encryption of sensitive data
+• Secure cloud storage
+• Authentication and access controls
+
+However, no system is 100% secure. Use AfriStyle at your own risk, and help keep your data safe by protecting your account credentials.`
+    },
+    {
+      heading: '5. Your Rights',
+      body: `Depending on your location, you may have the right to:
+• Access the personal data we hold about you
+• Correct or update your information
+• Delete your data (right to be forgotten)
+• Object to data processing or withdraw consent
+
+To make a request, contact us at support@afristyle.app.`
+    },
+    {
+      heading: '6. Data Retention',
+      body: 'We retain your data only as long as necessary to fulfill the purposes outlined in this policy unless a longer retention period is required or permitted by law.'
+    },
+    {
+      heading: '7. Children\'s Privacy',
+      body: 'AfriStyle is not intended for users under 13. We do not knowingly collect data from children under this age. If we learn we have collected data from a child, we will delete it promptly.'
+    },
+    {
+      heading: '8. Third-Party Links and Services',
+      body: 'Our app may contain links to external sites or integrate third-party services. We are not responsible for the privacy practices of those third parties.'
+    },
+    {
+      heading: '9. Changes to This Policy',
+      body: 'We may update this Privacy Policy from time to time. Any changes will be posted here, and we may notify you through the app or by email.'
+    },
+    {
+      heading: '10. Contact Us',
+      body: `If you have questions or concerns about your privacy or this policy, please reach out to us:
+
+AfriStyle Team
+Email: support@afristyle.app
+Phone: +234 801 234 5678
+Location: Lagos, Nigeria`
+    }
+  ];
 
   const handleBackPress = () => {
     router.back();
   };
 
-  const handleChangePassword = () => {
-    console.log('Change Password pressed');
-  };
-
-  const handleDeactivateAccount = () => {
-    Alert.alert(
-      'Deactivate Account',
-      'Are you sure you want to temporarily deactivate your account?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Deactivate', style: 'destructive', onPress: () => console.log('Account deactivated') }
-      ]
-    );
-  };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. Are you sure you want to permanently delete your account?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => console.log('Account deleted') }
-      ]
-    );
-  };
-
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-      
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -57,92 +105,29 @@ export default function PrivacySecurityScreen() {
             <Ionicons name="chevron-back" size={24} color="#000000" />
           </TouchableOpacity>
           
-          <Text style={styles.headerTitle}>Privacy & Security</Text>
+          <Text style={styles.headerTitle}>Privacy Policy</Text>
         </View>
 
-        {/* Settings Items */}
-        <View style={styles.settingsContainer}>
+        <View style={styles.content}>
+          <Text style={styles.effectiveDate}>Effective Date: 20 June 2025</Text>
           
-          {/* Biometric ID */}
-          <View style={styles.settingItem}>
-            <Text style={styles.settingText}>Biometric ID</Text>
-                         <Switch
-               value={biometricEnabled}
-               onValueChange={setBiometricEnabled}
-               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
-               thumbColor={biometricEnabled ? '#FFFFFF' : '#FFFFFF'}
-               ios_backgroundColor="#E0E0E0"
-             />
-          </View>
+          <Text style={styles.introText}>
+            At AfriStyle, your privacy matters. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our mobile application ("App").
+          </Text>
+          
+          <Text style={styles.introText}>
+            By using AfriStyle, you agree to the practices described in this Privacy Policy.
+          </Text>
 
-          {/* Face ID */}
-          <View style={styles.settingItem}>
-            <Text style={styles.settingText}>Face ID</Text>
-                         <Switch
-               value={faceIdEnabled}
-               onValueChange={setFaceIdEnabled}
-               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
-               thumbColor={faceIdEnabled ? '#FFFFFF' : '#FFFFFF'}
-               ios_backgroundColor="#E0E0E0"
-             />
-          </View>
-
-          {/* Google Authenticator */}
-          <View style={styles.settingItem}>
-            <Text style={styles.settingText}>Google Authenticator</Text>
-                         <Switch
-               value={googleAuthEnabled}
-               onValueChange={setGoogleAuthEnabled}
-               trackColor={{ false: '#E0E0E0', true: '#FF6B35' }}
-               thumbColor={googleAuthEnabled ? '#FFFFFF' : '#FFFFFF'}
-               ios_backgroundColor="#E0E0E0"
-             />
-          </View>
-
-          {/* Change Password */}
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={handleChangePassword}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.settingText}>Change Password</Text>
-            <Ionicons name="chevron-forward" size={20} color="#666666" />
-          </TouchableOpacity>
-
-          {/* Deactivate Account */}
-          <TouchableOpacity 
-            style={styles.settingItemWithDescription}
-            onPress={handleDeactivateAccount}
-            activeOpacity={0.7}
-          >
-            <View style={styles.settingTextContainer}>
-              <Text style={styles.settingText}>Deactivate Account</Text>
-              <Text style={styles.settingDescription}>
-                Temporarily deactivate your account. Easily reactivate when you're ready.
-              </Text>
+          {sections.map((s) => (
+            <View key={s.heading} style={styles.section}>
+              <Text style={styles.sectionHeading}>{s.heading}</Text>
+              <Text style={styles.sectionBody}>{s.body}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#666666" />
-          </TouchableOpacity>
-
-          {/* Delete Account */}
-          <TouchableOpacity 
-            style={styles.settingItemWithDescription}
-            onPress={handleDeleteAccount}
-            activeOpacity={0.7}
-          >
-            <View style={styles.settingTextContainer}>
-              <Text style={styles.settingText}>Delete Account</Text>
-              <Text style={styles.settingDescription}>
-                Permanently remove your account and data. Proceed with caution.
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#666666" />
-          </TouchableOpacity>
-
+          ))}
+          
+          <View style={styles.bottomSpacing} />
         </View>
-
-        {/* Bottom spacing for tab bar */}
-        <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
   );
@@ -151,7 +136,7 @@ export default function PrivacySecurityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -180,56 +165,34 @@ const styles = StyleSheet.create({
     color: '#000000',
     flex: 1,
   },
-  settingsContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 24, // Minimal top spacing
+  content: {
+    padding: 24,
+    paddingTop: 0,
   },
-  // Individual setting item
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginBottom: 12,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  // Setting item with description
-  settingItemWithDescription: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginBottom: 12,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  settingTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
-  settingText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000000',
-    marginBottom: 2,
-  },
-  settingDescription: {
-    fontSize: 13,
+  effectiveDate: {
+    fontSize: 14,
     color: '#666666',
-    lineHeight: 18,
+    marginBottom: 16,
+  },
+  introText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#333333',
+    marginBottom: 16,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 6,
+  },
+  sectionBody: {
+    fontSize: 14,
+    color: '#444444',
+    lineHeight: 20,
   },
   bottomSpacing: {
     height: 100, // Space for bottom tab bar

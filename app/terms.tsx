@@ -57,24 +57,35 @@ export default function TermsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      {/* Back button only for accessibility */}
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="chevron-back" size={24} color={Colors.black} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Terms & Conditions</Text>
-        <View style={styles.backButton} />
       </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.effectiveDate}>Effective Date: 19 June 2025</Text>
-        {sections.map((s) => (
-          <View key={s.heading} style={styles.section}>
-            <Text style={styles.sectionHeading}>{s.heading}</Text>
-            <Text style={styles.sectionBody}>{s.body}</Text>
-          </View>
-        ))}
-        <View style={{ height: 40 }} />
+      
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <Text style={styles.mainHeading}>Terms & Conditions</Text>
+          <Text style={styles.effectiveDate}>Effective Date: 19 June 2025</Text>
+          
+          <Text style={styles.introText}>
+            Welcome to AfriStyle. These Terms & Conditions govern your use of our application and services. 
+            By using AfriStyle, you agree to these terms in their entirety.
+          </Text>
+          
+          {sections.map((s) => (
+            <View key={s.heading} style={styles.section}>
+              <Text style={styles.sectionHeading}>{s.heading}</Text>
+              <Text style={styles.sectionBody}>{s.body}</Text>
+            </View>
+          ))}
+          <View style={{ height: 40 }} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -85,33 +96,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  backButtonContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   backButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.black,
+  scrollView: {
+    flex: 1,
   },
   content: {
     padding: 24,
+    paddingTop: 0,
+  },
+  mainHeading: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.black,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   effectiveDate: {
     fontSize: 14,
     color: Colors.darkGray,
     marginBottom: 16,
+    textAlign: 'center',
+  },
+  introText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.darkGray,
+    marginBottom: 24,
+    textAlign: 'center',
   },
   section: {
     marginBottom: 20,
