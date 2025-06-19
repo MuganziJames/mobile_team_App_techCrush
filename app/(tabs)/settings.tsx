@@ -37,7 +37,7 @@ export default function SettingsTabScreen() {
   const handleAbout = () => setAboutVisible(true);
 
   const handleTerms = () => {
-    Alert.alert('Terms & Conditions', 'Terms & conditions coming soon!');
+    router.push('/terms');
   };
 
   const handlePrivacyPolicy = () => {

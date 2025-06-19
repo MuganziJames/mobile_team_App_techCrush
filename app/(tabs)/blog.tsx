@@ -1,4 +1,5 @@
 import { useLike } from '@/contexts/SaveContext';
+import { blogPosts } from '@/data/blogData';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -15,69 +16,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
-
-// Sample blog data - African Fashion Focus
-const blogPosts = [
-  {
-    id: 1,
-    title: 'The African Fashionista\'s Guide to Style and Cultural Pride.',
-    date: 'Jan 23, 2025',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=300&fit=crop',
-    category: 'African Fashion',
-    featured: true
-  },
-  {
-    id: 2,
-    title: 'Modern African Fashion: Traditions Meet Contemporary Style.',
-    date: 'Mar 25, 2025',
-    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=300&fit=crop',
-    category: 'Culture',
-    featured: true
-  },
-  {
-    id: 3,
-    title: 'Ankara, Kente & Beyond: African Print Fashion Guide.',
-    date: 'Jan 03, 2025',
-    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=300&fit=crop',
-    category: 'African Fashion',
-    featured: true
-  },
-  {
-    id: 4,
-    title: 'Celebrating African Heritage Through Fashion.',
-    date: 'Jun 01, 2025',
-    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=300&fit=crop',
-    category: 'Culture'
-  },
-  {
-    id: 5,
-    title: 'African Fashion Week: Runway to Street Style.',
-    date: 'Mar 05, 2025',
-    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=300&fit=crop',
-    category: 'African Fashion'
-  },
-  {
-    id: 6,
-    title: 'Traditional Meets Modern: African Fashion Trends.',
-    date: 'Apr 23, 2025',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=300&fit=crop',
-    category: 'Trends'
-  },
-  {
-    id: 7,
-    title: 'African Textile Heritage: Stories in Every Thread.',
-    date: 'Feb 15, 2025',
-    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=300&fit=crop',
-    category: 'Culture'
-  },
-  {
-    id: 8,
-    title: 'African Beauty & Fashion: Celebrating Natural Elegance',
-    date: 'Feb 17, 2025',
-    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=300&fit=crop',
-    category: 'Beauty'
-  }
-];
 
 export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
@@ -423,6 +361,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
+    backgroundColor: '#f0f0f0',
   },
   featuredOverlay: {
     position: 'absolute',
@@ -499,6 +438,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     resizeMode: 'cover',
+    backgroundColor: '#f0f0f0',
   },
   popularInfo: {
     flex: 1,
@@ -542,6 +482,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     resizeMode: 'cover',
+    backgroundColor: '#f0f0f0',
   },
   allPostInfo: {
     flex: 1,
