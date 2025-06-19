@@ -16,7 +16,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.afristyle.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +32,8 @@
       "edgeToEdgeEnabled": true,
       "package": "com.afristyle.app",
       "versionCode": 1,
-      "permissions": []
+      "permissions": [],
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -54,13 +61,12 @@
         "origin": false
       },
       "eas": {
-        "projectId": "6f759c11-6bcb-4339-a41d-3c355cda3ba6"
+        "projectId": "96f5cd40-902b-4b96-95c0-167ca24fbdfa"
       }
     },
     "owner": "muganzijames",
-    "runtimeVersion": "1.0.0",
     "updates": {
-      "url": "https://u.expo.dev/6f759c11-6bcb-4339-a41d-3c355cda3ba6"
+      "url": "https://u.expo.dev/96f5cd40-902b-4b96-95c0-167ca24fbdfa"
     }
   }
 }
