@@ -7,13 +7,15 @@ import {
     ActivityIndicator,
     Alert,
     Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -80,10 +82,12 @@ export default function SignInScreen() {
     }
   };
 
-
-
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+    <SafeAreaView style={{flex:1}}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -167,6 +171,7 @@ export default function SignInScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

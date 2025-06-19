@@ -85,7 +85,8 @@ export default function ResetPasswordScreen() {
   const passwordStrength = getPasswordStrength();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS==='ios'?'padding':undefined}>
+    <SafeAreaView style={{flex:1}}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -256,6 +257,7 @@ export default function ResetPasswordScreen() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

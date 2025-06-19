@@ -1,21 +1,21 @@
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import ModalCard from '@/components/ui/ModalCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsTabScreen() {
   const { logout, user } = useAuth();
+  const [logoutVisible, setLogoutVisible] = useState(false);
+  const [accountVisible, setAccountVisible] = useState(false);
+  const [helpVisible, setHelpVisible] = useState(false);
+  const [aboutVisible, setAboutVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
 
   const handleAccountInfo = () => {
-    Alert.alert(
-      'Account Information',
-      `Name: ${user?.name || 'Not provided'}\n` +
-      `Email: ${user?.email || 'Not provided'}\n` +
-      `Account ID: ${user?.id || 'N/A'}\n` +
-      `Role: ${user?.role || 'User'}\n` +
-      `Account Type: Premium Member`,
-      [{ text: 'OK' }]
-    );
+    setAccountVisible(true);
   };
 
   const handlePrivacySecurity = () => {
@@ -32,27 +32,9 @@ export default function SettingsTabScreen() {
     Alert.alert('Notifications', 'Notification settings coming soon!');
   };
 
-  const handleHelpSupport = () => {
-    Alert.alert(
-      'Help & Support',
-      '📧 Email: support@afristyle.com\n' +
-      '📞 Phone: +234 801 234 5678\n' +
-      '🕒 Hours: Mon-Fri 9AM-6PM WAT\n\n' +
-      '💬 Live Chat: Available in-app\n' +
-      '📚 FAQ: Visit our help center\n' +
-      '🎥 Video Tutorials: Coming soon\n\n' +
-      '🌍 Follow us:\n' +
-      '@AfriStyleApp on all social media',
-      [
-        { text: 'Email Support', onPress: () => Alert.alert('Email', 'Opening email app...') },
-        { text: 'OK', style: 'cancel' }
-      ]
-    );
-  };
+  const handleHelpSupport = () => setHelpVisible(true);
 
-  const handleAbout = () => {
-    Alert.alert('About AfriStyle', 'Version 1.0.0\n\nDiscover authentic African fashion and art from the comfort of your home.');
-  };
+  const handleAbout = () => setAboutVisible(true);
 
   const handleTerms = () => {
     Alert.alert('Terms & Conditions', 'Terms & conditions coming soon!');
@@ -63,26 +45,16 @@ export default function SettingsTabScreen() {
   };
 
   const handleLogout = () => {
-    console.log('Logout button pressed');
-    
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: () => {
-            console.log('User confirmed logout');
-            performLogout();
-          }
-        }
-      ]
-    );
+    setLogoutVisible(true);
+  };
+
+  const confirmLogout = () => {
+    setLogoutVisible(false);
+    performLogout();
+  };
+
+  const cancelLogout = () => {
+    setLogoutVisible(false);
   };
 
   const performLogout = async () => {
@@ -96,25 +68,7 @@ export default function SettingsTabScreen() {
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to permanently delete your account? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            // TODO: Implement actual account deletion
-            Alert.alert('Account Deleted', 'Your account has been deleted successfully.');
-            performLogout();
-          }
-        }
-      ]
-    );
+    setDeleteVisible(true);
   };
 
   return (
@@ -284,6 +238,56 @@ export default function SettingsTabScreen() {
         {/* Bottom spacing for tab bar */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Logout confirmation Modal */}
+      <ConfirmationModal
+        visible={logoutVisible}
+        iconName="log-out"
+        title="Log Out"
+        message="Are you sure  you want to log out?"
+        confirmLabel="Log Out"
+        cancelLabel="Cancel"
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
+
+      {/* Info & Support Modals */}
+      <ModalCard
+        visible={accountVisible}
+        iconName="person"
+        title="Account Information"
+        message={`Name: ${user?.name || 'Not provided'}\nEmail: ${user?.email || 'Not provided'}\nAccount ID: ${user?.id || 'N/A'}\nRole: ${user?.role || 'User'}\nAccount Type: Premium Member`}
+        onClose={() => setAccountVisible(false)}
+      />
+
+      <ModalCard
+        visible={helpVisible}
+        iconName="help-circle"
+        title="Help & Support"
+        message={'Email: support@afristyle.com\nPhone: +234 801 234 5678\nHours: Mon-Fri 9AM-6PM WAT\n\nLive Chat: Available in-app\nFAQ: Visit our help center'}
+        onClose={() => setHelpVisible(false)}
+      />
+
+      <ModalCard
+        visible={aboutVisible}
+        iconName="information-circle"
+        title="About AfriStyle"
+        message={'Version 1.0.0\n\nDiscover authentic African fashion and art from the comfort of your home.'}
+        onClose={() => setAboutVisible(false)}
+      />
+
+      {/* Delete account confirmation */}
+      <ConfirmationModal
+        visible={deleteVisible}
+        iconName="trash"
+        iconBackground="#FF3B30"
+        title="Delete Account"
+        message="Are you sure you want to permanently delete your account? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={() => { setDeleteVisible(false); /* TODO call API */ performLogout(); }}
+        onCancel={() => setDeleteVisible(false)}
+      />
     </View>
   );
 }

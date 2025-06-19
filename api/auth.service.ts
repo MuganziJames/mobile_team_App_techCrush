@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Config from '../constants/Config';
 import apiClient, { clearAuthData } from './axios';
 import {
     ApiResponse,
@@ -179,7 +180,9 @@ class AuthService {
         user: user
       };
     } catch (error: any) {
-      console.error('Auth check error:', error);
+      if (Config.enableLogging) {
+        console.error('Auth check error:', error);
+      }
       
       // Clear auth data on failure
       await clearAuthData();

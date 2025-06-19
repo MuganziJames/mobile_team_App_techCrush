@@ -5,6 +5,8 @@ import { useState } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -49,10 +51,9 @@ export default function SignUpEmailScreen() {
     }, 1000);
   };
 
-
-
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS==='ios'?'padding':undefined}>
+    <SafeAreaView style={{flex:1}}>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -108,6 +109,7 @@ export default function SignUpEmailScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
