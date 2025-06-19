@@ -24,6 +24,8 @@ export default function BlogDetailScreen() {
 
   const postId = parseInt(id as string);
   const post = blogPosts.find(p => p.id === postId);
+  
+  // Use the content from blogPostsContent but ensure we use the image from the post preview
   const content = blogPostsContent[postId as keyof typeof blogPostsContent];
 
   if (!post || !content) {
@@ -110,21 +112,19 @@ export default function BlogDetailScreen() {
           </View>
         </View>
 
-        {/* Hero Image */}
+        {/* Hero Image - Use the image from the post preview */}
         <View style={styles.heroContainer}>
-          <Image source={{ uri: post.image }} style={styles.heroImage} />
+          <Image 
+            source={{ uri: post.image }} 
+            style={styles.heroImage} 
+            resizeMode="cover"
+          />
           <View style={styles.heroOverlay}>
             <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
               <Ionicons 
-                name={(() => {
-                  const blogPost = blogPosts.find(p => p.id === postId);
-                  return blogPost && isPostLiked(blogPost.id) ? "heart" : "heart-outline";
-                })()} 
+                name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
                 size={28} 
-                color={(() => {
-                  const blogPost = blogPosts.find(p => p.id === postId);
-                  return blogPost && isPostLiked(blogPost.id) ? "#FF6B35" : "#fff";
-                })()} 
+                color={isPostLiked(post.id) ? "#FF6B35" : "#fff"} 
               />
             </TouchableOpacity>
           </View>
@@ -156,22 +156,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingTop: 20,
+    zIndex: 10,
   },
   headerButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   headerButtonDisabled: {
     opacity: 0.5,
@@ -181,17 +189,16 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     position: 'relative',
-    height: 250,
+    height: 300,
   },
   heroImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
     backgroundColor: '#f0f0f0',
   },
   heroOverlay: {
     position: 'absolute',
-    top: 16,
+    bottom: 16,
     right: 16,
   },
   likeButton: {

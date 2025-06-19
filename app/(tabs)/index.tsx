@@ -195,7 +195,7 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={styles.fixedHeader}>
         <Text style={styles.headerTitle}>Style Feed</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity 
@@ -207,15 +207,6 @@ export default function FeedScreen() {
         </View>
       </View>
 
-      <View style={styles.welcomeSection}>
-        <Text style={styles.welcomeText}>
-          Welcome back, {user?.name?.split(' ')[0] || 'User'}!
-        </Text>
-        <Text style={styles.subText}>
-          Discover new styles and save them to your lookbook
-        </Text>
-      </View>
-
       <FlatList
         data={sampleStyles}
         renderItem={renderStyleCard}
@@ -224,6 +215,16 @@ export default function FeedScreen() {
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.feedContent}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={() => (
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeText}>
+              Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+            </Text>
+            <Text style={styles.subText}>
+              Discover new styles and save them to your lookbook
+            </Text>
+          </View>
+        )}
       />
 
       <Modal
@@ -249,22 +250,32 @@ export default function FeedScreen() {
               Choose a folder for "{selectedStyle?.title}"
             </Text>
             
-            {folders.map((folder) => (
-              <TouchableOpacity
-                key={folder.id}
-                style={styles.folderOption}
-                onPress={() => handleFolderSelect(folder.id)}
-              >
-                <View 
-                  style={[
-                    styles.folderColorIndicator, 
-                    { backgroundColor: folder.color }
-                  ]} 
-                />
-                <Text style={styles.folderOptionText}>{folder.name}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#999" />
-              </TouchableOpacity>
-            ))}
+            <FlatList
+              data={folders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.folderItem}
+                  onPress={() => handleFolderSelect(item.id)}
+                >
+                  <View style={styles.folderIcon}>
+                    <Ionicons name="folder" size={24} color={Colors.primary} />
+                  </View>
+                  <Text style={styles.folderName}>{item.name}</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyState}>
+                  <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
+                  <Text style={styles.emptyStateText}>No folders yet</Text>
+                  <Text style={styles.emptyStateSubtext}>
+                    Create a folder in your lookbook first
+                  </Text>
+                </View>
+              )}
+            />
           </View>
         </SafeAreaView>
       </Modal>
@@ -277,38 +288,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  header: {
+  fixedHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: '#f0f0f0',
+    zIndex: 10,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: Colors.primary,
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
   },
   headerIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.lightGray,
+    alignItems: 'center',
+  },
+  feedContent: {
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   welcomeSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
   welcomeText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '600',
     color: Colors.black,
     marginBottom: 4,
@@ -316,13 +331,12 @@ const styles = StyleSheet.create({
   subText: {
     fontSize: 14,
     color: Colors.darkGray,
-  },
-  feedContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
+    marginBottom: 16,
   },
   row: {
     justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   modalContainer: {
     flex: 1,
@@ -333,23 +347,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   modalCloseButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    minWidth: 60,
+    width: 60,
+    height: 40,
+    justifyContent: 'center',
   },
   modalCloseText: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   modalContent: {
     flex: 1,
@@ -359,27 +372,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginBottom: 24,
-    textAlign: 'center',
   },
-  folderOption: {
+  folderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingVertical: 12,
   },
-  folderColorIndicator: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+  folderIcon: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
-  folderOptionText: {
-    flex: 1,
+  folderName: {
     fontSize: 16,
+    flex: 1,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 18,
     fontWeight: '500',
-    color: '#000',
+    color: '#666',
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

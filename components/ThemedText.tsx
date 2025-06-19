@@ -1,60 +1,22 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
-
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { Platform, Text, TextProps } from 'react-native';
 
-export type ThemedTextProps = TextProps & {
+export type ThemeProps = {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  fontFamily?: 'normal' | 'mono';
 };
 
-export function ThemedText({
-  style,
-  lightColor,
-  darkColor,
-  type = 'default',
-  ...rest
-}: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+export type ThemedTextProps = ThemeProps & TextProps;
 
-  return (
-    <Text
-      style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+export default function ThemedText(props: ThemedTextProps) {
+  const { style, lightColor, darkColor, fontFamily = 'normal', ...otherProps } = props;
+  const color = useThemeColor('text', { light: lightColor, dark: darkColor });
+
+  // Use system fonts instead of SpaceMono to avoid loading issues
+  const fontFamilyStyle = fontFamily === 'mono' 
+    ? { fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' } 
+    : {};
+
+  return <Text style={[{ color }, fontFamilyStyle, style]} {...otherProps} />;
 }
-
-const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
-  },
-});
