@@ -14,6 +14,8 @@ interface User {
   firstName?: string;
   lastName?: string;
   phone?: string;
+  dateOfBirth?: string; // ISO string or formatted date
+  location?: string;
 }
 
 interface AuthState {
@@ -54,6 +56,7 @@ interface AuthContextProps {
   resetPassword: (email: string) => Promise<AuthResult>;
   verifyOtp: (email: string, resetToken: string) => Promise<AuthResult>;
   setNewPassword: (email: string, newPassword: string, resetToken: string) => Promise<AuthResult>;
+  updateProfile: (updates: Partial<User>) => void;
 }
 
 // Context
@@ -131,6 +134,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Auth actions
   const authContext: AuthContextProps = {
     ...state,
+    
+    /**
+     * Update the currently authenticated user's profile locally.
+     * Optionally, you could call an API endpoint here to persist the change.
+     */
+    updateProfile: (updates: Partial<User>) => {
+      setState(prev => ({
+        ...prev,
+        user: prev.user ? { ...prev.user, ...updates } : prev.user,
+      }));
+    },
     
     login: async ({ email, password }: LoginParams): Promise<AuthResult> => {
       console.log('Login attempt:', { email });

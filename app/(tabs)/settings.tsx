@@ -306,8 +306,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '600',
     color: '#000000',
     textAlign: 'center',
   },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#666',
     textTransform: 'uppercase',
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   settingText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#000000',
     flex: 1,
   },

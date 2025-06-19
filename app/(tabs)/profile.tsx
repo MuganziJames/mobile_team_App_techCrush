@@ -1,6 +1,7 @@
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -8,6 +9,10 @@ export default function ProfileScreen() {
   const { user } = useAuth();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
+  const [countryCode, setCountryCode] = useState('NG+234');
 
   const handleEditAvatar = () => {
     Alert.alert('Edit Avatar', 'Avatar editing feature coming soon!');
@@ -58,7 +63,7 @@ export default function ProfileScreen() {
       'Choose your country and enter your phone number:',
       [
         {
-          text: 'Nigeria 🇳🇬',
+          text: 'Nigeria (NG+234)',
           onPress: () => {
             Alert.prompt(
               'Edit Phone Number',
@@ -69,6 +74,8 @@ export default function ProfileScreen() {
                   text: 'Save',
                   onPress: (value) => {
                     if (value && /^\d{10,11}$/.test(value.replace(/\s/g, ''))) {
+                      setPhoneNumber(value);
+                      setCountryCode('NG+234');
                       Alert.alert('Success', 'Phone number updated successfully!');
                     } else {
                       Alert.alert('Error', 'Please enter a valid Nigerian phone number (10-11 digits).');
@@ -77,14 +84,60 @@ export default function ProfileScreen() {
                 }
               ],
               'plain-text',
-              user?.phone?.replace('+234', '') || ''
+              phoneNumber.replace(/^\+234/, '') || ''
             );
           }
         },
         {
-          text: 'Other Country',
+          text: 'Kenya (KE+254)',
           onPress: () => {
-            Alert.alert('Coming Soon', 'Support for other countries coming soon!');
+            Alert.prompt(
+              'Edit Phone Number',
+              'Enter your Kenyan phone number:',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Save',
+                  onPress: (value) => {
+                    if (value && /^\d{9,10}$/.test(value.replace(/\s/g, ''))) {
+                      setPhoneNumber(value);
+                      setCountryCode('KE+254');
+                      Alert.alert('Success', 'Phone number updated successfully!');
+                    } else {
+                      Alert.alert('Error', 'Please enter a valid Kenyan phone number (9-10 digits).');
+                    }
+                  }
+                }
+              ],
+              'plain-text',
+              phoneNumber.replace(/^\+254/, '') || ''
+            );
+          }
+        },
+        {
+          text: 'Ghana (GH+233)',
+          onPress: () => {
+            Alert.prompt(
+              'Edit Phone Number',
+              'Enter your Ghanaian phone number:',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Save',
+                  onPress: (value) => {
+                    if (value && /^\d{9,10}$/.test(value.replace(/\s/g, ''))) {
+                      setPhoneNumber(value);
+                      setCountryCode('GH+233');
+                      Alert.alert('Success', 'Phone number updated successfully!');
+                    } else {
+                      Alert.alert('Error', 'Please enter a valid Ghanaian phone number (9-10 digits).');
+                    }
+                  }
+                }
+              ],
+              'plain-text',
+              phoneNumber.replace(/^\+233/, '') || ''
+            );
           }
         },
         { text: 'Cancel', style: 'cancel' }
@@ -92,50 +145,27 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleEditDate = () => {
-    Alert.alert(
-      'Edit Date of Birth',
-      'Select your birth date:',
-      [
-        {
-          text: 'January 1990',
-          onPress: () => Alert.alert('Success', 'Date of birth updated to January 1990!')
-        },
-        {
-          text: 'February 1991',
-          onPress: () => Alert.alert('Success', 'Date of birth updated to February 1991!')
-        },
-        {
-          text: 'March 1992',
-          onPress: () => Alert.alert('Success', 'Date of birth updated to March 1992!')
-        },
-        {
-          text: 'Custom Date',
-          onPress: () => {
-            Alert.prompt(
-              'Custom Date',
-              'Enter your birth date (DD/MM/YYYY):',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Save',
-                  onPress: (value) => {
-                    if (value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-                      Alert.alert('Success', `Date of birth updated to ${value}!`);
-                    } else {
-                      Alert.alert('Error', 'Please enter date in DD/MM/YYYY format.');
-                    }
-                  }
-                }
-              ],
-              'default',
-              '15/01/1990'
-            );
-          }
-        },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
+  const showDatePicker = () => {
+    setDatePickerVisible(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+
+  const handleConfirmDate = (date: Date) => {
+    setBirthDate(date);
+    hideDatePicker();
+    Alert.alert('Success', 'Date of birth updated successfully!');
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'Not provided';
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const handleEditLocation = () => {
@@ -152,8 +182,12 @@ export default function ProfileScreen() {
           onPress: () => Alert.alert('Success', 'Location updated to Abuja, Nigeria!')
         },
         {
-          text: 'Kano, Nigeria 🇳🇬',
-          onPress: () => Alert.alert('Success', 'Location updated to Kano, Nigeria!')
+          text: 'Nairobi, Kenya 🇰🇪',
+          onPress: () => Alert.alert('Success', 'Location updated to Nairobi, Kenya!')
+        },
+        {
+          text: 'Accra, Ghana 🇬🇭',
+          onPress: () => Alert.alert('Success', 'Location updated to Accra, Ghana!')
         },
         {
           text: 'Custom Location',
@@ -182,6 +216,10 @@ export default function ProfileScreen() {
         { text: 'Cancel', style: 'cancel' }
       ]
     );
+  };
+
+  const handleEditProfile = () => {
+    router.push('/edit-profile');
   };
 
   // Get user initials for avatar
@@ -249,86 +287,62 @@ export default function ProfileScreen() {
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={() => handleEditField('Full Name', user?.name || '')}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Full Name</Text>
               <View style={styles.fieldContainer}>
                 <Text style={styles.fieldValue}>
                   {user?.name || 'Not provided'}
                 </Text>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={handleEditDate}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Date Of Birth</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>Not provided</Text>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
+                <Text style={styles.fieldValue}>{user?.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'Not provided'}</Text>
               </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={() => handleEditField('Email', user?.email || '')}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Email</Text>
               <View style={styles.fieldContainer}>
                 <Text style={styles.fieldValue}>{user?.email || 'Not provided'}</Text>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={handleEditPhone}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Phone Number</Text>
               <View style={styles.fieldContainer}>
-                <View style={styles.phoneContainer}>
-                  <Text style={styles.flagPrefix}>🇳🇬</Text>
-                  <Text style={styles.fieldValue}>{user?.phone || 'Not provided'}</Text>
-                </View>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
+                <Text style={styles.fieldValue}>{user?.phone || 'Not provided'}</Text>
               </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={handleEditLocation}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Location</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>Not provided</Text>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
+                <Text style={styles.fieldValue}>{user?.location || 'Not provided'}</Text>
               </View>
-            </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity 
-              style={styles.fieldGroup}
-              onPress={handleEditAvatar}
-              activeOpacity={0.7}
-            >
+            <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Profile Picture</Text>
               <View style={styles.fieldContainer}>
                 <View style={styles.profilePictureContainer}>
                   <Ionicons name="camera" size={20} color={Colors.darkGray} />
                   <Text style={styles.fieldValue}>Current photo</Text>
                 </View>
-                <Ionicons name="pencil" size={16} color={Colors.darkGray} />
               </View>
-            </TouchableOpacity>
+            </View>
           </View>
+
+          {/* Edit Profile Button */}
+          <TouchableOpacity 
+            style={styles.editProfileButton}
+            onPress={handleEditProfile}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+          </TouchableOpacity>
 
           {/* Bottom spacing for home indicator */}
           <View style={styles.bottomSpacing} />
@@ -488,6 +502,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  editProfileButton: {
+    width: '100%',
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#E76E2C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  editProfileButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.white,
   },
   bottomSpacing: {
     height: 100, // Increased for tab bar
