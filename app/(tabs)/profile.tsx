@@ -1,8 +1,9 @@
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
@@ -13,6 +14,31 @@ export default function ProfileScreen() {
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [countryCode, setCountryCode] = useState('NG+234');
+
+  // Ensure status bar settings are applied when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Apply status bar settings when screen is focused
+      const applyStatusBarSettings = () => {
+        StatusBar.setBarStyle('light-content', true);
+        StatusBar.setBackgroundColor('transparent', true);
+        StatusBar.setTranslucent(true);
+      };
+
+      // Apply immediately and with a small delay to ensure it takes effect
+      applyStatusBarSettings();
+      const timer = setTimeout(applyStatusBarSettings, 100);
+
+      // Cleanup function when screen loses focus
+      return () => {
+        clearTimeout(timer);
+        // Reset to proper settings for other screens with white backgrounds
+        StatusBar.setBarStyle('dark-content', true);
+        StatusBar.setBackgroundColor('#FFFFFF', true);
+        StatusBar.setTranslucent(false);
+      };
+    }, [])
+  );
 
   const handleEditAvatar = () => {
     Alert.alert('Edit Avatar', 'Avatar editing feature coming soon!');
@@ -241,17 +267,14 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#E76E2C" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Orange Header with curved bottom */}
+        {/* Orange Header with curved bottom - extends to screen edges */}
         <View style={styles.orangeHeader}>
-          {/* Status bar area */}
-          <View style={styles.statusBarArea} />
-          
           {/* Navigation bar */}
           <View style={styles.navBar}>
             <View style={styles.backButton} />
@@ -363,17 +386,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
-  // Orange header with curved bottom
+  // Orange header with curved bottom - extends to full screen
   orangeHeader: {
     backgroundColor: '#E76E2C',
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
-    height: 200, // Restored to 200px to accommodate avatar at y=144
+    height: 240, // Increased to account for status bar area
     position: 'relative',
-  },
-  // Status bar area (44px on iPhone)
-  statusBarArea: {
-    height: 60,
+    paddingTop: 60, // Add padding for status bar area
   },
   // Navigation bar with back button, title, and menu
   navBar: {
@@ -381,8 +401,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingVertical: 12, // Restored to 12px
-    height: 56, // Restored to 56px
+    paddingVertical: 12,
+    height: 56,
   },
   backButton: {
     width: 40,
@@ -393,7 +413,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#000000',
+    color: '#FFFFFF',
     letterSpacing: -0.44,
     flex: 1,
     textAlign: 'center',
@@ -407,7 +427,7 @@ const styles = StyleSheet.create({
   // Avatar positioned absolutely at y=144px, horizontally centered
   avatarContainer: {
     position: 'absolute',
-    top: 144, // Exact y position as specified
+    top: 184, // Adjusted for increased header height (was 144, now 144 + 40)
     left: 0,
     right: 0,
     alignItems: 'center', // Horizontally center

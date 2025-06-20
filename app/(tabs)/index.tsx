@@ -9,6 +9,7 @@ import {
   FlatList,
   Modal,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -194,6 +195,7 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <FlatList
         data={sampleStyles}
         renderItem={renderStyleCard}
