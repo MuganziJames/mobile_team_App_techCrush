@@ -3,11 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import {
     Dimensions,
     Modal,
-    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -47,64 +46,34 @@ export default function ConfirmationModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          {/* Warning indicator for destructive actions */}
-          {isDestructive && (
-            <View style={styles.warningStripe} />
-          )}
-          
-          {/* Header section */}
-          <View style={styles.header}>
-            <View style={[styles.iconCircle, { backgroundColor: iconBackground }]}>
-              <Ionicons name={iconName} size={32} color={Colors.white} />
-            </View>
-            
-            {/* Pulse effect for destructive actions */}
-            {isDestructive && (
-              <View style={[styles.pulseRing, { borderColor: iconBackground }]} />
-            )}
+          {/* Icon */}
+          <View style={[styles.iconContainer, { backgroundColor: iconBackground }]}>
+            <Ionicons name={iconName} size={24} color="#FFFFFF" />
           </View>
           
-          {/* Content section */}
-          <View style={styles.content}>
-            <Text style={styles.title}>{title}</Text>
-            <View style={styles.messageBox}>
-              <Text style={styles.message}>{message}</Text>
-            </View>
-          </View>
+          {/* Title */}
+          <Text style={styles.title}>{title}</Text>
+          
+          {/* Message */}
+          <Text style={styles.message}>{message}</Text>
           
           {/* Action buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
-              style={[
-                styles.confirmButton, 
-                { backgroundColor: iconBackground },
-                isDestructive && styles.destructiveButton
-              ]} 
+              style={[styles.confirmButton, { backgroundColor: iconBackground }]} 
               onPress={onConfirm} 
               activeOpacity={0.8}
             >
-              <Ionicons 
-                name={isDestructive ? "warning" : "checkmark"} 
-                size={16} 
-                color={Colors.white} 
-                style={styles.buttonIcon} 
-              />
               <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.cancelButton, { borderColor: iconBackground }]} 
+              style={styles.cancelButton} 
               onPress={onCancel} 
               activeOpacity={0.8}
             >
-              <Ionicons name="close" size={16} color={iconBackground} style={styles.buttonIcon} />
-              <Text style={[styles.cancelButtonText, { color: iconBackground }]}>{cancelLabel}</Text>
+              <Text style={styles.cancelButtonText}>{cancelLabel}</Text>
             </TouchableOpacity>
-          </View>
-          
-          {/* Bottom decoration */}
-          <View style={styles.bottomDecor}>
-            <View style={[styles.decorLine, { backgroundColor: iconBackground }]} />
           </View>
         </View>
       </View>
@@ -115,128 +84,74 @@ export default function ConfirmationModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 20,
+    zIndex: 1000,
   },
   card: {
-    width: '100%',
-    borderRadius: 16,
-    backgroundColor: Colors.white,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    width: Math.min(width - 40, 320),
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
     alignItems: 'center',
-    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Platform.OS === 'ios' ? 0.15 : 0.4,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 5,
+    zIndex: 1001,
   },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '600',
-    color: Colors.black,
-    marginBottom: 12,
+    color: '#000000',
+    marginBottom: 8,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
+    lineHeight: 20,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
   },
   confirmButton: {
-    flex: 1,
+    width: '100%',
     height: 48,
-    borderRadius: 8,
-    backgroundColor: Colors.primary,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
-    flexDirection: 'row',
   },
   confirmButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
+    color: '#FFFFFF',
   },
   cancelButton: {
-    flex: 1,
+    width: '100%',
     height: 48,
-    borderRadius: 8,
-    backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.primary,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
-    flexDirection: 'row',
+    backgroundColor: 'transparent',
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  warningStripe: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#FF3B30',
-    marginBottom: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  pulseRing: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    marginLeft: 12,
-  },
-  content: {
-    alignItems: 'center',
-  },
-  messageBox: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.lightGray,
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  buttonContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  bottomDecor: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.lightGray,
-  },
-  decorLine: {
-    width: '100%',
-    height: 1,
-    backgroundColor: Colors.lightGray,
-  },
-  destructiveButton: {
-    backgroundColor: '#FF3B30',
+    fontWeight: '500',
+    color: '#666666',
   },
 }); 
