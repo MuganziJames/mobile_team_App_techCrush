@@ -136,9 +136,87 @@ const allStyles: Style[] = [
   }
 ];
 
-const categories = ['All', 'Evening Wear', 'Casual', 'Business', 'Bohemian', 'Athleisure', 'Vintage', 'Minimalist', 'Street Style', 'Romantic', 'Punk', 'Resort', 'Gothic', 'Preppy'];
-const colors = ['All', '#000000', '#87CEEB', '#2F4F4F', '#DEB887', '#FF6347', '#8B4513', '#F5F5F5', '#696969', '#FFB6C1', '#8B0000', '#00CED1', '#2F2F2F'];
-const tags = ['All', 'elegant', 'casual', 'formal', 'summer', 'professional', 'boho', 'sporty', 'vintage', 'minimal', 'edgy', 'romantic', 'floral', 'feminine', 'punk', 'rebellious', 'alternative', 'tropical', 'vacation', 'colorful', 'gothic', 'dark', 'mysterious', 'preppy', 'academic', 'classic'];
+const categories = [
+  'All', 
+  'Evening Wear', 
+  'Casual', 
+  'Business', 
+  'Traditional', 
+  'Street Style', 
+  'Bohemian', 
+  'Romantic', 
+  'Vintage', 
+  'Minimalist', 
+  'Athleisure', 
+  'Resort', 
+  'Gothic', 
+  'Punk', 
+  'Preppy'
+];
+
+const colors = [
+  'All', 
+  '#FF6B35', // AfriStyle Orange
+  '#8B4513', // Saddle Brown (African earth tones)
+  '#000000', // Black
+  '#F5F5F5', // White Smoke
+  '#DEB887', // Burlywood (natural tones)
+  '#CD853F', // Peru (warm earth)
+  '#D2691E', // Chocolate
+  '#A0522D', // Sienna
+  '#2F4F4F', // Dark Slate Gray
+  '#87CEEB', // Sky Blue
+  '#FFB6C1', // Light Pink
+  '#8B0000', // Dark Red
+  '#2F2F2F'  // Dark Gray
+];
+
+const tags = [
+  'All', 
+  'african', 
+  'ankara', 
+  'kente', 
+  'dashiki', 
+  'traditional', 
+  'modern', 
+  'heritage', 
+  'cultural', 
+  'ethnic', 
+  'tribal', 
+  'elegant', 
+  'formal', 
+  'casual', 
+  'streetwear', 
+  'contemporary', 
+  'vintage', 
+  'bohemian', 
+  'romantic', 
+  'professional', 
+  'business', 
+  'evening', 
+  'prints', 
+  'patterns', 
+  'colorful', 
+  'vibrant', 
+  'earthy', 
+  'natural', 
+  'handmade', 
+  'artisan', 
+  'festival', 
+  'celebration', 
+  'ceremony', 
+  'urban', 
+  'chic', 
+  'sophisticated', 
+  'bold', 
+  'statement', 
+  'authentic', 
+  'pride', 
+  'identity', 
+  'fashion-forward', 
+  'trendy', 
+  'classic'
+];
 
 export default function SearchScreen() {
   const { 

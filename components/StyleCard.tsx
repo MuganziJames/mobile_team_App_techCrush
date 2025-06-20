@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import {
   Dimensions,
   Image,
+  ImageSourcePropType,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,6 +13,11 @@ import {
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2; // 2 columns with padding
+
+// Helper function to handle image sources
+const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
+  return typeof image === 'string' ? { uri: image } : image;
+};
 
 interface StyleCardProps {
   style: Style;
@@ -54,7 +60,7 @@ export default function StyleCard({
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
-        <Image source={style.image} style={styles.image} />
+        <Image source={getImageSource(style.image)} style={styles.image} />
         {showSaveButton && (
           <TouchableOpacity 
             style={styles.saveButton}
