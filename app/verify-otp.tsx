@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    AppState,
     Dimensions,
     KeyboardAvoidingView,
     Platform,
@@ -32,9 +33,23 @@ export default function VerifyOTPScreen() {
 
   // Focus the input when the component mounts
   useEffect(() => {
-    setTimeout(() => {
+    const focusTimer = setTimeout(() => {
       inputRef.current?.focus();
-    }, 500);
+    }, 100);
+
+    return () => clearTimeout(focusTimer);
+  }, []);
+
+  // Handle app state changes to prevent focus conflicts
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        inputRef.current?.blur();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
   }, []);
 
   const handleSubmit = async () => {
@@ -89,7 +104,6 @@ export default function VerifyOTPScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 40}
       >
         <View style={styles.header}>
           <TouchableOpacity 
@@ -105,11 +119,6 @@ export default function VerifyOTPScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          bounces={false}
-          onContentSizeChange={() => {
-            // Scroll to bottom when keyboard appears
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-          }}
         >
           <View style={styles.content}>
             <Text style={styles.title}>Verification Code</Text>
@@ -129,7 +138,6 @@ export default function VerifyOTPScreen() {
               }}
               keyboardType="number-pad"
               maxLength={6}
-              autoFocus
               caretHidden
             />
             
@@ -163,9 +171,6 @@ export default function VerifyOTPScreen() {
                 <Text style={styles.resendLink}>Resend Code</Text>
               </TouchableOpacity>
             </View>
-            
-            {/* Extra padding at the bottom to ensure content is visible above keyboard */}
-            <View style={styles.extraPadding} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -194,15 +199,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+    paddingBottom: 50,
   },
   content: {
-    flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 40,
     alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: Dimensions.get('window').height - 200,
   },
   title: {
     fontSize: 28,
@@ -302,7 +304,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textDecorationLine: 'underline',
   },
-  extraPadding: {
-    height: 150, // Extra padding at the bottom
-  }
 }); 
