@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Alert,
     Keyboard,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -39,6 +40,7 @@ export default function SignUpFullForm() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     console.log('Email from params:', email);
@@ -145,7 +147,7 @@ export default function SignUpFullForm() {
       console.log('Registration result:', result);
       
       if (result.success) {
-        console.log('Registration successful, navigating to tabs');
+        console.log('Registration successful, showing success modal');
         // Clear form data
         setFormData({
           firstName: '',
@@ -156,10 +158,8 @@ export default function SignUpFullForm() {
           confirmPassword: '',
         });
         
-        // Navigate to home screen
-        setTimeout(() => {
-          router.replace('/(tabs)');
-        }, 500);
+        // Show success modal instead of auto-login
+        setShowSuccessModal(true);
       } else {
         // Check if it's a duplicate registration error
         if (result.message?.toLowerCase().includes('already exists') || 
@@ -360,6 +360,39 @@ export default function SignUpFullForm() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Registration Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalIconContainer}>
+              <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
+            </View>
+            
+            <Text style={styles.modalTitle}>Account Created Successfully!</Text>
+            <Text style={styles.modalMessage}>
+              Welcome to AfriStyle! Your account has been created successfully. 
+              You can now sign in with your credentials to start exploring amazing African fashion and styles.
+            </Text>
+            
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowSuccessModal(false);
+                router.replace('/signin');
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.modalButtonText}>Continue to Sign In</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -513,6 +546,52 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitButtonText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: Colors.white,
+    padding: 24,
+    borderRadius: 12,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalIconContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 60,
+    padding: 12,
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colors.black,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    color: Colors.darkGray,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  modalButton: {
+    backgroundColor: Colors.primary,
+    padding: 16,
+    borderRadius: 8,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalButtonText: {
     color: Colors.white,
     fontWeight: '600',
     fontSize: 16,
