@@ -102,6 +102,19 @@ export default function SignUpFullForm() {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
+    } else {
+      // Check for comprehensive password requirements
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasNumber = /[0-9]/.test(formData.password);
+      const hasSpecialChar = /[^A-Za-z0-9]/.test(formData.password);
+      
+      if (!hasUpperCase) {
+        newErrors.password = 'Password must contain at least one uppercase letter';
+      } else if (!hasNumber) {
+        newErrors.password = 'Password must contain at least one number';
+      } else if (!hasSpecialChar) {
+        newErrors.password = 'Password must contain at least one special character';
+      }
     }
     
     if (formData.password !== formData.confirmPassword) {
@@ -285,6 +298,86 @@ export default function SignUpFullForm() {
               </TouchableOpacity>
             </View>
             {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            
+            {/* Password Requirements */}
+            {formData.password.length > 0 && (
+              <View style={styles.passwordRules}>
+                <Text style={styles.passwordRulesTitle}>Password Requirements:</Text>
+                
+                {(() => {
+                  const hasLength = formData.password.length >= 8;
+                  const hasUpperCase = /[A-Z]/.test(formData.password);
+                  const hasNumber = /[0-9]/.test(formData.password);
+                  const hasSpecialChar = /[^A-Za-z0-9]/.test(formData.password);
+                  
+                  const completedRules = [hasLength, hasUpperCase, hasNumber, hasSpecialChar].filter(Boolean).length;
+                  const strengthColors = ['#FF6B6B', '#FFD93D', '#6BCF7F', '#4ECDC4'];
+                  const strengthTexts = ['Weak', 'Fair', 'Good', 'Strong'];
+                  const strengthColor = strengthColors[Math.min(completedRules - 1, 3)] || '#E0E0E0';
+                  const strengthText = strengthTexts[Math.min(completedRules - 1, 3)] || 'Too Weak';
+                  
+                  return (
+                    <View style={styles.strengthIndicator}>
+                      <View style={styles.strengthBar}>
+                        <View 
+                          style={[
+                            styles.strengthFill, 
+                            { 
+                              width: `${(completedRules / 4) * 100}%`,
+                              backgroundColor: strengthColor 
+                            }
+                          ]} 
+                        />
+                      </View>
+                      <Text style={[styles.strengthText, { color: strengthColor }]}>
+                        {strengthText}
+                      </Text>
+                    </View>
+                  );
+                })()}
+                
+                <View style={styles.ruleRow}>
+                  <Ionicons 
+                    name={formData.password.length >= 8 ? "checkmark-circle" : "ellipse-outline"} 
+                    size={16} 
+                    color={formData.password.length >= 8 ? '#4ECDC4' : Colors.darkGray} 
+                  />
+                  <Text style={[styles.passwordRule, formData.password.length >= 8 && styles.ruleCompleted]}>
+                    At least 8 characters
+                  </Text>
+                </View>
+                <View style={styles.ruleRow}>
+                  <Ionicons 
+                    name={/[A-Z]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                    size={16} 
+                    color={/[A-Z]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                  />
+                  <Text style={[styles.passwordRule, /[A-Z]/.test(formData.password) && styles.ruleCompleted]}>
+                    At least one uppercase letter
+                  </Text>
+                </View>
+                <View style={styles.ruleRow}>
+                  <Ionicons 
+                    name={/[0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                    size={16} 
+                    color={/[0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                  />
+                  <Text style={[styles.passwordRule, /[0-9]/.test(formData.password) && styles.ruleCompleted]}>
+                    At least one number
+                  </Text>
+                </View>
+                <View style={styles.ruleRow}>
+                  <Ionicons 
+                    name={/[^A-Za-z0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                    size={16} 
+                    color={/[^A-Za-z0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                  />
+                  <Text style={[styles.passwordRule, /[^A-Za-z0-9]/.test(formData.password) && styles.ruleCompleted]}>
+                    At least one special character
+                  </Text>
+                </View>
+              </View>
+            )}
             
             <Text style={styles.fieldLabel}>Confirm Password</Text>
             <View style={styles.passwordContainer}>
@@ -767,5 +860,57 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Colors.primary,
     marginHorizontal: 4,
+  },
+  passwordRules: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  passwordRulesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.black,
+    marginBottom: 12,
+  },
+  strengthIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  strengthBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2,
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  strengthFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  strengthText: {
+    fontSize: 12,
+    fontWeight: '600',
+    minWidth: 50,
+  },
+  ruleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  passwordRule: {
+    fontSize: 13,
+    color: Colors.darkGray,
+    marginLeft: 10,
+    flex: 1,
+  },
+  ruleCompleted: {
+    color: '#4ECDC4',
+    fontWeight: '500',
   },
 }); 
