@@ -41,6 +41,7 @@ export default function SignUpFullForm() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showAccountExistsModal, setShowAccountExistsModal] = useState(false);
 
   useEffect(() => {
     console.log('Email from params:', email);
@@ -167,21 +168,7 @@ export default function SignUpFullForm() {
             result.message?.toLowerCase().includes('user already exists') ||
             result.message?.toLowerCase().includes('email already') ||
             result.message?.toLowerCase().includes('duplicate')) {
-          Alert.alert(
-            '🚫 Account Already Exists', 
-            `An account with the email "${formData.email}" is already registered.\n\n` +
-            '✅ You can sign in with your existing account\n' +
-            '📧 Or use a different email address\n' +
-            '🔑 Forgot your password? Use "Forgot Password" on the sign-in screen',
-            [
-              { text: 'Use Different Email', style: 'cancel' },
-              { 
-                text: 'Sign In Instead', 
-                style: 'default',
-                onPress: () => router.replace('/signin') 
-              }
-            ]
-          );
+          setShowAccountExistsModal(true);
         } else {
           // Show other errors with more helpful messaging
           Alert.alert(
@@ -393,6 +380,82 @@ export default function SignUpFullForm() {
           </View>
         </View>
       </Modal>
+
+      {/* Account Already Exists Modal */}
+      <Modal
+        visible={showAccountExistsModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowAccountExistsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.accountExistsContainer}>
+            {/* Warning indicator */}
+            <View style={styles.warningHeader}>
+              <View style={styles.warningIconContainer}>
+                <Ionicons name="warning" size={32} color="#FF9500" />
+              </View>
+              <View style={styles.pulseRing} />
+            </View>
+            
+            <Text style={styles.accountExistsTitle}>Account Already Exists</Text>
+            <View style={styles.accountExistsMessageContainer}>
+              <Text style={styles.accountExistsMessage}>
+                An account with the email{'\n'}
+                <Text style={styles.emailHighlight}>"{formData.email}"</Text>{'\n'}
+                is already registered.
+              </Text>
+            </View>
+            
+            {/* Options */}
+            <View style={styles.optionsContainer}>
+              <View style={styles.optionItem}>
+                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                <Text style={styles.optionText}>Sign in with your existing account</Text>
+              </View>
+              <View style={styles.optionItem}>
+                <Ionicons name="mail" size={20} color="#2196F3" />
+                <Text style={styles.optionText}>Use a different email address</Text>
+              </View>
+              <View style={styles.optionItem}>
+                <Ionicons name="key" size={20} color="#FF6B35" />
+                <Text style={styles.optionText}>Use "Forgot Password" to recover</Text>
+              </View>
+            </View>
+            
+            {/* Action Buttons */}
+            <View style={styles.accountExistsButtonContainer}>
+              <TouchableOpacity
+                style={styles.differentEmailButton}
+                onPress={() => setShowAccountExistsModal(false)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="create" size={16} color="#666" />
+                <Text style={styles.differentEmailButtonText}>Use Different Email</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.signInInsteadButton}
+                onPress={() => {
+                  setShowAccountExistsModal(false);
+                  router.replace('/signin');
+                }}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="log-in" size={16} color={Colors.white} />
+                <Text style={styles.signInInsteadButtonText}>Sign In Instead</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Bottom decoration */}
+            <View style={styles.bottomDecoration}>
+              <View style={styles.decorativeDot} />
+              <View style={[styles.decorativeDot, { opacity: 0.6 }]} />
+              <View style={[styles.decorativeDot, { opacity: 0.3 }]} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -595,5 +658,114 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontWeight: '600',
     fontSize: 16,
+  },
+  accountExistsContainer: {
+    backgroundColor: Colors.white,
+    padding: 24,
+    borderRadius: 12,
+    width: '80%',
+    alignItems: 'center',
+  },
+  warningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  warningIconContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 60,
+    padding: 12,
+    marginRight: 16,
+  },
+  pulseRing: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    opacity: 0.5,
+  },
+  accountExistsTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colors.black,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  accountExistsMessageContainer: {
+    marginBottom: 24,
+  },
+  accountExistsMessage: {
+    color: Colors.darkGray,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  emailHighlight: {
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  optionsContainer: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  optionText: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginLeft: 8,
+    flex: 1,
+  },
+  accountExistsButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+  },
+  differentEmailButton: {
+    flex: 1,
+    backgroundColor: Colors.lightGray,
+    padding: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  differentEmailButtonText: {
+    color: Colors.darkGray,
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  signInInsteadButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    padding: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signInInsteadButtonText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  bottomDecoration: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  decorativeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    marginHorizontal: 4,
   },
 }); 

@@ -1,12 +1,16 @@
+import Colors from '@/constants/Colors';
 import { blogPosts, blogPostsContent } from '@/data/blogData';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import {
+    Alert,
     Dimensions,
     Image,
+    Modal,
     ScrollView,
+    Share,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -19,6 +23,7 @@ const { width } = Dimensions.get('window');
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
   const [isSharing, setIsSharing] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const postId = parseInt(id as string);
   const post = blogPosts.find(p => p.id === postId);
@@ -43,23 +48,46 @@ export default function BlogDetailScreen() {
     router.back();
   };
 
-
-
   const handleShare = async () => {
+    setShowShareModal(true);
+  };
+
+  const handleShareText = async () => {
     setIsSharing(true);
+    setShowShareModal(false);
     try {
+      const shareTitle = `${post.title} | AfriStyle`;
+      const shareContent = `${post.title}\n\n${content.content.substring(0, 300)}...\n\n📱 Read the full article on AfriStyle - Discover African Fashion & Style`;
+      
+      await Share.share({
+        title: shareTitle,
+        message: shareContent,
+      });
+    } catch (error) {
+      console.error('Error sharing text:', error);
+      Alert.alert("Error", "Failed to share the article. Please try again.");
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleShareImage = async () => {
+    setIsSharing(true);
+    setShowShareModal(false);
+    try {
+      const shareTitle = `${post.title} | AfriStyle`;
+      
       if (await Sharing.isAvailableAsync()) {
-        const shareContent = `Check out this article: ${post.title}\n\n${content.content.substring(0, 200)}...\n\nRead more on AfriStyle`;
-        
         await Sharing.shareAsync(post.image, {
           mimeType: 'image/jpeg',
-          dialogTitle: `Share: ${post.title}`,
+          dialogTitle: shareTitle,
         });
       } else {
-        console.log('Sharing is not available on this platform');
+        Alert.alert("Not Available", "Image sharing is not available on this device.");
       }
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error sharing image:', error);
+      Alert.alert("Error", "Failed to share the image. Please try again.");
     } finally {
       setIsSharing(false);
     }
@@ -113,10 +141,114 @@ export default function BlogDetailScreen() {
               </Text>
             ))}
           </View>
+
+          {/* Share Button at the end of content */}
+          <View style={styles.shareSection}>
+            <Text style={styles.sharePrompt}>Enjoyed this article?</Text>
+            <TouchableOpacity 
+              style={styles.shareButton} 
+              onPress={handleShare}
+              disabled={isSharing}
+            >
+              <Ionicons 
+                name="share-social" 
+                size={20} 
+                color="#fff" 
+                style={styles.shareIcon}
+              />
+              <Text style={styles.shareButtonText}>
+                {isSharing ? 'Sharing...' : 'Share with Friends'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Custom Share Modal */}
+      <Modal
+        visible={showShareModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowShareModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.shareModal}>
+            {/* Decorative header */}
+            <View style={styles.shareModalHeader}>
+              <View style={styles.modalTopBar} />
+              <View style={styles.shareIconContainer}>
+                <View style={styles.shareIconRing}>
+                  <Ionicons name="share-social" size={28} color={Colors.primary} />
+                </View>
+              </View>
+            </View>
+
+            {/* Content */}
+            <View style={styles.shareModalContent}>
+              <Text style={styles.shareModalTitle}>Share Article</Text>
+              <Text style={styles.shareModalSubtitle}>
+                How would you like to share "{post.title}"?
+              </Text>
+
+              {/* Share Options */}
+              <View style={styles.shareOptions}>
+                <TouchableOpacity 
+                  style={styles.shareOption}
+                  onPress={handleShareText}
+                  disabled={isSharing}
+                >
+                  <View style={styles.shareOptionIcon}>
+                    <Ionicons name="text" size={24} color={Colors.primary} />
+                  </View>
+                  <View style={styles.shareOptionContent}>
+                    <Text style={styles.shareOptionTitle}>Share Text</Text>
+                    <Text style={styles.shareOptionDescription}>
+                      Share article with title and excerpt
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.shareOption}
+                  onPress={handleShareImage}
+                  disabled={isSharing}
+                >
+                  <View style={styles.shareOptionIcon}>
+                    <Ionicons name="image" size={24} color={Colors.primary} />
+                  </View>
+                  <View style={styles.shareOptionContent}>
+                    <Text style={styles.shareOptionTitle}>Share Image</Text>
+                    <Text style={styles.shareOptionDescription}>
+                      Share the article's featured image
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Cancel Button */}
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setShowShareModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Decorative footer dots */}
+            <View style={styles.modalFooter}>
+              <View style={styles.decorativeDots}>
+                <View style={[styles.dot, { backgroundColor: Colors.primary }]} />
+                <View style={[styles.dot, { backgroundColor: '#ddd' }]} />
+                <View style={[styles.dot, { backgroundColor: '#ddd' }]} />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -227,5 +359,171 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 100,
+  },
+  shareSection: {
+    marginTop: 32,
+    marginBottom: 16,
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  sharePrompt: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  shareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    backgroundColor: Colors.primary,
+    borderRadius: 25,
+    elevation: 2,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    minWidth: 180,
+  },
+  shareIcon: {
+    marginRight: 8,
+  },
+  shareButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareModal: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    width: '80%',
+    maxHeight: '80%',
+    alignItems: 'center',
+  },
+  shareModalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTopBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: '#ccc',
+    borderRadius: 2,
+    marginBottom: 10,
+  },
+  shareIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareIconRing: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shareModalContent: {
+    width: '100%',
+  },
+  shareModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 8,
+  },
+  shareModalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 24,
+  },
+  shareOptions: {
+    width: '100%',
+  },
+  shareOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  shareOptionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    elevation: 2,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  shareOptionContent: {
+    flex: 1,
+  },
+  shareOptionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  shareOptionDescription: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+
+  cancelButton: {
+    width: '100%',
+    padding: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  modalFooter: {
+    width: '100%',
+    marginTop: 20,
+  },
+  decorativeDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
 }); 

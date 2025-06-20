@@ -1,7 +1,9 @@
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
-import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 interface ModalCardProps {
   visible: boolean;
@@ -34,17 +36,44 @@ export default function ModalCard({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
+          {/* Decorative top gradient bar */}
+          <View style={[styles.topBar, { backgroundColor: iconBackground }]} />
+          
           {iconName && (
-            <View style={[styles.iconCircle, { backgroundColor: iconBackground }]}>
-              <Ionicons name={iconName} size={32} color={Colors.white} />
+            <View style={styles.iconContainer}>
+              <View style={[styles.iconCircle, { backgroundColor: iconBackground }]}>
+                <Ionicons name={iconName} size={28} color={Colors.white} />
+              </View>
+              {/* Decorative ring around icon */}
+              <View style={[styles.iconRing, { borderColor: iconBackground }]} />
             </View>
           )}
-          <Text style={styles.title}>{title}</Text>
-          {message && <Text style={styles.message}>{message}</Text>}
-          {content}
-          <TouchableOpacity style={styles.primaryButton} onPress={onClose} activeOpacity={0.8}>
+          
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>{title}</Text>
+            {message && (
+              <View style={styles.messageContainer}>
+                <Text style={styles.message}>{message}</Text>
+              </View>
+            )}
+            {content}
+          </View>
+          
+          <TouchableOpacity 
+            style={[styles.primaryButton, { backgroundColor: iconBackground }]} 
+            onPress={onClose} 
+            activeOpacity={0.8}
+          >
             <Text style={styles.primaryButtonText}>{primaryLabel}</Text>
+            <Ionicons name="arrow-forward" size={16} color={Colors.white} style={styles.buttonIcon} />
           </TouchableOpacity>
+          
+          {/* Bottom decorative element */}
+          <View style={styles.bottomDecoration}>
+            <View style={[styles.decorativeDot, { backgroundColor: iconBackground }]} />
+            <View style={[styles.decorativeDot, { backgroundColor: iconBackground, opacity: 0.6 }]} />
+            <View style={[styles.decorativeDot, { backgroundColor: iconBackground, opacity: 0.3 }]} />
+          </View>
         </View>
       </View>
     </Modal>
@@ -72,13 +101,34 @@ const styles = StyleSheet.create({
     shadowOpacity: Platform.OS === 'ios' ? 0.15 : 0.4,
     shadowRadius: 6,
   },
+  topBar: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    marginBottom: 24,
+  },
+  iconContainer: {
+    position: 'relative',
+    marginBottom: 24,
+  },
   iconCircle: {
     width: 56,
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+  },
+  iconRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  contentContainer: {
+    alignItems: 'center',
   },
   title: {
     fontSize: 22,
@@ -87,11 +137,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'center',
   },
+  messageContainer: {
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 24,
+  },
   message: {
     fontSize: 14,
     color: Colors.darkGray,
     textAlign: 'center',
-    marginBottom: 24,
   },
   primaryButton: {
     width: '100%',
@@ -106,5 +161,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  buttonIcon: {
+    marginLeft: 8,
+  },
+  bottomDecoration: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  decorativeDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginHorizontal: 2,
   },
 }); 

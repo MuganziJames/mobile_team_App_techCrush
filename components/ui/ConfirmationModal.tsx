@@ -1,6 +1,7 @@
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import {
+    Dimensions,
     Modal,
     Platform,
     StyleSheet,
@@ -8,6 +9,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 interface ConfirmationModalProps {
   visible: boolean;
@@ -32,6 +35,8 @@ export default function ConfirmationModal({
   onConfirm,
   onCancel,
 }: ConfirmationModalProps) {
+  const isDestructive = iconBackground === '#FF3B30' || iconName === 'trash';
+  
   return (
     <Modal
       visible={visible}
@@ -42,19 +47,65 @@ export default function ConfirmationModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <View style={[styles.iconCircle, { backgroundColor: iconBackground }]}>
-            <Ionicons name={iconName} size={32} color={Colors.white} />
+          {/* Warning indicator for destructive actions */}
+          {isDestructive && (
+            <View style={styles.warningStripe} />
+          )}
+          
+          {/* Header section */}
+          <View style={styles.header}>
+            <View style={[styles.iconCircle, { backgroundColor: iconBackground }]}>
+              <Ionicons name={iconName} size={32} color={Colors.white} />
+            </View>
+            
+            {/* Pulse effect for destructive actions */}
+            {isDestructive && (
+              <View style={[styles.pulseRing, { borderColor: iconBackground }]} />
+            )}
           </View>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          
+          {/* Content section */}
+          <View style={styles.content}>
+            <Text style={styles.title}>{title}</Text>
+            <View style={styles.messageBox}>
+              <Text style={styles.message}>{message}</Text>
+            </View>
+          </View>
+          
+          {/* Action buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.confirmButton, 
+                { backgroundColor: iconBackground },
+                isDestructive && styles.destructiveButton
+              ]} 
+              onPress={onConfirm} 
+              activeOpacity={0.8}
+            >
+              <Ionicons 
+                name={isDestructive ? "warning" : "checkmark"} 
+                size={16} 
+                color={Colors.white} 
+                style={styles.buttonIcon} 
+              />
+              <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.confirmButton} onPress={onConfirm} activeOpacity={0.8}>
-            <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.cancelButton} onPress={onCancel} activeOpacity={0.8}>
-            <Text style={styles.cancelButtonText}>{cancelLabel}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.cancelButton, { borderColor: iconBackground }]} 
+              onPress={onCancel} 
+              activeOpacity={0.8}
+            >
+              <Ionicons name="close" size={16} color={iconBackground} style={styles.buttonIcon} />
+              <Text style={[styles.cancelButtonText, { color: iconBackground }]}>{cancelLabel}</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Bottom decoration */}
+          <View style={styles.bottomDecor}>
+            <View style={[styles.decorLine, { backgroundColor: iconBackground }]} />
+          </View>
         </View>
       </View>
     </Modal>
@@ -104,13 +155,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   confirmButton: {
-    width: '100%',
+    flex: 1,
     height: 48,
     borderRadius: 8,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: 8,
+    flexDirection: 'row',
   },
   confirmButtonText: {
     fontSize: 16,
@@ -118,18 +170,73 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   cancelButton: {
-    width: '100%',
+    flex: 1,
     height: 48,
     borderRadius: 8,
     backgroundColor: Colors.white,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 8,
+    flexDirection: 'row',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  warningStripe: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#FF3B30',
+    marginBottom: 24,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  pulseRing: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    marginLeft: 12,
+  },
+  content: {
+    alignItems: 'center',
+  },
+  messageBox: {
+    width: '100%',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    borderRadius: 8,
+    marginBottom: 24,
+  },
+  buttonContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  bottomDecor: {
+    width: '100%',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.lightGray,
+  },
+  decorLine: {
+    width: '100%',
+    height: 1,
+    backgroundColor: Colors.lightGray,
+  },
+  destructiveButton: {
+    backgroundColor: '#FF3B30',
   },
 }); 

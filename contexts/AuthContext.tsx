@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import authService from '../api/auth.service';
@@ -24,6 +25,7 @@ interface AuthState {
   isLoading: boolean;
   isSignout: boolean;
   isAuthenticated: boolean;
+  hasCompletedOnboarding: boolean;
 }
 
 interface LoginParams {
@@ -50,6 +52,7 @@ interface AuthContextProps {
   isLoading: boolean;
   isSignout: boolean;
   isAuthenticated: boolean;
+  hasCompletedOnboarding: boolean;
   login: (params: LoginParams) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (params: RegisterParams) => Promise<AuthResult>;
@@ -57,6 +60,8 @@ interface AuthContextProps {
   verifyOtp: (email: string, resetToken: string) => Promise<AuthResult>;
   setNewPassword: (email: string, newPassword: string, resetToken: string) => Promise<AuthResult>;
   updateProfile: (updates: Partial<User>) => void;
+  completeOnboarding: () => Promise<void>;
+  checkOnboardingStatus: () => Promise<boolean>;
 }
 
 // Context
@@ -85,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: true,
     isSignout: false,
     isAuthenticated: false,
+    hasCompletedOnboarding: false,
   });
 
   // Load token and user from storage on mount
@@ -92,6 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const bootstrapAsync = async () => {
       try {
         console.log('Bootstrapping auth state...');
+        
+        // Check onboarding completion status first
+        const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
+        const hasCompletedOnboarding = onboardingCompleted === 'true';
         
         // Use auth service to bootstrap authentication
         const { user: apiUser, token } = await authService.bootstrapAuth();
@@ -105,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isLoading: false,
             isSignout: false,
             isAuthenticated: true,
+            hasCompletedOnboarding,
           });
         } else {
           console.log('No valid auth state found');
@@ -114,10 +125,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isLoading: false,
             isSignout: false,
             isAuthenticated: false,
+            hasCompletedOnboarding,
           });
         }
       } catch (e) {
         console.error('Auth check error:', e);
+        // Check onboarding status even on error
+        const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
+        const hasCompletedOnboarding = onboardingCompleted === 'true';
+        
         // Clear any stale auth data
         setState({
           user: null,
@@ -125,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isLoading: false,
           isSignout: false,
           isAuthenticated: false,
+          hasCompletedOnboarding,
         });
       }
     };
@@ -158,13 +175,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (result.success && result.user && result.token) {
           const user = convertApiUserToUser(result.user);
           
-          setState({
+          setState(prev => ({
+            ...prev,
             user,
-            token: result.token,
+            token: result.token || null,
             isLoading: false,
             isSignout: false,
             isAuthenticated: true,
-          });
+          }));
 
           console.log('User logged in:', user);
           return { 
@@ -238,6 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isLoading: false,
           isSignout: false,
           isAuthenticated: false,
+          hasCompletedOnboarding: false,
         });
         
         console.log('Auth state cleared, navigating to signin...');
@@ -314,6 +333,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           success: false,
           message: error.message || 'An error occurred while setting new password'
         };
+      }
+    },
+
+    completeOnboarding: async () => {
+      try {
+        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+        setState(prev => ({
+          ...prev,
+          hasCompletedOnboarding: true,
+        }));
+        console.log('Onboarding completed and saved');
+      } catch (error) {
+        console.error('Error saving onboarding completion:', error);
+      }
+    },
+
+    checkOnboardingStatus: async () => {
+      try {
+        const completed = await AsyncStorage.getItem('hasCompletedOnboarding');
+        return completed === 'true';
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        return false;
       }
     },
   };

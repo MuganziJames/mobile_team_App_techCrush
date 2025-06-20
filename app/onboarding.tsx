@@ -1,6 +1,7 @@
 import Button from '@/components/ui/Button';
 import PaginationDots from '@/components/ui/PaginationDots';
 import Colors from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -32,25 +33,25 @@ const onboardingData = [
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+  const { completeOnboarding } = useAuth();
 
   const handleSkip = () => {
+    completeOnboarding();
     router.replace('/signin');
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < onboardingData.length - 1) {
       flatListRef?.current?.scrollToIndex({
         index: currentIndex + 1,
         animated: true,
       });
     } else {
+      // User completed onboarding, mark it as complete
+      await completeOnboarding();
       router.replace('/signin');
     }
   };
-
-
-
-
 
   const renderItem = ({ item }: { item: typeof onboardingData[0] }) => (
     <View style={styles.slide}>

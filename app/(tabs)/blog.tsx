@@ -10,6 +10,7 @@ import {
     Image,
     Modal,
     ScrollView,
+    Share,
     StyleSheet,
     Text,
     TextInput,
@@ -103,6 +104,21 @@ export default function BlogScreen() {
     });
   };
 
+  const handleShare = async (post: any) => {
+    try {
+      const shareTitle = `${post.title} | AfriStyle`;
+      const shareContent = `Check out this article: ${post.title}\n\nCategory: ${post.category}\nPublished: ${post.date}\n\n📱 Read more on AfriStyle - Discover African Fashion & Style`;
+      
+      await Share.share({
+        title: shareTitle,
+        message: shareContent,
+      });
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      Alert.alert("Error", "Failed to share the article. Please try again.");
+    }
+  };
+
   if (showAll) {
     const postsToShow = searchQuery ? filteredPosts : blogPosts;
     
@@ -168,16 +184,28 @@ export default function BlogScreen() {
                     <Text style={styles.allPostCategory}>{post.category}</Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.saveButton}
-                  onPress={() => handleSave(post)}
-                >
-                  <Ionicons 
-                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
-                    size={24} 
-                    color={isStyleSaved(post.id) ? "#FF6B35" : "#999"} 
-                  />
-                </TouchableOpacity>
+                <View style={styles.postActions}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleShare(post)}
+                  >
+                    <Ionicons 
+                      name="share-outline" 
+                      size={22} 
+                      color="#666" 
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleSave(post)}
+                  >
+                    <Ionicons 
+                      name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
+                      size={22} 
+                      color={isStyleSaved(post.id) ? "#FF6B35" : "#666"} 
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))
           )}
@@ -253,19 +281,34 @@ export default function BlogScreen() {
               <Image source={{ uri: post.image }} style={styles.featuredImage} />
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{post.title}</Text>
-                <TouchableOpacity
-                  style={styles.featuredSaveButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleSave(post);
-                  }}
-                >
-                  <Ionicons 
-                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
-                    size={24} 
-                    color="#fff" 
-                  />
-                </TouchableOpacity>
+                <View style={styles.featuredActions}>
+                  <TouchableOpacity
+                    style={styles.featuredActionButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleShare(post);
+                    }}
+                  >
+                    <Ionicons 
+                      name="share-outline" 
+                      size={22} 
+                      color="#fff" 
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.featuredActionButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleSave(post);
+                    }}
+                  >
+                    <Ionicons 
+                      name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
+                      size={22} 
+                      color="#fff" 
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
@@ -300,7 +343,18 @@ export default function BlogScreen() {
               onPress={() => handlePostPress(post.id)}
               activeOpacity={0.7}
             >
-              <Image source={{ uri: post.image }} style={styles.popularImage} />
+              <View style={styles.popularImageContainer}>
+                <Image source={{ uri: post.image }} style={styles.popularImage} />
+                {/* <TouchableOpacity 
+                  style={styles.popularShareButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleShare(post);
+                  }}
+                >
+                  <Ionicons name="share-outline" size={16} color="#fff" />
+                </TouchableOpacity> */}
+              </View>
               <View style={styles.popularInfo}>
                 <Text style={styles.popularTitle} numberOfLines={2}>
                   {post.title}
@@ -475,7 +529,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 12,
   },
-  featuredSaveButton: {
+  featuredActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  featuredActionButton: {
     padding: 4,
     marginRight: 8,
   },
@@ -527,6 +585,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  popularImageContainer: {
+    position: 'relative',
   },
   popularImage: {
     width: 80,
@@ -603,11 +664,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 2,
   },
-  saveButton: {
-    width: 50,
+  postActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
   },
   noResultsContainer: {
     alignItems: 'center',
@@ -699,5 +764,16 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
     textAlign: 'center',
+  },
+  popularShareButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 
