@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: Colors.midGray,
+    color: Colors.black,
   },
   inputError: {
     borderColor: Colors.errorRed,

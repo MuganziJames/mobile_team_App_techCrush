@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: Typography.sizes.body,
-    color: Colors.darkGray,
+    color: Colors.black,
   },
   eyeIcon: {
     padding: Layout.spacing.xs,

@@ -117,7 +117,7 @@ export default function SignInScreen() {
               <Text style={styles.label}>Password</Text>
               <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
                 <TextInput
-                  style={styles.passwordInput}
+                  style={[styles.passwordInput, errors.password && styles.inputError]}
                   placeholder="********"
                   placeholderTextColor="#999"
                   value={password}
@@ -221,6 +221,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     backgroundColor: Colors.lightGray,
+    color: Colors.black,
   },
   inputError: {
     borderColor: Colors.errorRed,
@@ -244,6 +245,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: 16,
     fontSize: 16,
+    color: Colors.black,
   },
   eyeIcon: {
     paddingHorizontal: 16,

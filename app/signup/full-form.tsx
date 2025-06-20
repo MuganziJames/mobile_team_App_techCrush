@@ -632,6 +632,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.midGray,
     paddingHorizontal: 12,
     fontSize: 16,
+    color: Colors.black,
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -647,6 +648,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     fontSize: 16,
+    color: Colors.black,
   },
   eyeIcon: {
     paddingHorizontal: 12,

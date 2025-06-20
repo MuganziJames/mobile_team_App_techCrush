@@ -1,4 +1,4 @@
-package com.anonymous.mobile_team_App_techCrush
+package com.afristyle.app
 
 import android.app.Application
 import android.content.res.Configuration

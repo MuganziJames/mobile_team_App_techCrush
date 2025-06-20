@@ -190,6 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
     paddingHorizontal: 16,
     marginBottom: 16,
+    color: Colors.black,
   },
   inputRow: {
     flexDirection: 'row',
