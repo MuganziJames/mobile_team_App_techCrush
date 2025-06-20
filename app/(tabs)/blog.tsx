@@ -345,15 +345,19 @@ export default function BlogScreen() {
             >
               <View style={styles.popularImageContainer}>
                 <Image source={{ uri: post.image }} style={styles.popularImage} />
-                {/* <TouchableOpacity 
-                  style={styles.popularShareButton}
+                <TouchableOpacity 
+                  style={styles.popularSaveButton}
                   onPress={(e) => {
                     e.stopPropagation();
-                    handleShare(post);
+                    handleSave(post);
                   }}
                 >
-                  <Ionicons name="share-outline" size={16} color="#fff" />
-                </TouchableOpacity> */}
+                  <Ionicons 
+                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
+                    size={16} 
+                    color={isStyleSaved(post.id) ? "#FF6B35" : "#fff"} 
+                  />
+                </TouchableOpacity>
               </View>
               <View style={styles.popularInfo}>
                 <Text style={styles.popularTitle} numberOfLines={2}>
@@ -765,7 +769,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
-  popularShareButton: {
+  popularSaveButton: {
     position: 'absolute',
     top: 4,
     right: 4,
