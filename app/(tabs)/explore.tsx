@@ -20,7 +20,7 @@ const allStyles: Style[] = [
   {
     id: 1,
     title: 'Elegant Ankara Evening Gown',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/2681751/pexels-photo-2681751.jpeg',
     category: 'Evening Wear',
     tags: ['elegant', 'formal', 'ankara', 'african'],
     color: '#8B4513',
@@ -29,7 +29,7 @@ const allStyles: Style[] = [
   {
     id: 2,
     title: 'Kente Casual Chic',
-    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/3021550/pexels-photo-3021550.jpeg',
     category: 'Casual',
     tags: ['kente', 'casual', 'comfortable', 'african'],
     color: '#DAA520',
@@ -38,7 +38,7 @@ const allStyles: Style[] = [
   {
     id: 3,
     title: 'Professional Dashiki Look',
-    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/2480382/pexels-photo-2480382.jpeg',
     category: 'Business',
     tags: ['professional', 'dashiki', 'formal', 'african'],
     color: '#2F4F4F',
@@ -47,7 +47,7 @@ const allStyles: Style[] = [
   {
     id: 4,
     title: 'Bohemian Mudcloth Style',
-    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/2036646/pexels-photo-2036646.jpeg',
     category: 'Bohemian',
     tags: ['boho', 'mudcloth', 'artistic', 'african'],
     color: '#8B4513',
@@ -56,7 +56,7 @@ const allStyles: Style[] = [
   {
     id: 5,
     title: 'Sporty African Print Athleisure',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
     category: 'Athleisure',
     tags: ['sporty', 'african print', 'active', 'comfortable'],
     color: '#FF6347',
@@ -65,16 +65,16 @@ const allStyles: Style[] = [
   {
     id: 6,
     title: 'Vintage African Inspired',
-    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/3286680/pexels-photo-3286680.jpeg',
     category: 'Vintage',
-    tags: ['vintage', 'retro', 'african', 'classic'],
+    tags: ['vintage', 'retro', 'african', 'classic', 'heritage'],
     color: '#8B4513',
-    description: 'Classic vintage-inspired outfit celebrating African fashion heritage. This timeless look draws from traditional African garments reinterpreted for modern wear, featuring authentic patterns and quality craftsmanship that honors the rich history of African fashion.'
+    description: 'Timeless vintage African ensemble featuring traditional patterns and classic silhouettes. This sophisticated look combines authentic African textiles with retro styling, celebrating the golden era of African fashion while maintaining contemporary elegance and cultural pride.'
   },
   {
     id: 7,
     title: 'Modern African Minimalist',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/1937336/pexels-photo-1937336.jpeg',
     category: 'Minimalist',
     tags: ['minimal', 'clean', 'modern', 'african'],
     color: '#F5F5F5',
@@ -83,7 +83,7 @@ const allStyles: Style[] = [
   {
     id: 8,
     title: 'Afrocentric Street Style',
-    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
     category: 'Street Style',
     tags: ['afrocentric', 'urban', 'trendy', 'african'],
     color: '#696969',
@@ -92,7 +92,7 @@ const allStyles: Style[] = [
   {
     id: 9,
     title: 'African Print Romantic Dress',
-    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg',
     category: 'Romantic',
     tags: ['romantic', 'african print', 'feminine', 'floral'],
     color: '#FFB6C1',
@@ -101,7 +101,7 @@ const allStyles: Style[] = [
   {
     id: 10,
     title: 'Afropunk Rebellion',
-    image: 'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/935985/pexels-photo-935985.jpeg',
     category: 'Punk',
     tags: ['afropunk', 'rebellious', 'alternative', 'african'],
     color: '#8B0000',
@@ -110,7 +110,7 @@ const allStyles: Style[] = [
   {
     id: 11,
     title: 'Tropical African Paradise',
-    image: 'https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
     category: 'Resort',
     tags: ['tropical', 'vacation', 'colorful', 'african'],
     color: '#00CED1',
@@ -119,7 +119,7 @@ const allStyles: Style[] = [
   {
     id: 12,
     title: 'African Gothic Elegance',
-    image: 'https://images.unsplash.com/photo-1594736797933-d0d5e7e2e0e8?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/2060241/pexels-photo-2060241.jpeg',
     category: 'Gothic',
     tags: ['gothic', 'dark', 'mysterious', 'african'],
     color: '#2F2F2F',
@@ -128,7 +128,7 @@ const allStyles: Style[] = [
   {
     id: 13,
     title: 'Afrocentric Academia Style',
-    image: 'https://images.unsplash.com/photo-1616847220575-2e2f9e6e3f34?w=400&h=600&fit=crop',
+    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
     category: 'Preppy',
     tags: ['preppy', 'academic', 'classic', 'african'],
     color: '#8B4513',
@@ -236,14 +236,6 @@ export default function SearchScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Search Styles</Text>
-          <TouchableOpacity onPress={clearAllFilters} style={styles.clearButton}>
-            <Text style={styles.clearButtonText}>Clear All</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
@@ -332,6 +324,14 @@ export default function SearchScreen() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Clear All Filters */}
+        <View style={styles.clearAllContainer}>
+          <TouchableOpacity onPress={clearAllFilters} style={styles.clearAllButton}>
+            <Ionicons name="refresh-outline" size={16} color="#007AFF" />
+            <Text style={styles.clearAllText}>Clear All Filters</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Results */}
@@ -444,6 +444,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingTop: 42,
   },
   searchBar: {
     flexDirection: 'row',
@@ -539,6 +540,27 @@ const styles = StyleSheet.create({
   },
   tagChipTextActive: {
     color: '#fff',
+    fontWeight: '500',
+  },
+  clearAllContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  clearAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#f0f8ff',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  clearAllText: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: '#007AFF',
     fontWeight: '500',
   },
   resultsSection: {

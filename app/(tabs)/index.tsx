@@ -3,17 +3,16 @@ import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Style, useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 // Sample style data - African Fashion Collection
@@ -30,7 +29,7 @@ const sampleStyles: Style[] = [
   {
     id: 2,
     title: 'Kente Casual Chic',
-    image: 'https://images.pexels.com/photos/3021550/pexels-photo-3021550.jpeg',
+    image: 'https://images.pexels.com/photos/6192591/pexels-photo-6192591.jpeg',
     category: 'Casual',
     tags: ['kente', 'casual', 'comfortable', 'african'],
     color: '#DAA520',
@@ -57,7 +56,7 @@ const sampleStyles: Style[] = [
   {
     id: 5,
     title: 'Sporty African Print Athleisure',
-    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
+    image: 'https://images.pexels.com/photos/3760610/pexels-photo-3760610.jpeg',
     category: 'Athleisure',
     tags: ['sporty', 'african print', 'active', 'comfortable'],
     color: '#FF6347',
@@ -68,14 +67,14 @@ const sampleStyles: Style[] = [
     title: 'Vintage African Inspired',
     image: 'https://images.pexels.com/photos/3286680/pexels-photo-3286680.jpeg',
     category: 'Vintage',
-    tags: ['vintage', 'retro', 'african', 'classic'],
+    tags: ['vintage', 'retro', 'african', 'classic', 'heritage'],
     color: '#8B4513',
-    description: 'Classic vintage-inspired outfit celebrating African fashion heritage. This timeless look draws from traditional African garments reinterpreted for modern wear, featuring authentic patterns and quality craftsmanship that honors the rich history of African fashion.'
+    description: 'Timeless vintage African ensemble featuring traditional patterns and classic silhouettes. This sophisticated look combines authentic African textiles with retro styling, celebrating the golden era of African fashion while maintaining contemporary elegance and cultural pride.'
   },
   {
     id: 7,
     title: 'Modern African Minimalist',
-    image: 'https://images.pexels.com/photos/1937336/pexels-photo-1937336.jpeg',
+    image: 'https://images.pexels.com/photos/3062595/pexels-photo-3062595.jpeg',
     category: 'Minimalist',
     tags: ['minimal', 'clean', 'modern', 'african'],
     color: '#F5F5F5',
@@ -84,7 +83,7 @@ const sampleStyles: Style[] = [
   {
     id: 8,
     title: 'Afrocentric Street Style',
-    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
+    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
     category: 'Street Style',
     tags: ['afrocentric', 'urban', 'trendy', 'african'],
     color: '#696969',
@@ -102,7 +101,7 @@ const sampleStyles: Style[] = [
   {
     id: 10,
     title: 'Afropunk Rebellion',
-    image: 'https://images.pexels.com/photos/935985/pexels-photo-935985.jpeg',
+    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
     category: 'Punk',
     tags: ['afropunk', 'rebellious', 'alternative', 'african'],
     color: '#8B0000',
@@ -111,7 +110,7 @@ const sampleStyles: Style[] = [
   {
     id: 11,
     title: 'Tropical African Paradise',
-    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
+    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
     category: 'Resort',
     tags: ['tropical', 'vacation', 'colorful', 'african'],
     color: '#00CED1',
@@ -120,7 +119,7 @@ const sampleStyles: Style[] = [
   {
     id: 12,
     title: 'African Gothic Elegance',
-    image: 'https://images.pexels.com/photos/2060241/pexels-photo-2060241.jpeg',
+    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
     category: 'Gothic',
     tags: ['gothic', 'dark', 'mysterious', 'african'],
     color: '#2F2F2F',
@@ -195,18 +194,6 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.fixedHeader}>
-        <Text style={styles.headerTitle}>Style Feed</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity 
-            style={styles.headerIcon}
-            onPress={() => router.push('/(tabs)/explore')}
-          >
-            <Ionicons name="search-outline" size={24} color={Colors.black} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <FlatList
         data={sampleStyles}
         renderItem={renderStyleCard}
@@ -288,35 +275,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  fixedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    zIndex: 10,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerIcon: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   feedContent: {
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingTop: 42,
+    paddingBottom: 30,
   },
   welcomeSection: {
     paddingHorizontal: 24,

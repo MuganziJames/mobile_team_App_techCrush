@@ -1,17 +1,16 @@
-import { useLike } from '@/contexts/SaveContext';
 import { blogPosts, blogPostsContent } from '@/data/blogData';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Dimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,7 +18,6 @@ const { width } = Dimensions.get('window');
 
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { likePost, unlikePost, isPostLiked } = useLike();
   const [isSharing, setIsSharing] = useState(false);
 
   const postId = parseInt(id as string);
@@ -45,20 +43,7 @@ export default function BlogDetailScreen() {
     router.back();
   };
 
-  const handleLike = async () => {
-    if (isPostLiked(post.id)) {
-      await unlikePost(post.id);
-    } else {
-      await likePost({
-        id: post.id,
-        title: post.title,
-        date: post.date,
-        image: post.image,
-        category: post.category,
-        likedAt: new Date().toISOString()
-      });
-    }
-  };
+
 
   const handleShare = async () => {
     setIsSharing(true);
@@ -102,13 +87,7 @@ export default function BlogDetailScreen() {
               />
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.headerButton} onPress={handleLike}>
-              <Ionicons 
-                name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
-                size={24} 
-                color={isPostLiked(post.id) ? "#FF6B35" : "#fff"} 
-              />
-            </TouchableOpacity>
+
           </View>
         </View>
 
@@ -119,15 +98,7 @@ export default function BlogDetailScreen() {
             style={styles.heroImage} 
             resizeMode="cover"
           />
-          <View style={styles.heroOverlay}>
-            <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
-              <Ionicons 
-                name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
-                size={28} 
-                color={isPostLiked(post.id) ? "#FF6B35" : "#fff"} 
-              />
-            </TouchableOpacity>
-          </View>
+
         </View>
 
         {/* Content */}

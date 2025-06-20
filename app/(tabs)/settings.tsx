@@ -13,6 +13,8 @@ export default function SettingsTabScreen() {
   const [helpVisible, setHelpVisible] = useState(false);
   const [aboutVisible, setAboutVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [preferencesVisible, setPreferencesVisible] = useState(false);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
 
   const handleAccountInfo = () => {
     setAccountVisible(true);
@@ -23,13 +25,11 @@ export default function SettingsTabScreen() {
   };
 
   const handlePreference = () => {
-    // Navigate to preferences screen (to be created)
-    Alert.alert('Preferences', 'Preferences screen coming soon!');
+    setPreferencesVisible(true);
   };
 
   const handleNotification = () => {
-    // Navigate to notification settings (to be created)
-    Alert.alert('Notifications', 'Notification settings coming soon!');
+    setNotificationsVisible(true);
   };
 
   const handleHelpSupport = () => setHelpVisible(true);
@@ -192,7 +192,8 @@ export default function SettingsTabScreen() {
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          {/* Privacy Policy - Commented out */}
+          {/* <TouchableOpacity 
             style={styles.settingItem}
             onPress={handlePrivacyPolicy}
             activeOpacity={0.7}
@@ -202,7 +203,7 @@ export default function SettingsTabScreen() {
             </View>
             <Text style={styles.settingText}>Privacy Policy</Text>
             <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Danger Zone */}
           <View style={styles.sectionHeader}>
@@ -274,6 +275,23 @@ export default function SettingsTabScreen() {
         title="About AfriStyle"
         message={'Version 1.0.0\n\nDiscover authentic African fashion and art from the comfort of your home.'}
         onClose={() => setAboutVisible(false)}
+      />
+
+      {/* Coming Soon Modals */}
+      <ModalCard
+        visible={preferencesVisible}
+        iconName="options"
+        title="Preferences"
+        message={'🎨 Customize Your Experience\n\n• Theme & Display Settings\n• Language Preferences\n• Content Recommendations\n• Accessibility Options\n\nWe\'re working hard to bring you these amazing customization features!\n\nExpected Launch: Q2 2025'}
+        onClose={() => setPreferencesVisible(false)}
+      />
+
+      <ModalCard
+        visible={notificationsVisible}
+        iconName="notifications"
+        title="Notification Settings"
+        message={'🔔 Stay Connected\n\n• Push Notifications\n• Email Updates\n• Style Alerts & Trends\n• Sale & Promotion Notifications\n• Weekly Style Digest\n\nPersonalized notification controls are coming soon to help you stay updated with what matters most!\n\nExpected Launch: Q2 2025'}
+        onClose={() => setNotificationsVisible(false)}
       />
 
       {/* Delete account confirmation */}

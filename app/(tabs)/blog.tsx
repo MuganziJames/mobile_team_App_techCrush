@@ -1,11 +1,14 @@
-import { useLike } from '@/contexts/SaveContext';
+import { useLookbook } from '@/contexts/LookbookContext';
 import { blogPosts } from '@/data/blogData';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+    Alert,
     Dimensions,
+    FlatList,
     Image,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -21,7 +24,13 @@ export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { likePost, unlikePost, isPostLiked } = useLike();
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const { 
+    folders, 
+    saveStyleToFolder, 
+    isStyleSaved 
+  } = useLookbook();
 
   const featuredPosts = blogPosts.filter(post => post.featured);
   const popularPosts = blogPosts.slice(0, 4);
@@ -40,18 +49,50 @@ export default function BlogScreen() {
     setShowAll(false);
   };
 
-  const handleLike = async (post: any) => {
-    if (isPostLiked(post.id)) {
-      await unlikePost(post.id);
+  const handleSave = (post: any) => {
+    const style = {
+      id: post.id,
+      title: post.title,
+      image: post.image,
+      category: post.category,
+      tags: [post.category.toLowerCase()],
+      color: '#FF6B35',
+      description: post.title
+    };
+
+    if (isStyleSaved(post.id)) {
+      Alert.alert(
+        'Post Already Saved',
+        'This post is already in your lookbook. What would you like to do?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Move to Different Folder', 
+            onPress: () => {
+              setSelectedPost(style);
+              setShowFolderModal(true);
+            }
+          }
+        ]
+      );
     } else {
-      await likePost({
-        id: post.id,
-        title: post.title,
-        date: post.date,
-        image: post.image,
-        category: post.category,
-        likedAt: new Date().toISOString()
-      });
+      setSelectedPost(style);
+      setShowFolderModal(true);
+    }
+  };
+
+  const handleFolderSelect = async (folderId: string) => {
+    if (selectedPost) {
+      await saveStyleToFolder(selectedPost, folderId);
+      setShowFolderModal(false);
+      setSelectedPost(null);
+      
+      const folderName = folders.find((f: any) => f.id === folderId)?.name || 'folder';
+      Alert.alert(
+        'Post Saved!',
+        `"${selectedPost.title}" has been saved to ${folderName}.`,
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -75,10 +116,10 @@ export default function BlogScreen() {
             </TouchableOpacity>
             <Text style={styles.headerTitle}>All</Text>
             <TouchableOpacity 
-              style={styles.likedButton}
+              style={styles.searchButton}
               onPress={() => router.push('/(tabs)/explore')}
             >
-              <Ionicons name="heart-outline" size={24} color="#000" />
+              <Ionicons name="search-outline" size={24} color="#000" />
             </TouchableOpacity>
           </View>
 
@@ -128,13 +169,13 @@ export default function BlogScreen() {
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity 
-                  style={styles.likeButton}
-                  onPress={() => handleLike(post)}
+                  style={styles.saveButton}
+                  onPress={() => handleSave(post)}
                 >
                   <Ionicons 
-                    name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
+                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
                     size={24} 
-                    color={isPostLiked(post.id) ? "#FF6B35" : "#999"} 
+                    color={isStyleSaved(post.id) ? "#FF6B35" : "#999"} 
                   />
                 </TouchableOpacity>
               </View>
@@ -156,10 +197,10 @@ export default function BlogScreen() {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Blog</Text>
           <TouchableOpacity 
-            style={styles.likedButton}
+            style={styles.searchButton}
             onPress={() => router.push('/(tabs)/explore')}
           >
-            <Ionicons name="heart-outline" size={24} color="#000" />
+            <Ionicons name="search-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
 
@@ -213,14 +254,14 @@ export default function BlogScreen() {
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{post.title}</Text>
                 <TouchableOpacity
-                  style={styles.featuredLikeButton}
+                  style={styles.featuredSaveButton}
                   onPress={(e) => {
                     e.stopPropagation();
-                    handleLike(post);
+                    handleSave(post);
                   }}
                 >
                   <Ionicons 
-                    name={isPostLiked(post.id) ? "heart" : "heart-outline"} 
+                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
                     size={24} 
                     color="#fff" 
                   />
@@ -275,6 +316,59 @@ export default function BlogScreen() {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      <Modal
+        visible={showFolderModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowFolderModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity 
+              onPress={() => setShowFolderModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Save to Folder</Text>
+            <View style={styles.modalCloseButton} />
+          </View>
+
+          <View style={styles.modalContent}>
+            <Text style={styles.modalSubtitle}>
+              Choose a folder for "{selectedPost?.title}"
+            </Text>
+            
+            <FlatList
+              data={folders}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.folderItem}
+                  onPress={() => handleFolderSelect(item.id)}
+                >
+                  <View style={styles.folderIcon}>
+                    <Ionicons name="folder" size={24} color="#FF6B35" />
+                  </View>
+                  <Text style={styles.folderName}>{item.name}</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyState}>
+                  <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
+                  <Text style={styles.emptyStateText}>No folders yet</Text>
+                  <Text style={styles.emptyStateSubtext}>
+                    Create a folder in your lookbook first
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -305,7 +399,7 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 40,
   },
-  likedButton: {
+  searchButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -381,7 +475,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 12,
   },
-  featuredLikeButton: {
+  featuredSaveButton: {
     padding: 4,
     marginRight: 8,
   },
@@ -451,16 +545,14 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 8,
   },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   popularDate: {
     fontSize: 12,
     color: '#999',
     marginLeft: 4,
   },
-  // All posts view styles
+  bottomSpacing: {
+    height: 20,
+  },
   allPostItem: {
     flexDirection: 'row',
     marginHorizontal: 16,
@@ -479,52 +571,133 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   allPostImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     resizeMode: 'cover',
     backgroundColor: '#f0f0f0',
   },
   allPostInfo: {
     flex: 1,
-    padding: 16,
+    padding: 12,
     justifyContent: 'space-between',
   },
   allPostTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   allPostDate: {
     fontSize: 12,
     color: '#999',
-    marginBottom: 4,
     marginLeft: 4,
   },
   allPostCategory: {
     fontSize: 12,
-    color: '#999',
+    color: '#FF6B35',
+    fontWeight: '500',
+    marginTop: 4,
   },
-  likeButton: {
-    padding: 4,
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
   },
-  bottomSpacing: {
-    height: 100,
-  },
-  noResultsContainer: {
-    flex: 1,
+  saveButton: {
+    width: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+  },
+  noResultsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
   },
   noResultsText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 16,
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+    marginTop: 16,
+    textAlign: 'center',
   },
   noResultsSubtext: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalCloseButton: {
+    width: 60,
+    height: 40,
+    justifyContent: 'center',
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: '#FF6B35',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 16,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 24,
+  },
+  folderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  folderIcon: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  folderName: {
+    fontSize: 16,
+    flex: 1,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
     textAlign: 'center',
   },
 }); 
