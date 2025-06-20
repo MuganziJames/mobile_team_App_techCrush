@@ -54,7 +54,7 @@ export default function StyleCard({
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: style.image }} style={styles.image} />
+        <Image source={style.image} style={styles.image} />
         {showSaveButton && (
           <TouchableOpacity 
             style={styles.saveButton}

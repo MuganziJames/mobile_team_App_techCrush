@@ -8,6 +8,7 @@ import {
     Alert,
     Dimensions,
     Image,
+    ImageSourcePropType,
     Modal,
     ScrollView,
     Share,
@@ -18,7 +19,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+
+// Helper function to handle image sources
+const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
+  return typeof image === 'string' ? { uri: image } : image;
+};
 
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -77,13 +83,26 @@ export default function BlogDetailScreen() {
     try {
       const shareTitle = `${post.title} | AfriStyle`;
       
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(post.image, {
-          mimeType: 'image/jpeg',
-          dialogTitle: shareTitle,
-        });
+      if (typeof post.image === 'string') {
+        // Handle URL images
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(post.image, {
+            mimeType: 'image/jpeg',
+            dialogTitle: shareTitle,
+          });
+        } else {
+          Alert.alert("Not Available", "Image sharing is not available on this device.");
+        }
       } else {
-        Alert.alert("Not Available", "Image sharing is not available on this device.");
+        // Handle local images (require() objects)
+        Alert.alert(
+          "Share Image", 
+          "Local images cannot be shared directly. Please share the text version instead.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Share Text", onPress: handleShareText }
+          ]
+        );
       }
     } catch (error) {
       console.error('Error sharing image:', error);
@@ -121,11 +140,7 @@ export default function BlogDetailScreen() {
 
         {/* Hero Image - Use the image from the post preview */}
         <View style={styles.heroContainer}>
-          <Image 
-            source={{ uri: post.image }} 
-            style={styles.heroImage} 
-            resizeMode="cover"
-          />
+          <Image source={getImageSource(post.image)} style={styles.heroImage} />
 
         </View>
 

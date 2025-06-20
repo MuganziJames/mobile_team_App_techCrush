@@ -1,20 +1,22 @@
+import { ImageSourcePropType } from 'react-native';
+
 // Unified blog data for consistency across all screens
 export interface BlogPost {
   id: number;
   title: string;
   date: string;
-  image: string;
+  image: string | ImageSourcePropType;
   category: string;
   featured?: boolean;
 }
 
-// Unified blog posts with reliable images featuring Black/African individuals
+// Unified blog posts with local images featuring African fashion
 export const blogPosts: BlogPost[] = [
   {
     id: 1,
     title: "Lagos Street Style: Modern Takes on Ankara Prints",
     date: 'Jan 23, 2025',
-    image: 'https://images.pexels.com/photos/2681751/pexels-photo-2681751.jpeg',
+    image: require('../assets/images/modernAfrican.jpg'),
     category: 'African Fashion',
     featured: true
   },
@@ -22,7 +24,7 @@ export const blogPosts: BlogPost[] = [
     id: 2,
     title: 'Nairobi Runway: Beadwork & Bold Hues Elevate Couture',
     date: 'Mar 25, 2025',
-    image: 'https://images.pexels.com/photos/6192591/pexels-photo-6192591.jpeg',
+    image: require('../assets/images/elegantAfrican.jpg'),
     category: 'Culture',
     featured: true
   },
@@ -30,7 +32,7 @@ export const blogPosts: BlogPost[] = [
     id: 3,
     title: 'Ankara, Kente & Beyond: African Print Fashion Guide',
     date: 'Jan 03, 2025',
-    image: 'https://images.pexels.com/photos/2036646/pexels-photo-2036646.jpeg',
+    image: require('../assets/images/kenteCasual.jpg'),
     category: 'African Fashion',
     featured: true
   },
@@ -38,73 +40,73 @@ export const blogPosts: BlogPost[] = [
     id: 4,
     title: 'Celebrating African Heritage Through Fashion',
     date: 'Jun 01, 2025',
-    image: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg',
+    image: require('../assets/images/afroCentricStyle.jpg'),
     category: 'Culture'
   },
   {
     id: 5,
     title: 'African Fashion Week: Runway to Street Style',
     date: 'Mar 05, 2025',
-    image: 'https://images.pexels.com/photos/3760610/pexels-photo-3760610.jpeg',
+    image: require('../assets/images/AfricanPrintRomanticDress.jpg'),
     category: 'African Fashion'
   },
   {
     id: 6,
     title: 'Traditional Meets Modern: African Fashion Trends',
     date: 'Apr 23, 2025',
-    image: 'https://images.pexels.com/photos/4725136/pexels-photo-4725136.jpeg',
+    image: require('../assets/images/danshikiLook.jpg'),
     category: 'Trends'
   },
   {
     id: 7,
     title: 'African Textile Heritage: Stories in Every Thread',
     date: 'Feb 15, 2025',
-    image: 'https://images.pexels.com/photos/3062595/pexels-photo-3062595.jpeg',
+    image: require('../assets/images/bohemianCloth.jpg'),
     category: 'Culture'
   },
   {
     id: 8,
     title: 'African Beauty & Fashion: Celebrating Natural Elegance',
     date: 'Feb 17, 2025',
-    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
+    image: require('../assets/images/vintageAfrican.jpg'),
     category: 'Beauty'
   },
   {
     id: 9,
     title: 'The Rise of African Sustainable Fashion',
     date: 'May 12, 2025',
-    image: 'https://images.pexels.com/photos/2480382/pexels-photo-2480382.jpeg',
+    image: require('../assets/images/tropicalAfricanParadise.jpg'),
     category: 'Sustainability'
   },
   {
     id: 10,
     title: 'Black Designers Reshaping Global Fashion Industry',
     date: 'Apr 08, 2025',
-    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
+    image: require('../assets/images/africaGothicElegance.jpg'),
     category: 'Industry'
   },
   {
     id: 11,
     title: 'Headwraps & History: Cultural Significance in Modern Style',
     date: 'Mar 17, 2025',
-    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
+    image: require('../assets/images/afroPunk.jpg'),
     category: 'Culture'
   },
   {
     id: 12,
     title: 'Urban African Streetwear: The Next Global Trend',
     date: 'May 02, 2025',
-    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
+    image: require('../assets/images/afroCentricStyle.jpg'),
     category: 'Streetwear'
   }
 ];
 
 // Blog post content for detail screen
-export const blogPostsContent: { [key: number]: { title: string; date: string; image: string; content: string } } = {
+export const blogPostsContent: { [key: number]: { title: string; date: string; image: string | ImageSourcePropType; content: string } } = {
   1: {
     title: 'Lagos Street Style: Modern Takes on Ankara Prints',
     date: 'Jan 23, 2025',
-    image: 'https://images.pexels.com/photos/2681751/pexels-photo-2681751.jpeg',
+    image: require('../assets/images/modernAfrican.jpg'),
     content: `Lagos street style is a vibrant tapestry of traditional African prints meeting contemporary fashion sensibilities. The bustling streets of Nigeria's commercial capital have become a runway where fashion-forward individuals showcase how Ankara prints can be styled for the modern world.
 
 The beauty of Ankara lies in its versatility. From flowing maxi dresses that celebrate feminine grace to sharp tailored blazers that command respect in boardrooms, these traditional prints have found their place in every aspect of modern life. Young Nigerian designers are pushing boundaries, creating pieces that honor heritage while embracing innovation.
@@ -120,7 +122,7 @@ For those looking to incorporate Ankara into their wardrobe, start with versatil
   2: {
     title: 'Nairobi Runway: Beadwork & Bold Hues Elevate Couture',
     date: 'Mar 25, 2025',
-    image: 'https://images.pexels.com/photos/6192591/pexels-photo-6192591.jpeg',
+    image: require('../assets/images/elegantAfrican.jpg'),
     content: `Nairobi's fashion scene is experiencing a renaissance, with local designers creating couture pieces that celebrate Kenya's rich cultural heritage through intricate beadwork and bold color palettes. The city's runways have become showcases for the evolution of African fashion.
 
 Traditional Maasai beadwork, once reserved for ceremonial occasions, is now being reimagined for contemporary fashion. Designers are incorporating these time-honored techniques into evening gowns, cocktail dresses, and even casual wear, creating pieces that tell stories of cultural pride and artistic heritage.
@@ -138,7 +140,7 @@ For fashion enthusiasts interested in incorporating these elements into their st
   3: {
     title: 'Ankara, Kente & Beyond: African Print Fashion Guide',
     date: 'Jan 03, 2025',
-    image: 'https://images.pexels.com/photos/2036646/pexels-photo-2036646.jpeg',
+    image: require('../assets/images/kenteCasual.jpg'),
     content: `African prints represent one of the world's most vibrant and meaningful textile traditions. From the geometric patterns of Kente cloth to the bold motifs of Ankara fabric, each print tells a story and carries cultural significance that extends far beyond mere decoration.
 
 Kente cloth, originating from Ghana, is perhaps the most recognizable African textile globally. Traditionally woven by hand, each pattern and color combination has specific meanings. The intricate geometric designs represent concepts like wisdom, strength, and unity, making every piece a wearable piece of philosophy.
@@ -158,7 +160,7 @@ The global fashion industry's growing appreciation for African prints represents
   4: {
     title: 'Celebrating African Heritage Through Fashion',
     date: 'Jun 01, 2025',
-    image: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg',
+    image: require('../assets/images/afroCentricStyle.jpg'),
     content: `Fashion has always been a powerful medium for cultural expression, and nowhere is this more evident than in the celebration of African heritage through contemporary style. Today's fashion landscape offers countless ways to honor African traditions while embracing modern aesthetics.
 
 The concept of heritage fashion goes beyond simply wearing traditional garments. It's about understanding the stories behind the patterns, the significance of the colors, and the cultural context that gives each piece its meaning. This knowledge transforms fashion from mere clothing into cultural celebration.
@@ -178,7 +180,7 @@ Heritage fashion is not just about looking good – it's about feeling connected
   5: {
     title: 'African Fashion Week: Runway to Street Style',
     date: 'Mar 05, 2025',
-    image: 'https://images.pexels.com/photos/3760610/pexels-photo-3760610.jpeg',
+    image: require('../assets/images/AfricanPrintRomanticDress.jpg'),
     content: `African Fashion Week events across the continent and diaspora have become powerful platforms for showcasing the creativity, innovation, and cultural richness of African fashion. These events demonstrate how runway trends translate into everyday street style, creating a dynamic fashion ecosystem.
 
 The runway shows at African Fashion Week events are more than just fashion presentations – they're cultural celebrations that showcase the diversity and creativity of African designers. From avant-garde couture to ready-to-wear collections, these shows demonstrate the full spectrum of African fashion innovation.
@@ -200,7 +202,7 @@ The continued growth and success of African Fashion Week events demonstrate the 
   6: {
     title: 'Traditional Meets Modern: African Fashion Trends',
     date: 'Apr 23, 2025',
-    image: 'https://images.pexels.com/photos/4725136/pexels-photo-4725136.jpeg',
+    image: require('../assets/images/danshikiLook.jpg'),
     content: `The intersection of traditional African fashion elements with contemporary design sensibilities has created a dynamic and evolving fashion landscape that honors heritage while embracing innovation. This fusion represents the future of African fashion.
 
 Traditional African garments like the dashiki, kaftan, and boubou are being reimagined by contemporary designers who understand how to maintain cultural authenticity while creating pieces that fit modern lifestyles. The result is fashion that's both meaningful and practical.
@@ -222,7 +224,7 @@ The success of this fusion approach demonstrates that the future of fashion lies
   7: {
     title: 'African Textile Heritage: Stories in Every Thread',
     date: 'Feb 15, 2025',
-    image: 'https://images.pexels.com/photos/3062595/pexels-photo-3062595.jpeg',
+    image: require('../assets/images/bohemianCloth.jpg'),
     content: `African textiles represent one of humanity's richest traditions of fabric artistry, with each thread carrying stories of cultural identity, spiritual beliefs, and artistic expression that have been passed down through generations. Understanding these stories adds depth and meaning to contemporary African fashion.
 
 The art of textile creation in Africa is deeply intertwined with cultural and spiritual practices. Many traditional patterns are believed to offer protection, bring good fortune, or communicate social status. These beliefs transform simple fabrics into powerful cultural artifacts.
@@ -244,7 +246,7 @@ The stories woven into African textiles remind us that fashion can be about much
   8: {
     title: 'African Beauty & Fashion: Celebrating Natural Elegance',
     date: 'Feb 17, 2025',
-    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
+    image: require('../assets/images/vintageAfrican.jpg'),
     content: `The concept of African beauty and fashion is undergoing a renaissance, with a growing movement celebrating natural elegance, authentic self-expression, and the diverse beauty standards that exist across the African continent. This shift represents a powerful reclamation of cultural identity.
 
 Natural hair has become a symbol of this movement, with many African women choosing to embrace their natural textures rather than conforming to Western beauty standards. This choice has influenced fashion, with designers creating pieces that complement and celebrate natural hair styles.
@@ -266,7 +268,7 @@ The growing appreciation for African beauty and fashion represents more than jus
   9: {
     title: 'The Rise of African Sustainable Fashion',
     date: 'May 12, 2025',
-    image: 'https://images.pexels.com/photos/2480382/pexels-photo-2480382.jpeg',
+    image: require('../assets/images/tropicalAfricanParadise.jpg'),
     content: `African fashion is leading the way in sustainable practices, drawing on centuries-old traditions of resourcefulness, craftsmanship, and respect for natural materials. As the global fashion industry grapples with its environmental impact, African designers are offering valuable lessons in sustainability.
 
 Many traditional African fashion practices are inherently sustainable. Techniques like hand-weaving, natural dyeing, and upcycling have been part of African fashion traditions long before sustainability became a global concern. These practices minimize waste and environmental impact while creating beautiful, durable garments.
@@ -288,7 +290,7 @@ The growing global recognition of African sustainable fashion represents an oppo
   10: {
     title: 'Black Designers Reshaping Global Fashion Industry',
     date: 'Apr 08, 2025',
-    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
+    image: require('../assets/images/africaGothicElegance.jpg'),
     content: `Black designers are transforming the global fashion landscape, bringing fresh perspectives, cultural richness, and innovative approaches that are reshaping industry standards and expectations. Their contributions extend far beyond aesthetics, challenging the fashion world to become more inclusive and culturally diverse.
 
 The historical contributions of Black designers to fashion have often been overlooked, despite their significant influence on global style trends. Today's recognition of Black design talent represents a long-overdue acknowledgment of the creative genius that has always existed in Black communities.
@@ -310,7 +312,7 @@ The growing influence of Black designers in global fashion represents more than 
   11: {
     title: 'Headwraps & History: Cultural Significance in Modern Style',
     date: 'Mar 17, 2025',
-    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
+    image: require('../assets/images/afroPunk.jpg'),
     content: `The headwrap, a seemingly simple piece of fabric, carries profound cultural significance across Africa and its diaspora. Understanding its history and meaning adds depth to its contemporary use as a fashion statement and cultural symbol.
 
 Throughout African history, headwraps have served as markers of identity, indicating a person's age, marital status, wealth, or spiritual role within their community. The specific wrapping styles, fabric choices, and occasions for wearing headwraps varied widely across different cultures and regions.
@@ -332,7 +334,7 @@ The continued presence and evolution of headwraps in modern fashion demonstrates
   12: {
     title: 'Urban African Streetwear: The Next Global Trend',
     date: 'May 02, 2025',
-    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
+    image: require('../assets/images/afroCentricStyle.jpg'),
     content: `Urban African streetwear is emerging as a powerful force in global fashion, blending traditional African aesthetics with contemporary urban style to create looks that are both culturally rich and thoroughly modern. This dynamic fashion movement is redefining streetwear on its own terms.
 
 Cities across Africa have become incubators for streetwear innovation, with Lagos, Johannesburg, Nairobi, and Accra emerging as particularly influential hubs. Each city brings its unique cultural influences and street style sensibilities to the movement, creating diverse expressions of urban African fashion.

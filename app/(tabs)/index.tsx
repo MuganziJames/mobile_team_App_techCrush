@@ -20,7 +20,7 @@ const sampleStyles: Style[] = [
   {
     id: 1,
     title: 'Elegant Ankara Evening Gown',
-    image: 'https://images.pexels.com/photos/2681751/pexels-photo-2681751.jpeg',
+    image: require('../../assets/images/modernAfrican.jpg'),
     category: 'Evening Wear',
     tags: ['elegant', 'formal', 'ankara', 'african'],
     color: '#8B4513',
@@ -29,7 +29,7 @@ const sampleStyles: Style[] = [
   {
     id: 2,
     title: 'Kente Casual Chic',
-    image: 'https://images.pexels.com/photos/6192591/pexels-photo-6192591.jpeg',
+    image: require('../../assets/images/elegantAfrican.jpg'),
     category: 'Casual',
     tags: ['kente', 'casual', 'comfortable', 'african'],
     color: '#DAA520',
@@ -38,7 +38,7 @@ const sampleStyles: Style[] = [
   {
     id: 3,
     title: 'Professional Dashiki Look',
-    image: 'https://images.pexels.com/photos/2480382/pexels-photo-2480382.jpeg',
+    image: require('../../assets/images/tropicalAfricanParadise.jpg'),
     category: 'Business',
     tags: ['professional', 'dashiki', 'formal', 'african'],
     color: '#2F4F4F',
@@ -47,7 +47,7 @@ const sampleStyles: Style[] = [
   {
     id: 4,
     title: 'Bohemian Mudcloth Style',
-    image: 'https://images.pexels.com/photos/2036646/pexels-photo-2036646.jpeg',
+    image: require('../../assets/images/kenteCasual.jpg'),
     category: 'Bohemian',
     tags: ['boho', 'mudcloth', 'artistic', 'african'],
     color: '#8B4513',
@@ -56,7 +56,7 @@ const sampleStyles: Style[] = [
   {
     id: 5,
     title: 'Sporty African Print Athleisure',
-    image: 'https://images.pexels.com/photos/3760610/pexels-photo-3760610.jpeg',
+    image: require('../../assets/images/AfricanPrintRomanticDress.jpg'),
     category: 'Athleisure',
     tags: ['sporty', 'african print', 'active', 'comfortable'],
     color: '#FF6347',
@@ -65,7 +65,7 @@ const sampleStyles: Style[] = [
   {
     id: 6,
     title: 'Vintage African Inspired',
-    image: 'https://images.pexels.com/photos/3286680/pexels-photo-3286680.jpeg',
+    image: require('../../assets/images/vintageAfrican.jpg'),
     category: 'Vintage',
     tags: ['vintage', 'retro', 'african', 'classic', 'heritage'],
     color: '#8B4513',
@@ -74,7 +74,7 @@ const sampleStyles: Style[] = [
   {
     id: 7,
     title: 'Modern African Minimalist',
-    image: 'https://images.pexels.com/photos/3062595/pexels-photo-3062595.jpeg',
+    image: require('../../assets/images/bohemianCloth.jpg'),
     category: 'Minimalist',
     tags: ['minimal', 'clean', 'modern', 'african'],
     color: '#F5F5F5',
@@ -83,7 +83,7 @@ const sampleStyles: Style[] = [
   {
     id: 8,
     title: 'Afrocentric Street Style',
-    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
+    image: require('../../assets/images/afroCentricStyle.jpg'),
     category: 'Street Style',
     tags: ['afrocentric', 'urban', 'trendy', 'african'],
     color: '#696969',
@@ -92,7 +92,7 @@ const sampleStyles: Style[] = [
   {
     id: 9,
     title: 'African Print Romantic Dress',
-    image: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg',
+    image: require('../../assets/images/afroCentricStyle.jpg'),
     category: 'Romantic',
     tags: ['romantic', 'african print', 'feminine', 'floral'],
     color: '#FFB6C1',
@@ -101,7 +101,7 @@ const sampleStyles: Style[] = [
   {
     id: 10,
     title: 'Afropunk Rebellion',
-    image: 'https://images.pexels.com/photos/1456741/pexels-photo-1456741.jpeg',
+    image: require('../../assets/images/africaGothicElegance.jpg'),
     category: 'Punk',
     tags: ['afropunk', 'rebellious', 'alternative', 'african'],
     color: '#8B0000',
@@ -110,7 +110,7 @@ const sampleStyles: Style[] = [
   {
     id: 11,
     title: 'Tropical African Paradise',
-    image: 'https://images.pexels.com/photos/7148384/pexels-photo-7148384.jpeg',
+    image: require('../../assets/images/afroPunk.jpg'),
     category: 'Resort',
     tags: ['tropical', 'vacation', 'colorful', 'african'],
     color: '#00CED1',
@@ -119,7 +119,7 @@ const sampleStyles: Style[] = [
   {
     id: 12,
     title: 'African Gothic Elegance',
-    image: 'https://images.pexels.com/photos/1639729/pexels-photo-1639729.jpeg',
+    image: require('../../assets/images/danshikiLook.jpg'),
     category: 'Gothic',
     tags: ['gothic', 'dark', 'mysterious', 'african'],
     color: '#2F2F2F',
@@ -128,7 +128,7 @@ const sampleStyles: Style[] = [
   {
     id: 13,
     title: 'Afrocentric Academia Style',
-    image: 'https://images.pexels.com/photos/2218786/pexels-photo-2218786.jpeg',
+    image: require('../../assets/images/afroCentricStyle.jpg'),
     category: 'Preppy',
     tags: ['preppy', 'academic', 'classic', 'african'],
     color: '#8B4513',

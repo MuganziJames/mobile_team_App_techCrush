@@ -8,6 +8,7 @@ import {
     Dimensions,
     FlatList,
     Image,
+    ImageSourcePropType,
     Modal,
     ScrollView,
     Share,
@@ -20,6 +21,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+
+// Helper function to handle image sources
+const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
+  return typeof image === 'string' ? { uri: image } : image;
+};
 
 export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
@@ -174,7 +180,7 @@ export default function BlogScreen() {
                   onPress={() => handlePostPress(post.id)}
                   activeOpacity={0.7}
                 >
-                  <Image source={{ uri: post.image }} style={styles.allPostImage} />
+                  <Image source={getImageSource(post.image)} style={styles.allPostImage} />
                   <View style={styles.allPostInfo}>
                     <Text style={styles.allPostTitle}>{post.title}</Text>
                     <View style={styles.dateContainer}>
@@ -278,7 +284,7 @@ export default function BlogScreen() {
               onPress={() => handlePostPress(post.id)}
               activeOpacity={0.9}
             >
-              <Image source={{ uri: post.image }} style={styles.featuredImage} />
+              <Image source={getImageSource(post.image)} style={styles.featuredImage} />
               <View style={styles.featuredOverlay}>
                 <Text style={styles.featuredTitle}>{post.title}</Text>
                 <View style={styles.featuredActions}>
@@ -344,7 +350,7 @@ export default function BlogScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.popularImageContainer}>
-                <Image source={{ uri: post.image }} style={styles.popularImage} />
+                <Image source={getImageSource(post.image)} style={styles.popularImage} />
                 <TouchableOpacity 
                   style={styles.popularSaveButton}
                   onPress={(e) => {

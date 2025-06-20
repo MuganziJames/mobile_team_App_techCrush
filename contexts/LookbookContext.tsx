@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { ImageSourcePropType } from 'react-native';
 
 // Types
 export interface Style {
   id: number;
   title: string;
-  image: string;
+  image: string | ImageSourcePropType;
   category: string;
   tags: string[];
   color: string;

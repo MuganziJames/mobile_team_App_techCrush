@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
     Dimensions,
     Image,
+    ImageSourcePropType,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -11,6 +12,11 @@ import {
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2;
+
+// Helper function to handle image sources
+const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
+  return typeof image === 'string' ? { uri: image } : image;
+};
 
 interface FolderCardProps {
   folder: LookbookFolder;
@@ -53,17 +59,17 @@ export default function FolderCard({
           <View style={styles.imageGrid}>
             {previewImages.length === 1 ? (
               <Image 
-                source={{ uri: previewImages[0].image }} 
+                source={getImageSource(previewImages[0].image)} 
                 style={styles.singleImage} 
               />
             ) : previewImages.length === 2 ? (
               <>
                 <Image 
-                  source={{ uri: previewImages[0].image }} 
+                  source={getImageSource(previewImages[0].image)} 
                   style={styles.halfImage} 
                 />
                 <Image 
-                  source={{ uri: previewImages[1].image }} 
+                  source={getImageSource(previewImages[1].image)} 
                   style={styles.halfImage} 
                 />
               </>
@@ -71,22 +77,22 @@ export default function FolderCard({
               <>
                 <View style={styles.topRow}>
                   <Image 
-                    source={{ uri: previewImages[0].image }} 
+                    source={getImageSource(previewImages[0].image)} 
                     style={styles.quarterImage} 
                   />
                   <Image 
-                    source={{ uri: previewImages[1].image }} 
+                    source={getImageSource(previewImages[1].image)} 
                     style={styles.quarterImage} 
                   />
                 </View>
                 <View style={styles.bottomRow}>
                   <Image 
-                    source={{ uri: previewImages[2].image }} 
+                    source={getImageSource(previewImages[2].image)} 
                     style={styles.quarterImage} 
                   />
                   {previewImages[3] ? (
                     <Image 
-                      source={{ uri: previewImages[3].image }} 
+                      source={getImageSource(previewImages[3].image)} 
                       style={styles.quarterImage} 
                     />
                   ) : (

@@ -1,26 +1,29 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import Typography from '@/constants/Typography';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
-export default function OnboardingScreen4() {
+const { width, height } = Dimensions.get('window');
+
+// Local images for African fashion styles
+const styleImages = [
+  require('../../assets/images/modernAfrican.jpg'),
+  require('../../assets/images/elegantAfrican.jpg'),
+  require('../../assets/images/kenteCasual.jpg'),
+  require('../../assets/images/afroCentricStyle.jpg'),
+];
+
+export default function Screen4() {
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        {/* Image collage grid (3x3) */}
-        <View style={styles.grid}>
-          {Array.from({ length: 9 }).map((_, index) => (
-            <View key={index} style={styles.gridItem}>
-              <Image 
-                source={{ uri: `https://source.unsplash.com/random/300x300/?african,fashion,style,${index}` }}
-                style={styles.gridImage}
-                resizeMode="cover"
-              />
-            </View>
-          ))}
-        </View>
-        {/* Gradient overlay */}
-        <View style={styles.gradient} />
+      <View style={styles.imageGrid}>
+        {styleImages.map((image, index) => (
+          <Image 
+            key={index}
+            source={image}
+            style={styles.gridImage}
+          />
+        ))}
       </View>
       
       <View style={styles.textContainer}>
@@ -38,39 +41,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  imageContainer: {
-    height: Layout.heroImageHeight,
-    width: '100%',
-  },
-  grid: {
+  imageGrid: {
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  gridItem: {
+  gridImage: {
     width: '33.3%',
     height: '33.3%',
     padding: 1,
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 90,
-    backgroundColor: 'transparent',
-    // Linear gradient from transparent to white
-    // In a real app, you'd use a LinearGradient component
-    // But for this example, we're using a plain View with a background
-    shadowColor: Colors.white,
-    shadowOffset: { width: 0, height: -90 },
-    shadowOpacity: 1,
-    shadowRadius: 90,
-    elevation: 10,
   },
   textContainer: {
     padding: Layout.horizontalMargin,

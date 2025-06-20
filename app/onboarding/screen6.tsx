@@ -7,14 +7,11 @@ export default function OnboardingScreen6() {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        {/* Street fashion photo */}
         <Image 
-          source={{ uri: 'https://source.unsplash.com/random/800x1200/?african,street,fashion' }}
-          style={styles.heroImage}
+          source={require('../../assets/images/afroPunk.jpg')}
+          style={styles.image}
           resizeMode="cover"
         />
-        {/* Gradient overlay */}
-        <View style={styles.gradient} />
       </View>
       
       <View style={styles.textContainer}>
@@ -36,23 +33,9 @@ const styles = StyleSheet.create({
     height: Layout.heroImageHeight,
     width: '100%',
   },
-  heroImage: {
+  image: {
     width: '100%',
     height: '100%',
-  },
-  gradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 90,
-    backgroundColor: 'transparent',
-    // Linear gradient from transparent to white
-    shadowColor: Colors.white,
-    shadowOffset: { width: 0, height: -90 },
-    shadowOpacity: 1,
-    shadowRadius: 90,
-    elevation: 10,
   },
   textContainer: {
     padding: Layout.horizontalMargin,
