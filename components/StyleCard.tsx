@@ -1,22 +1,36 @@
 import { Style } from '@/contexts/LookbookContext';
+import { getOutfitIdFromStyleId, isOutfitStyle } from '@/utils/outfitAdapter';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
-  Dimensions,
-  Image,
-  ImageSourcePropType,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Dimensions,
+    Image,
+    ImageSourcePropType,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
+
+// Import fallback image at the top to avoid require resolution issues
+const fallbackImage = require('../assets/images/modernAfrican.jpg');
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2; // 2 columns with padding
 
 // Helper function to handle image sources
 const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
-  return typeof image === 'string' ? { uri: image } : image;
+  if (typeof image === 'string') {
+    // If it's a string and not empty, use it as URI
+    if (image && image.trim() !== '') {
+      return { uri: image };
+    } else {
+      // Fallback to a default image when no image URL is provided
+      return fallbackImage;
+    }
+  }
+  // If it's already an ImageSourcePropType (local require), use it as is
+  return image;
 };
 
 interface StyleCardProps {
@@ -39,9 +53,12 @@ export default function StyleCard({
     if (onPress) {
       onPress(style);
     } else {
+      // Check if this is an outfit-based style and get the original outfit ID
+      const outfitId = isOutfitStyle(style.id) ? getOutfitIdFromStyleId(style.id) : null;
+      
       router.push({
         pathname: '/style-detail',
-        params: { id: style.id }
+        params: { id: outfitId || style.id }
       });
     }
   };

@@ -1,31 +1,29 @@
+import { BlogPost } from '@/api/types';
+import EmptyState from '@/components/ui/EmptyState';
+import Colors from '@/constants/Colors';
+import { useBlog } from '@/contexts/BlogContext';
 import { useLookbook } from '@/contexts/LookbookContext';
-import { blogPosts } from '@/data/blogData';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    FlatList,
-    Image,
-    ImageSourcePropType,
-    Modal,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
-
-// Helper function to handle image sources
-const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
-  return typeof image === 'string' ? { uri: image } : image;
-};
 
 export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
@@ -33,20 +31,45 @@ export default function BlogScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [searchResults, setSearchResults] = useState<BlogPost[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
   const { 
     folders, 
     saveStyleToFolder, 
     isStyleSaved 
   } = useLookbook();
 
-  const featuredPosts = blogPosts.filter(post => post.featured);
-  const popularPosts = blogPosts.slice(0, 4);
+  const {
+    blogs,
+    featuredBlogs,
+    loading,
+    error,
+    refreshBlogs,
+    searchBlogs
+  } = useBlog();
 
-  // Filter posts based on search query
-  const filteredPosts = blogPosts.filter(post =>
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Handle search
+  useEffect(() => {
+    const handleSearch = async () => {
+      if (searchQuery.trim().length > 0) {
+        setIsSearching(true);
+        try {
+          const results = await searchBlogs(searchQuery.trim());
+          setSearchResults(results);
+        } catch (error) {
+          console.error('Search error:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    const debounceTimer = setTimeout(handleSearch, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   const handleShowAll = () => {
     setShowAll(true);
@@ -54,20 +77,23 @@ export default function BlogScreen() {
 
   const handleBack = () => {
     setShowAll(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
-  const handleSave = (post: any) => {
+  const handleSave = (post: BlogPost) => {
+    const styleId = post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0));
     const style = {
-      id: post.id,
+      id: styleId,
       title: post.title,
-      image: post.image,
-      category: post.category,
-      tags: [post.category.toLowerCase()],
-      color: '#FF6B35',
+      image: post.imageUrl,
+      category: post.category.name,
+      tags: [post.category.name.toLowerCase()],
+      color: Colors.primary,
       description: post.title
     };
 
-    if (isStyleSaved(post.id)) {
+    if (isStyleSaved(styleId)) {
       Alert.alert(
         'Post Already Saved',
         'This post is already in your lookbook. What would you like to do?',
@@ -103,17 +129,17 @@ export default function BlogScreen() {
     }
   };
 
-  const handlePostPress = (postId: number) => {
+  const handlePostPress = (postId: string) => {
     router.push({
       pathname: '/blog-detail',
       params: { id: postId }
     });
   };
 
-  const handleShare = async (post: any) => {
+  const handleShare = async (post: BlogPost) => {
     try {
       const shareTitle = `${post.title} | AfriStyle`;
-      const shareContent = `Check out this article: ${post.title}\n\nCategory: ${post.category}\nPublished: ${post.date}\n\n📱 Read more on AfriStyle - Discover African Fashion & Style`;
+      const shareContent = `Check out this article: ${post.title}\n\nCategory: ${post.category.name}\nBy: ${post.creator.name}\n\n📱 Read more on AfriStyle - Discover African Fashion & Style`;
       
       await Share.share({
         title: shareTitle,
@@ -125,24 +151,65 @@ export default function BlogScreen() {
     }
   };
 
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Show loading state
+  if (loading && blogs.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading blogs...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show error state
+  if (error && blogs.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Something went wrong"
+          description={error}
+          actionText="Try Again"
+          onActionPress={refreshBlogs}
+        />
+      </SafeAreaView>
+    );
+  }
+
   if (showAll) {
-    const postsToShow = searchQuery ? filteredPosts : blogPosts;
+    const postsToShow = searchQuery ? searchResults : blogs;
     
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {/* Header - Now scrollable */}
+        <ScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={refreshBlogs}
+              colors={[Colors.primary]}
+            />
+          }
+        >
+          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <Ionicons name="chevron-back" size={24} color="#000" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>All</Text>
-            <TouchableOpacity 
-              style={styles.searchButton}
-              onPress={() => router.push('/(tabs)/explore')}
-            >
-              <Ionicons name="search-outline" size={24} color="#000" />
-            </TouchableOpacity>
+            <Text style={styles.headerTitle}>All Blogs</Text>
+            <View style={styles.searchButton} />
           </View>
 
           {/* Search Bar */}
@@ -164,14 +231,23 @@ export default function BlogScreen() {
             </View>
           </View>
 
-          {postsToShow.length === 0 ? (
-            <View style={styles.noResultsContainer}>
-              <Ionicons name="search-outline" size={60} color="#E0E0E0" />
-              <Text style={styles.noResultsText}>No posts found</Text>
-              <Text style={styles.noResultsSubtext}>
-                Try searching with different keywords
-              </Text>
+          {/* Search Loading */}
+          {isSearching && (
+            <View style={styles.searchLoadingContainer}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+              <Text style={styles.searchLoadingText}>Searching...</Text>
             </View>
+          )}
+
+          {/* Results */}
+          {postsToShow.length === 0 && !isSearching ? (
+            <EmptyState
+              icon="document-text-outline"
+              title={searchQuery ? "No posts found" : "No blogs available"}
+              description={searchQuery ? "Try searching with different keywords" : "Check back later for new content"}
+              actionText={searchQuery ? "Clear Search" : "Refresh"}
+              onActionPress={searchQuery ? () => setSearchQuery('') : refreshBlogs}
+            />
           ) : (
             postsToShow.map((post) => (
               <View key={post.id} style={styles.allPostItem}>
@@ -180,14 +256,15 @@ export default function BlogScreen() {
                   onPress={() => handlePostPress(post.id)}
                   activeOpacity={0.7}
                 >
-                  <Image source={getImageSource(post.image)} style={styles.allPostImage} />
+                  <Image source={{ uri: post.imageUrl }} style={styles.allPostImage} />
                   <View style={styles.allPostInfo}>
                     <Text style={styles.allPostTitle}>{post.title}</Text>
                     <View style={styles.dateContainer}>
                       <Ionicons name="calendar-outline" size={12} color="#999" />
-                      <Text style={styles.allPostDate}>{post.date}</Text>
+                      <Text style={styles.allPostDate}>{formatDate(post.createdAt)}</Text>
                     </View>
-                    <Text style={styles.allPostCategory}>{post.category}</Text>
+                    <Text style={styles.allPostCategory}>{post.category.name}</Text>
+                    <Text style={styles.allPostAuthor}>By {post.creator.name}</Text>
                   </View>
                 </TouchableOpacity>
                 <View style={styles.postActions}>
@@ -198,7 +275,7 @@ export default function BlogScreen() {
                     <Ionicons 
                       name="share-outline" 
                       size={22} 
-                      color="#666" 
+                      color="#666"
                     />
                   </TouchableOpacity>
                   <TouchableOpacity 
@@ -206,232 +283,232 @@ export default function BlogScreen() {
                     onPress={() => handleSave(post)}
                   >
                     <Ionicons 
-                      name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
+                      name={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? "bookmark" : "bookmark-outline"} 
                       size={22} 
-                      color={isStyleSaved(post.id) ? "#FF6B35" : "#666"} 
+                      color={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? Colors.primary : "#666"}
                     />
                   </TouchableOpacity>
                 </View>
               </View>
             ))
           )}
-          <View style={styles.bottomSpacing} />
         </ScrollView>
+
+        {/* Folder Selection Modal */}
+        <Modal
+          visible={showFolderModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowFolderModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.folderModal}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Save to Folder</Text>
+                <TouchableOpacity onPress={() => setShowFolderModal(false)}>
+                  <Ionicons name="close" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+              
+              <ScrollView style={styles.folderList}>
+                {folders.map((folder: any) => (
+                  <TouchableOpacity
+                    key={folder.id}
+                    style={styles.folderItem}
+                    onPress={() => handleFolderSelect(folder.id)}
+                  >
+                    <View style={styles.folderInfo}>
+                      <Text style={styles.folderName}>{folder.name}</Text>
+                      <Text style={styles.folderCount}>{folder.styles?.length || 0} items</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#999" />
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header - Now scrollable */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Blog</Text>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refreshBlogs}
+            colors={[Colors.primary]}
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.mainHeader}>
+          <View style={styles.titleSection}>
+            <Text style={styles.mainTitle}>Blog</Text>
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.subtitleOrange}>Ideas </Text>
+              <Text style={styles.subtitleBlack}>that </Text>
+              <Text style={styles.subtitleOrange}>Inspire</Text>
+            </View>
+          </View>
           <TouchableOpacity 
             style={styles.searchButton}
-            onPress={() => router.push('/(tabs)/explore')}
+            onPress={handleShowAll}
           >
-            <Ionicons name="search-outline" size={24} color="#000" />
+            <Ionicons name="search-outline" size={24} color="#FF6B35" />
           </TouchableOpacity>
         </View>
 
-        {/* Subtitle */}
-        <View style={styles.subtitleContainer}>
-          <Text style={styles.subtitle}>
-            <Text style={styles.subtitleHighlight}>Ideas</Text>
-            <Text> That </Text>
-            <Text style={styles.subtitleHighlight}>Inspire</Text>
-          </Text>
-        </View>
+        {/* Featured Section */}
+        {featuredBlogs.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Featured</Text>
+            </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#999"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {/* Featured Posts Carousel */}
-      <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={styles.carousel}
-          onMomentumScrollEnd={(event) => {
-            const slideIndex = Math.round(event.nativeEvent.contentOffset.x / (width - 32));
-            setCurrentSlide(slideIndex);
-          }}
-        >
-          {featuredPosts.map((post) => (
-            <TouchableOpacity 
-              key={post.id} 
-              style={styles.featuredCard}
-              onPress={() => handlePostPress(post.id)}
-              activeOpacity={0.9}
+            <ScrollView 
+              horizontal 
+              pagingEnabled 
+              showsHorizontalScrollIndicator={false}
+              style={styles.featuredContainer}
+              onScroll={(event) => {
+                const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+                setCurrentSlide(slideIndex);
+              }}
+              scrollEventThrottle={16}
             >
-              <Image source={getImageSource(post.image)} style={styles.featuredImage} />
-              <View style={styles.featuredOverlay}>
-                <Text style={styles.featuredTitle}>{post.title}</Text>
-                <View style={styles.featuredActions}>
-                  <TouchableOpacity
-                    style={styles.featuredActionButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      handleShare(post);
-                    }}
-                  >
-                    <Ionicons 
-                      name="share-outline" 
-                      size={22} 
-                      color="#fff" 
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.featuredActionButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      handleSave(post);
-                    }}
-                  >
-                    <Ionicons 
-                      name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
-                      size={22} 
-                      color="#fff" 
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+              {featuredBlogs.map((post) => (
+                <TouchableOpacity
+                  key={post.id}
+                  style={styles.featuredCard}
+                  onPress={() => handlePostPress(post.id)}
+                  activeOpacity={0.9}
+                >
+                  <Image source={{ uri: post.imageUrl }} style={styles.featuredImage} />
+                  <View style={styles.featuredOverlay}>
+                    <Text style={styles.featuredCategory}>{post.category.name}</Text>
+                    <Text style={styles.featuredTitle}>{post.title}</Text>
+                    <Text style={styles.featuredDate}>{formatDate(post.createdAt)}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
 
-        {/* Carousel Indicators */}
-        <View style={styles.indicators}>
-          {featuredPosts.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.indicator,
-                index === currentSlide ? styles.activeIndicator : styles.inactiveIndicator
-              ]}
-            />
-          ))}
-        </View>
+            {/* Pagination Dots */}
+            <View style={styles.paginationContainer}>
+              {featuredBlogs.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    currentSlide === index && styles.paginationDotActive
+                  ]}
+                />
+              ))}
+            </View>
+          </>
+        )}
 
         {/* Popular Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular</Text>
-          <TouchableOpacity onPress={handleShowAll}>
-            <Text style={styles.showAllText}>Show All</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Latest</Text>
+          {blogs.length > 4 && (
+            <TouchableOpacity onPress={handleShowAll}>
+              <Text style={styles.seeAllText}>See all</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        <View style={styles.popularGrid}>
-          {popularPosts.map((post) => (
-            <TouchableOpacity 
-              key={post.id} 
-              style={styles.popularItem}
-              onPress={() => handlePostPress(post.id)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.popularImageContainer}>
-                <Image source={getImageSource(post.image)} style={styles.popularImage} />
+        {blogs.length === 0 ? (
+          <EmptyState
+            icon="document-text-outline"
+            title="No blogs available"
+            description="Check back later for new content"
+            actionText="Refresh"
+            onActionPress={refreshBlogs}
+          />
+        ) : (
+          blogs.slice(0, 4).map((post) => (
+            <View key={post.id} style={styles.popularItem}>
+              <TouchableOpacity 
+                style={styles.popularContent}
+                onPress={() => handlePostPress(post.id)}
+                activeOpacity={0.7}
+              >
+                <Image source={{ uri: post.imageUrl }} style={styles.popularImage} />
+                <View style={styles.popularInfo}>
+                  <Text style={styles.popularTitle}>{post.title}</Text>
+                  <View style={styles.popularMeta}>
+                    <Text style={styles.popularDate}>{formatDate(post.createdAt)}</Text>
+                    <Text style={styles.popularCategory}>{post.category.name}</Text>
+                  </View>
+                  <Text style={styles.popularAuthor}>By {post.creator.name}</Text>
+                </View>
+              </TouchableOpacity>
+              <View style={styles.popularActions}>
                 <TouchableOpacity 
-                  style={styles.popularSaveButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleSave(post);
-                  }}
+                  style={styles.actionButton}
+                  onPress={() => handleShare(post)}
                 >
                   <Ionicons 
-                    name={isStyleSaved(post.id) ? "bookmark" : "bookmark-outline"} 
-                    size={16} 
-                    color={isStyleSaved(post.id) ? "#FF6B35" : "#fff"} 
+                    name="share-outline" 
+                    size={20} 
+                    color="#666"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={() => handleSave(post)}
+                >
+                  <Ionicons 
+                    name={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? "bookmark" : "bookmark-outline"} 
+                    size={20} 
+                    color={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? Colors.primary : "#666"}
                   />
                 </TouchableOpacity>
               </View>
-              <View style={styles.popularInfo}>
-                <Text style={styles.popularTitle} numberOfLines={2}>
-                  {post.title}
-                </Text>
-                <View style={styles.dateContainer}>
-                  <Ionicons name="calendar-outline" size={12} color="#999" />
-                  <Text style={styles.popularDate}>{post.date}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.bottomSpacing} />
+            </View>
+          ))
+        )}
       </ScrollView>
 
+      {/* Folder Selection Modal */}
       <Modal
         visible={showFolderModal}
+        transparent={true}
         animationType="slide"
-        presentationStyle="pageSheet"
         onRequestClose={() => setShowFolderModal(false)}
       >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity 
-              onPress={() => setShowFolderModal(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalCloseText}>Cancel</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Save to Folder</Text>
-            <View style={styles.modalCloseButton} />
-          </View>
-
-          <View style={styles.modalContent}>
-            <Text style={styles.modalSubtitle}>
-              Choose a folder for "{selectedPost?.title}"
-            </Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.folderModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Save to Folder</Text>
+              <TouchableOpacity onPress={() => setShowFolderModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
             
-            <FlatList
-              data={folders}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
+            <ScrollView style={styles.folderList}>
+              {folders.map((folder: any) => (
+                <TouchableOpacity
+                  key={folder.id}
                   style={styles.folderItem}
-                  onPress={() => handleFolderSelect(item.id)}
+                  onPress={() => handleFolderSelect(folder.id)}
                 >
-                  <View style={styles.folderIcon}>
-                    <Ionicons name="folder" size={24} color="#FF6B35" />
+                  <View style={styles.folderInfo}>
+                    <Text style={styles.folderName}>{folder.name}</Text>
+                    <Text style={styles.folderCount}>{folder.styles?.length || 0} items</Text>
                   </View>
-                  <Text style={styles.folderName}>{item.name}</Text>
                   <Ionicons name="chevron-forward" size={20} color="#999" />
                 </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-              ListEmptyComponent={() => (
-                <View style={styles.emptyState}>
-                  <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
-                  <Text style={styles.emptyStateText}>No folders yet</Text>
-                  <Text style={styles.emptyStateSubtext}>
-                    Create a folder in your lookbook first
-                  </Text>
-                </View>
-              )}
-            />
+              ))}
+            </ScrollView>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -442,75 +519,123 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  searchLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  searchLoadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+  },
+  mainHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  titleSection: {
+    flexDirection: 'column',
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FF6B35',
+  },
+  subtitleContainer: {
+    flexDirection: 'row',
+  },
+  subtitleOrange: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: '500',
+  },
+  subtitleBlack: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '500',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
+    marginRight: 12,
   },
   headerTitle: {
+    flex: 1,
     fontSize: 20,
     fontWeight: '600',
     color: '#000',
   },
-  headerSpacer: {
-    width: 40,
-  },
   searchButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subtitleContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  subtitleHighlight: {
-    color: '#FF6B35',
-    fontWeight: '600',
+    padding: 8,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F5F5F5',
-    borderRadius: 25,
+    borderRadius: 12,
     paddingHorizontal: 16,
-    height: 44,
+    paddingVertical: 12,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: '#000',
   },
-  scrollView: {
-    flex: 1,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
-  carousel: {
-    marginBottom: 16,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+  },
+  seeAllText: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  featuredContainer: {
+    paddingLeft: 20,
   },
   featuredCard: {
-    width: width - 32,
-    height: 200,
-    marginHorizontal: 16,
+    width: width - 40,
+    height: 240,
+    marginRight: 20,
     borderRadius: 16,
     overflow: 'hidden',
     position: 'relative',
@@ -519,143 +644,133 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-    backgroundColor: '#f0f0f0',
   },
   featuredOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 20,
+  },
+  featuredCategory: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.8,
+    marginBottom: 4,
   },
   featuredTitle: {
-    color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    flex: 1,
-    marginRight: 12,
+    color: '#fff',
+    marginBottom: 4,
   },
-  featuredActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  featuredDate: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.8,
   },
-  featuredActionButton: {
-    padding: 4,
-    marginRight: 8,
-  },
-  indicators: {
+  paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 24,
+    alignItems: 'center',
+    paddingVertical: 16,
   },
-  indicator: {
+  paginationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+    backgroundColor: '#E0E0E0',
     marginHorizontal: 4,
   },
-  activeIndicator: {
-    backgroundColor: '#FF6B35',
-  },
-  inactiveIndicator: {
-    backgroundColor: '#E0E0E0',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  showAllText: {
-    fontSize: 14,
-    color: '#FF6B35',
-    fontWeight: '500',
-  },
-  popularGrid: {
-    paddingHorizontal: 16,
+  paginationDotActive: {
+    backgroundColor: Colors.primary,
+    width: 24,
   },
   popularItem: {
     flexDirection: 'row',
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  popularImageContainer: {
-    position: 'relative',
+  popularContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   popularImage: {
     width: 80,
     height: 80,
-    resizeMode: 'cover',
-    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    marginRight: 16,
   },
   popularInfo: {
     flex: 1,
-    padding: 12,
-    justifyContent: 'space-between',
   },
   popularTitle: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 4,
+    lineHeight: 22,
+  },
+  popularMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   popularDate: {
     fontSize: 12,
     color: '#999',
-    marginLeft: 4,
+    marginRight: 12,
   },
-  bottomSpacing: {
-    height: 20,
+  popularCategory: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  popularAuthor: {
+    fontSize: 12,
+    color: '#666',
+  },
+  popularActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   allPostItem: {
     flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   allPostContent: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   allPostImage: {
-    width: 80,
-    height: 80,
-    resizeMode: 'cover',
-    backgroundColor: '#f0f0f0',
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    marginRight: 16,
   },
   allPostInfo: {
     flex: 1,
-    padding: 12,
-    justifyContent: 'space-between',
   },
   allPostTitle: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#000',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 4,
   },
   allPostDate: {
@@ -665,125 +780,68 @@ const styles = StyleSheet.create({
   },
   allPostCategory: {
     fontSize: 12,
-    color: '#FF6B35',
+    color: Colors.primary,
     fontWeight: '500',
-    marginTop: 4,
+    marginBottom: 4,
   },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 2,
+  allPostAuthor: {
+    fontSize: 12,
+    color: '#666',
   },
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   actionButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
+    marginLeft: 8,
   },
-  noResultsContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 32,
-  },
-  noResultsText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#666',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  noResultsSubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  folderModal: {
     backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
   },
   modalHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    alignItems: 'center',
+    padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  modalCloseButton: {
-    width: 60,
-    height: 40,
-    justifyContent: 'center',
-  },
-  modalCloseText: {
-    fontSize: 16,
-    color: '#FF6B35',
+    borderBottomColor: '#F0F0F0',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#000',
   },
-  modalContent: {
-    flex: 1,
-    padding: 16,
-  },
-  modalSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 24,
+  folderList: {
+    maxHeight: 300,
   },
   folderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  folderIcon: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  folderInfo: {
+    flex: 1,
   },
   folderName: {
     fontSize: 16,
-    flex: 1,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  emptyStateText: {
-    fontSize: 18,
     fontWeight: '500',
+    color: '#000',
+    marginBottom: 4,
+  },
+  folderCount: {
+    fontSize: 12,
     color: '#666',
-    marginTop: 16,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  popularSaveButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 }); 

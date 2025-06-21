@@ -2,14 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Config from '../constants/Config';
 import apiClient, { clearAuthData } from './axios';
 import {
-    ApiResponse,
-    ChangePasswordBody,
-    ForgotPasswordBody,
-    LoginBody,
-    LoginResponse,
-    RegisterBody,
-    User,
-    VerifyResetTokenBody
+  ApiResponse,
+  ChangePasswordBody,
+  ForgotPasswordBody,
+  LoginBody,
+  LoginResponse,
+  RegisterBody,
+  User,
+  VerifyResetTokenBody
 } from './types';
 
 class AuthService {

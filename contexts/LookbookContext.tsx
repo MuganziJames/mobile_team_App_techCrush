@@ -1,6 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import LookbookService from '@/api/lookbook.service';
+import { LookbookWithOutfits } from '@/api/types';
+import { getOutfitIdFromStyleId, isOutfitStyle } from '@/utils/outfitAdapter';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { ImageSourcePropType } from 'react-native';
+import { Alert, ImageSourcePropType } from 'react-native';
 
 // Types
 export interface Style {
@@ -24,128 +26,249 @@ export interface LookbookFolder {
   name: string;
   createdAt: string;
   color: string;
+  outfitCount?: number;
 }
 
 interface LookbookContextProps {
   folders: LookbookFolder[];
   savedStyles: SavedStyle[];
+  loading: boolean;
+  error: string | null;
   createFolder: (name: string, color: string) => Promise<void>;
   deleteFolder: (folderId: string) => Promise<void>;
+  updateFolder: (folderId: string, name: string) => Promise<void>;
+  refreshFolders: () => Promise<void>;
   saveStyleToFolder: (style: Style, folderId: string) => Promise<void>;
   removeStyleFromFolder: (styleId: number, folderId: string) => Promise<void>;
   updateStyleNotes: (styleId: number, folderId: string, notes: string) => Promise<void>;
   getStylesInFolder: (folderId: string) => SavedStyle[];
   isStyleSaved: (styleId: number) => boolean;
   getStyleFolder: (styleId: number) => string | null;
+  getLookbookWithOutfits: (folderId: string) => Promise<LookbookWithOutfits | null>;
 }
 
 // Context
 const LookbookContext = createContext<LookbookContextProps | undefined>(undefined);
 
-// Default folders
-const defaultFolders: LookbookFolder[] = [
-  {
-    id: 'favorites',
-    name: 'Favorites',
-    createdAt: new Date().toISOString(),
-    color: '#FF6B35'
-  },
-  {
-    id: 'inspiration',
-    name: 'Inspiration',
-    createdAt: new Date().toISOString(),
-    color: '#4ECDC4'
-  }
+// Color palette for folders
+const folderColors = [
+  '#FF6B35', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
 ];
 
 // Provider
 export function LookbookProvider({ children }: { children: ReactNode }) {
-  const [folders, setFolders] = useState<LookbookFolder[]>(defaultFolders);
+  const [folders, setFolders] = useState<LookbookFolder[]>([]);
   const [savedStyles, setSavedStyles] = useState<SavedStyle[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load data from storage on mount
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [foldersString, stylesString] = await Promise.all([
-          AsyncStorage.getItem('lookbook_folders'),
-          AsyncStorage.getItem('lookbook_styles')
-        ]);
-
-        if (foldersString) {
-          const loadedFolders = JSON.parse(foldersString);
-          setFolders(loadedFolders);
-        }
-
-        if (stylesString) {
-          const loadedStyles = JSON.parse(stylesString);
-          setSavedStyles(loadedStyles);
-        }
-      } catch (error) {
-        console.error('Failed to load lookbook data:', error);
+  // Load folders from API
+  const loadFolders = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await LookbookService.getAllLookbooks();
+      
+      if (response.success && response.data) {
+        const foldersWithColors = response.data.map((lookbook, index) => ({
+          id: lookbook.id,
+          name: lookbook.name,
+          createdAt: lookbook.createdAt,
+          color: folderColors[index % folderColors.length],
+        }));
+        
+        setFolders(foldersWithColors);
+      } else {
+        setError(response.message || 'Failed to load lookbooks');
       }
-    };
-
-    loadData();
-  }, []);
-
-  // Save data to storage whenever it changes
-  useEffect(() => {
-    const saveData = async () => {
-      try {
-        await Promise.all([
-          AsyncStorage.setItem('lookbook_folders', JSON.stringify(folders)),
-          AsyncStorage.setItem('lookbook_styles', JSON.stringify(savedStyles))
-        ]);
-      } catch (error) {
-        console.error('Failed to save lookbook data:', error);
-      }
-    };
-
-    saveData();
-  }, [folders, savedStyles]);
-
-  const createFolder = async (name: string, color: string) => {
-    const newFolder: LookbookFolder = {
-      id: Date.now().toString(),
-      name,
-      color,
-      createdAt: new Date().toISOString()
-    };
-
-    setFolders(prev => [...prev, newFolder]);
-  };
-
-  const deleteFolder = async (folderId: string) => {
-    // Don't allow deletion of default folders
-    if (folderId === 'favorites' || folderId === 'inspiration') {
-      return;
+    } catch (error: any) {
+      console.error('Error loading folders:', error);
+      setError(error.message || 'Failed to load lookbooks');
+    } finally {
+      setLoading(false);
     }
-
-    setFolders(prev => prev.filter(folder => folder.id !== folderId));
-    setSavedStyles(prev => prev.filter(style => style.folderId !== folderId));
   };
 
+  // Load all saved styles from all folders
+  const loadSavedStyles = async () => {
+    try {
+      const allStyles: SavedStyle[] = [];
+      
+      for (const folder of folders) {
+        const response = await LookbookService.getLookbookById(folder.id);
+        
+        if (response.success && response.data?.outfits) {
+          const stylesInFolder = response.data.outfits.map(outfit => ({
+            id: outfit.id.hashCode ? outfit.id.hashCode() : Math.abs(outfit.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)),
+            title: outfit.title,
+            image: outfit.imageUrls?.[0] || '',
+            category: outfit.category?.name || 'Style',
+            tags: [outfit.category?.name?.toLowerCase() || 'style'],
+            color: '#FF6B35',
+            description: outfit.description,
+            folderId: folder.id,
+            savedAt: outfit.createdAt
+          }));
+          
+          allStyles.push(...stylesInFolder);
+        }
+      }
+      
+      setSavedStyles(allStyles);
+    } catch (error) {
+      console.error('Error loading saved styles:', error);
+    }
+  };
+
+  // Create new folder
+  const createFolder = async (name: string, color: string) => {
+    try {
+      const response = await LookbookService.createLookbook({ name });
+      
+      if (response.success && response.data) {
+        const newFolder: LookbookFolder = {
+          id: response.data.id,
+          name: response.data.name,
+          createdAt: response.data.createdAt,
+          color: color
+        };
+        
+        setFolders(prev => [...prev, newFolder]);
+        Alert.alert('Success', 'Lookbook created successfully!');
+      } else {
+        Alert.alert('Error', response.message || 'Failed to create lookbook');
+      }
+    } catch (error: any) {
+      console.error('Error creating folder:', error);
+      Alert.alert('Error', error.message || 'Failed to create lookbook');
+    }
+  };
+
+  // Delete folder
+  const deleteFolder = async (folderId: string) => {
+    try {
+      const response = await LookbookService.deleteLookbook(folderId);
+      
+      if (response.success) {
+        setFolders(prev => prev.filter(folder => folder.id !== folderId));
+        setSavedStyles(prev => prev.filter(style => style.folderId !== folderId));
+        Alert.alert('Success', 'Lookbook deleted successfully!');
+      } else {
+        Alert.alert('Error', response.message || 'Failed to delete lookbook');
+      }
+    } catch (error: any) {
+      console.error('Error deleting folder:', error);
+      Alert.alert('Error', error.message || 'Failed to delete lookbook');
+    }
+  };
+
+  // Update folder name
+  const updateFolder = async (folderId: string, name: string) => {
+    try {
+      const response = await LookbookService.updateLookbook(folderId, { name });
+      
+      if (response.success && response.data) {
+        setFolders(prev => 
+          prev.map(folder => 
+            folder.id === folderId 
+              ? { ...folder, name: response.data!.name }
+              : folder
+          )
+        );
+        Alert.alert('Success', 'Lookbook updated successfully!');
+      } else {
+        Alert.alert('Error', response.message || 'Failed to update lookbook');
+      }
+    } catch (error: any) {
+      console.error('Error updating folder:', error);
+      Alert.alert('Error', error.message || 'Failed to update lookbook');
+    }
+  };
+
+  // Save style to folder
   const saveStyleToFolder = async (style: Style, folderId: string) => {
-    const savedStyle: SavedStyle = {
-      ...style,
-      folderId,
-      savedAt: new Date().toISOString()
-    };
+    try {
+      // Get the original outfit ID if this is an outfit-based style
+      let outfitId: string;
+      
+      if (isOutfitStyle(style.id)) {
+        const originalOutfitId = getOutfitIdFromStyleId(style.id);
+        if (!originalOutfitId) {
+          Alert.alert('Error', 'Could not find original outfit ID');
+          return;
+        }
+        outfitId = originalOutfitId;
+      } else {
+        // For non-outfit styles, we might need to handle differently
+        // For now, we'll show an error since the API expects outfit IDs
+        Alert.alert('Error', 'Can only save outfit-based styles to lookbooks');
+        return;
+      }
 
-    setSavedStyles(prev => {
-      // Remove from other folders first
-      const filtered = prev.filter(s => s.id !== style.id);
-      return [...filtered, savedStyle];
-    });
+      const response = await LookbookService.addOutfitToLookbook(folderId, { outfitId });
+      
+      if (response.success) {
+        const savedStyle: SavedStyle = {
+          ...style,
+          folderId,
+          savedAt: new Date().toISOString()
+        };
+
+        setSavedStyles(prev => {
+          // Remove from other folders first
+          const filtered = prev.filter(s => s.id !== style.id);
+          return [...filtered, savedStyle];
+        });
+        
+        // Show success message
+        const folderName = folders.find(f => f.id === folderId)?.name || 'lookbook';
+        Alert.alert('Success', `Style saved to ${folderName}!`);
+      } else {
+        Alert.alert('Error', response.message || 'Failed to save style');
+      }
+    } catch (error: any) {
+      console.error('Error saving style:', error);
+      Alert.alert('Error', error.message || 'Failed to save style');
+    }
   };
 
+  // Remove style from folder
   const removeStyleFromFolder = async (styleId: number, folderId: string) => {
-    setSavedStyles(prev => 
-      prev.filter(style => !(style.id === styleId && style.folderId === folderId))
-    );
+    try {
+      // Get the original outfit ID
+      let outfitId: string;
+      
+      if (isOutfitStyle(styleId)) {
+        const originalOutfitId = getOutfitIdFromStyleId(styleId);
+        if (!originalOutfitId) {
+          Alert.alert('Error', 'Could not find original outfit ID');
+          return;
+        }
+        outfitId = originalOutfitId;
+      } else {
+        Alert.alert('Error', 'Can only remove outfit-based styles from lookbooks');
+        return;
+      }
+
+      const response = await LookbookService.removeOutfitFromLookbook(folderId, { outfitId });
+      
+      if (response.success) {
+        setSavedStyles(prev => 
+          prev.filter(style => !(style.id === styleId && style.folderId === folderId))
+        );
+        Alert.alert('Success', 'Style removed from lookbook!');
+      } else {
+        Alert.alert('Error', response.message || 'Failed to remove style');
+      }
+    } catch (error: any) {
+      console.error('Error removing style:', error);
+      Alert.alert('Error', error.message || 'Failed to remove style');
+    }
   };
 
+  // Update style notes (local only for now, as API doesn't support notes)
   const updateStyleNotes = async (styleId: number, folderId: string, notes: string) => {
     setSavedStyles(prev =>
       prev.map(style =>
@@ -156,30 +279,66 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  // Get styles in folder
   const getStylesInFolder = (folderId: string) => {
     return savedStyles.filter(style => style.folderId === folderId);
   };
 
+  // Check if style is saved
   const isStyleSaved = (styleId: number) => {
     return savedStyles.some(style => style.id === styleId);
   };
 
+  // Get folder containing style
   const getStyleFolder = (styleId: number) => {
     const savedStyle = savedStyles.find(style => style.id === styleId);
     return savedStyle ? savedStyle.folderId : null;
   };
 
+  // Get lookbook with outfits
+  const getLookbookWithOutfits = async (folderId: string): Promise<LookbookWithOutfits | null> => {
+    try {
+      const response = await LookbookService.getLookbookById(folderId);
+      return response.success ? response.data || null : null;
+    } catch (error) {
+      console.error('Error getting lookbook with outfits:', error);
+      return null;
+    }
+  };
+
+  // Refresh folders
+  const refreshFolders = async () => {
+    await loadFolders();
+  };
+
+  // Load data on mount
+  useEffect(() => {
+    loadFolders();
+  }, []);
+
+  // Load saved styles when folders change
+  useEffect(() => {
+    if (folders.length > 0) {
+      loadSavedStyles();
+    }
+  }, [folders]);
+
   const lookbookContext: LookbookContextProps = {
     folders,
     savedStyles,
+    loading,
+    error,
     createFolder,
     deleteFolder,
+    updateFolder,
+    refreshFolders,
     saveStyleToFolder,
     removeStyleFromFolder,
     updateStyleNotes,
     getStylesInFolder,
     isStyleSaved,
-    getStyleFolder
+    getStyleFolder,
+    getLookbookWithOutfits
   };
 
   return (

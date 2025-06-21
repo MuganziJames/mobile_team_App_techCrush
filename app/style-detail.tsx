@@ -1,9 +1,14 @@
+import { Outfit } from '@/api/types';
+import EmptyState from '@/components/ui/EmptyState';
 import SuccessCard from '@/components/ui/SuccessCard';
 import { useLookbook } from '@/contexts/LookbookContext';
+import { useOutfit } from '@/contexts/OutfitContext';
+import { outfitToStyle } from '@/utils/outfitAdapter';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Dimensions,
     Image,
@@ -17,131 +22,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
+// Import fallback image at the top to avoid require resolution issues
+const fallbackImage = require('../assets/images/modernAfrican.jpg');
 
-// Sample style data - African Fashion Collection (same as feed)
-const sampleStyles = [
-  {
-    id: 1,
-    title: 'Elegant Ankara Evening Gown',
-    image: require('../assets/images/modernAfrican.jpg'),
-    category: 'Evening Wear',
-    tags: ['elegant', 'formal', 'ankara', 'african'],
-    color: '#8B4513',
-    description: 'A stunning Ankara evening gown that celebrates African heritage with modern elegance. This sophisticated piece features traditional African prints with contemporary tailoring, perfect for formal occasions, cultural events, and celebrations that honor African beauty and craftsmanship.'
-  },
-  {
-    id: 2,
-    title: 'Kente Casual Chic',
-    image: require('../assets/images/elegantAfrican.jpg'),
-    category: 'Casual',
-    tags: ['kente', 'casual', 'comfortable', 'african'],
-    color: '#DAA520',
-    description: 'Light and stylish casual wear featuring authentic Kente patterns. This comfortable ensemble combines traditional African textiles with modern cuts, perfect for cultural events, everyday wear, or any occasion where you want to showcase your African pride with contemporary flair.'
-  },
-  {
-    id: 3,
-    title: 'Professional Dashiki Look',
-    image: require('../assets/images/tropicalAfricanParadise.jpg'),
-    category: 'Business',
-    tags: ['professional', 'dashiki', 'formal', 'african'],
-    color: '#2F4F4F',
-    description: 'Sharp and professional business attire featuring modern Dashiki elements. This polished look combines traditional African aesthetics with contemporary tailoring, perfect for boardroom meetings, professional events, and showcasing cultural pride in corporate settings.'
-  },
-  {
-    id: 4,
-    title: 'Bohemian Mudcloth Style',
-    image: require('../assets/images/kenteCasual.jpg'),
-    category: 'Bohemian',
-    tags: ['boho', 'mudcloth', 'artistic', 'african'],
-    color: '#8B4513',
-    description: 'Free-spirited bohemian style featuring authentic African mudcloth patterns. This artistic look embraces traditional African textiles with flowing silhouettes, perfect for creative events, cultural festivals, or expressing your connection to African artistic heritage.'
-  },
-  {
-    id: 5,
-    title: 'Sporty African Print Athleisure',
-    image: require('../assets/images/AfricanPrintRomanticDress.jpg'),
-    category: 'Athleisure',
-    tags: ['sporty', 'african print', 'active', 'comfortable'],
-    color: '#FF6347',
-    description: 'Dynamic athleisure wear featuring vibrant African prints and modern athletic cuts. This versatile outfit seamlessly blends traditional African patterns with contemporary sportswear, perfect for active lifestyles while celebrating African design heritage.'
-  },
-  {
-    id: 6,
-    title: 'Vintage African Inspired',
-    image: require('../assets/images/vintageAfrican.jpg'),
-    category: 'Vintage',
-    tags: ['vintage', 'retro', 'african', 'classic', 'heritage'],
-    color: '#8B4513',
-    description: 'Timeless vintage African ensemble featuring traditional patterns and classic silhouettes. This sophisticated look combines authentic African textiles with retro styling, celebrating the golden era of African fashion while maintaining contemporary elegance and cultural pride.'
-  },
-  {
-    id: 7,
-    title: 'Modern African Minimalist',
-    image: require('../assets/images/bohemianCloth.jpg'),
-    category: 'Minimalist',
-    tags: ['minimal', 'clean', 'modern', 'african'],
-    color: '#F5F5F5',
-    description: 'Clean and modern minimalist style with subtle African influences. This sophisticated approach combines neutral tones with carefully chosen African-inspired details, creating maximum impact through thoughtful design that celebrates African aesthetics with contemporary elegance.'
-  },
-  {
-    id: 8,
-    title: 'Afrocentric Street Style',
-    image: require('../assets/images/afroCentricStyle.jpg'),
-    category: 'Street Style',
-    tags: ['afrocentric', 'urban', 'trendy', 'african'],
-    color: '#696969',
-    description: 'Bold Afrocentric street style that celebrates African culture in urban settings. This contemporary look combines traditional African elements with modern streetwear trends, perfect for making a cultural statement while navigating city life with confidence and pride.'
-  },
-  {
-    id: 9,
-    title: 'African Print Romantic Dress',
-    image: require('../assets/images/afroCentricStyle.jpg'),
-    category: 'Romantic',
-    tags: ['romantic', 'african print', 'feminine', 'floral'],
-    color: '#FFB6C1',
-    description: 'Dreamy romantic dress featuring beautiful African floral prints. This enchanting piece combines traditional African textile artistry with feminine silhouettes, perfect for special occasions, cultural celebrations, or any moment that calls for romantic African elegance.'
-  },
-  {
-    id: 10,
-    title: 'Afropunk Rebellion',
-    image: require('../assets/images/africaGothicElegance.jpg'),
-    category: 'Punk',
-    tags: ['afropunk', 'rebellious', 'alternative', 'african'],
-    color: '#8B0000',
-    description: 'Bold Afropunk style that merges African heritage with rebellious spirit. This fierce look combines traditional African elements with punk aesthetics, perfect for music festivals, alternative events, or expressing your unique blend of cultural pride and non-conformist attitude.'
-  },
-  {
-    id: 11,
-    title: 'Tropical African Paradise',
-    image: require('../assets/images/afroPunk.jpg'),
-    category: 'Resort',
-    tags: ['tropical', 'vacation', 'colorful', 'african'],
-    color: '#00CED1',
-    description: 'Vibrant tropical-inspired outfit featuring authentic African prints and colors. This colorful ensemble captures the essence of African paradise with bold patterns and breezy fabrics, perfect for beach vacations, resort wear, or bringing African sunshine to your wardrobe.'
-  },
-  {
-    id: 12,
-    title: 'African Gothic Elegance',
-    image: require('../assets/images/danshikiLook.jpg'),
-    category: 'Gothic',
-    tags: ['gothic', 'dark', 'mysterious', 'african'],
-    color: '#2F2F2F',
-    description: 'Mysterious gothic elegance with African influences. This dramatic look combines rich African textiles with dark, sophisticated styling to create an aura of cultural mystery, perfect for evening events or expressing your unique blend of African heritage and gothic aesthetics.'
-  },
-  {
-    id: 13,
-    title: 'Afrocentric Academia Style',
-    image: require('../assets/images/afroCentricStyle.jpg'),
-    category: 'Preppy',
-    tags: ['preppy', 'academic', 'classic', 'african'],
-    color: '#8B4513',
-    description: 'Classic academic style celebrating African intellectual heritage. This sophisticated look features traditional African elements with scholarly charm, perfect for academic settings, cultural institutions, or any environment where African intelligence meets impeccable style and cultural pride.'
-  }
-];
+const { width, height } = Dimensions.get('window');
 
 export default function StyleDetailScreen() {
   const { id } = useLocalSearchParams();
+  const { getOutfitById } = useOutfit();
   const { 
     folders, 
     saveStyleToFolder, 
@@ -149,29 +37,71 @@ export default function StyleDetailScreen() {
     getStyleFolder 
   } = useLookbook();
   
+  const [outfit, setOutfit] = useState<Outfit | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showSuccessCard, setShowSuccessCard] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  const style = sampleStyles.find(s => s.id === parseInt(id as string));
+  // Load outfit data
+  useEffect(() => {
+    const loadOutfit = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Convert the style ID back to outfit ID if needed
+        const outfitData = await getOutfitById(id as string);
+        if (outfitData) {
+          setOutfit(outfitData);
+        } else {
+          setError('Style not found');
+        }
+      } catch (err) {
+        console.error('Error loading outfit:', err);
+        setError('Failed to load style');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!style) {
+    loadOutfit();
+  }, [id]);
+
+  // Show loading state
+  if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Style not found</Text>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+          <Text style={styles.loadingText}>Loading style...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  // Show error state
+  if (error || !outfit) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Style Not Found"
+          description={error || "The style you're looking for doesn't exist"}
+          actionText="Go Back"
+          onActionPress={() => router.back()}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Convert outfit to style format
+  const style = outfitToStyle(outfit);
   const isSaved = isStyleSaved(style.id);
   const currentFolder = getStyleFolder(style.id);
 
@@ -198,26 +128,48 @@ export default function StyleDetailScreen() {
     setShowFolderModal(false);
     
     const folderName = folders.find(f => f.id === folderId)?.name || 'folder';
-    setSuccessMessage(`"${style.title}" has been saved to ${folderName}.`);
+    setSuccessMessage(`Saved to ${folderName}!`);
     setShowSuccessCard(true);
+    
+    // Hide success card after 2 seconds
+    setTimeout(() => {
+      setShowSuccessCard(false);
+    }, 2000);
   };
+
+  const handleShare = async () => {
+    try {
+      const shareContent = `Check out this amazing ${style.category} style: ${style.title}\n\n${style.description}\n\n#AfricanFashion #Style #Fashion`;
+      
+      // For now, just show an alert since Share API might need platform-specific setup
+      Alert.alert(
+        'Share Style',
+        shareContent,
+        [
+          { text: 'Copy', onPress: () => {
+            // In a real app, you'd copy to clipboard here
+            Alert.alert('Copied!', 'Style details copied to clipboard');
+          }},
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+    } catch (error) {
+      console.error('Error sharing:', error);
+      Alert.alert('Error', 'Failed to share style');
+    }
+  };
+
+  // Use first image from outfit or fallback
+  const imageSource = outfit.imageUrls && outfit.imageUrls.length > 0 
+    ? { uri: outfit.imageUrls[0] } 
+    : fallbackImage;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       
-      {/* Success Card */}
-      <SuccessCard
-        visible={showSuccessCard}
-        title="Style Saved!"
-        message={successMessage}
-        onClose={() => setShowSuccessCard(false)}
-        autoHide={true}
-        duration={3000}
-      />
-      
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header - now scrollable */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity 
             style={styles.headerButton}
@@ -226,42 +178,54 @@ export default function StyleDetailScreen() {
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
           
-          <TouchableOpacity 
-            style={styles.headerButton}
-            onPress={handleSave}
-          >
-            <Ionicons 
-              name={isSaved ? "bookmark" : "bookmark-outline"} 
-              size={24} 
-              color={isSaved ? "#FF6B35" : "#000"} 
-            />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={handleShare}
+            >
+              <Ionicons name="share-outline" size={24} color="#000" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={handleSave}
+            >
+              <Ionicons 
+                name={isSaved ? "bookmark" : "bookmark-outline"} 
+                size={24} 
+                color={isSaved ? "#FF6B35" : "#000"} 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Image */}
+        {/* Main Image */}
         <View style={styles.imageContainer}>
-          <Image source={style.image} style={styles.image} />
+          <Image source={imageSource} style={styles.mainImage} />
+          
+          {/* Category Badge */}
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{style.category}</Text>
+          </View>
         </View>
 
         {/* Content */}
         <View style={styles.content}>
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>{style.title}</Text>
-            <Text style={styles.category}>{style.category}</Text>
+          <Text style={styles.title}>{style.title}</Text>
+          
+          {/* Tags */}
+          <View style={styles.tagsContainer}>
+            {style.tags.map((tag, index) => (
+              <View key={index} style={styles.tag}>
+                <Text style={styles.tagText}>#{tag}</Text>
+              </View>
+            ))}
           </View>
 
-          {isSaved && currentFolder && (
-            <View style={styles.savedIndicator}>
-              <Ionicons name="bookmark" size={16} color="#FF6B35" />
-              <Text style={styles.savedText}>
-                Saved in {folders.find(f => f.id === currentFolder)?.name}
-              </Text>
-            </View>
-          )}
-
+          {/* Color Indicator */}
           <View style={styles.colorSection}>
-            <Text style={styles.sectionTitle}>Color</Text>
-            <View style={styles.colorInfo}>
+            <Text style={styles.sectionTitle}>Color Theme</Text>
+            <View style={styles.colorIndicator}>
               <View 
                 style={[styles.colorDot, { backgroundColor: style.color }]} 
               />
@@ -269,41 +233,36 @@ export default function StyleDetailScreen() {
             </View>
           </View>
 
-          <View style={styles.tagsSection}>
-            <Text style={styles.sectionTitle}>Tags</Text>
-            <View style={styles.tagsContainer}>
-              {style.tags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>#{tag}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
+          {/* Description */}
           <View style={styles.descriptionSection}>
             <Text style={styles.sectionTitle}>Description</Text>
             <Text style={styles.description}>{style.description}</Text>
           </View>
 
-          <TouchableOpacity 
-            style={[
-              styles.saveButton,
-              isSaved && styles.saveButtonSaved
-            ]}
-            onPress={handleSave}
-          >
-            <Ionicons 
-              name={isSaved ? "bookmark" : "bookmark-outline"} 
-              size={20} 
-              color={isSaved ? "#FF6B35" : "#fff"} 
-            />
-            <Text style={[
-              styles.saveButtonText,
-              isSaved && styles.saveButtonTextSaved
-            ]}>
-              {isSaved ? 'Saved to Lookbook' : 'Save to Lookbook'}
-            </Text>
-          </TouchableOpacity>
+          {/* Creator Info */}
+          {outfit.creator && (
+            <View style={styles.creatorSection}>
+              <Text style={styles.sectionTitle}>Created By</Text>
+              <Text style={styles.creatorName}>{outfit.creator.name}</Text>
+              <Text style={styles.createdDate}>
+                {new Date(outfit.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </Text>
+            </View>
+          )}
+
+          {/* Save Status */}
+          {isSaved && currentFolder && (
+            <View style={styles.saveStatus}>
+              <Ionicons name="bookmark" size={20} color="#FF6B35" />
+              <Text style={styles.saveStatusText}>
+                Saved in {folders.find(f => f.id === currentFolder)?.name || 'folder'}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -315,7 +274,6 @@ export default function StyleDetailScreen() {
         onRequestClose={() => setShowFolderModal(false)}
       >
         <SafeAreaView style={styles.modalContainer}>
-          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
           <View style={styles.modalHeader}>
             <TouchableOpacity 
               onPress={() => setShowFolderModal(false)}
@@ -332,25 +290,42 @@ export default function StyleDetailScreen() {
               Choose a folder for "{style.title}"
             </Text>
             
-            {folders.map((folder) => (
-              <TouchableOpacity
-                key={folder.id}
-                style={styles.folderOption}
-                onPress={() => handleFolderSelect(folder.id)}
-              >
-                <View 
-                  style={[
-                    styles.folderColorIndicator, 
-                    { backgroundColor: folder.color }
-                  ]} 
-                />
-                <Text style={styles.folderOptionText}>{folder.name}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#999" />
-              </TouchableOpacity>
-            ))}
+            <ScrollView style={styles.folderList}>
+              {folders.map((folder) => (
+                <TouchableOpacity
+                  key={folder.id}
+                  style={styles.folderItem}
+                  onPress={() => handleFolderSelect(folder.id)}
+                >
+                  <View style={styles.folderIcon}>
+                    <Ionicons name="folder" size={24} color="#FF6B35" />
+                  </View>
+                  <Text style={styles.folderName}>{folder.name}</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#999" />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+            {folders.length === 0 && (
+              <View style={styles.emptyFolders}>
+                <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
+                <Text style={styles.emptyFoldersText}>No folders yet</Text>
+                <Text style={styles.emptyFoldersSubtext}>
+                  Create a folder in your lookbook first
+                </Text>
+              </View>
+            )}
           </View>
         </SafeAreaView>
       </Modal>
+
+      {/* Success Card */}
+      <SuccessCard 
+        visible={showSuccessCard}
+        title="Style Saved!"
+        message={successMessage}
+        onClose={() => setShowSuccessCard(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -360,165 +335,176 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
   scrollView: {
     flex: 1,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
   },
   imageContainer: {
-    width: width,
-    height: width * 1.2,
-    backgroundColor: '#f5f5f5',
+    position: 'relative',
+    height: height * 0.6,
   },
-  image: {
+  mainImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  content: {
-    padding: 16,
+  categoryBadge: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  titleSection: {
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
-  },
-  category: {
-    fontSize: 16,
-    color: '#666',
+  categoryText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  savedIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF5F0',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginBottom: 20,
+  content: {
+    padding: 24,
   },
-  savedText: {
-    fontSize: 14,
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 16,
+    lineHeight: 34,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 24,
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 53, 0.2)',
+  },
+  tagText: {
+    fontSize: 12,
     color: '#FF6B35',
-    marginLeft: 6,
     fontWeight: '500',
+  },
+  colorSection: {
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  colorSection: {
-    marginBottom: 20,
-  },
-  colorInfo: {
+  colorIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
   },
   colorDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   colorText: {
-    fontSize: 16,
-    color: '#333',
-    textTransform: 'uppercase',
-  },
-  tagsSection: {
-    marginBottom: 20,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  tag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  tagText: {
     fontSize: 14,
     color: '#666',
+    fontWeight: '500',
+    textTransform: 'uppercase',
   },
   descriptionSection: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   description: {
     fontSize: 16,
-    color: '#333',
+    color: '#666',
     lineHeight: 24,
   },
-  saveButton: {
+  creatorSection: {
+    marginBottom: 24,
+  },
+  creatorName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B35',
+    marginBottom: 4,
+  },
+  createdDate: {
+    fontSize: 14,
+    color: '#999',
+  },
+  saveStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  saveButtonSaved: {
-    backgroundColor: '#f0f0f0',
-    borderWidth: 1,
-    borderColor: '#FF6B35',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  saveButtonTextSaved: {
-    color: '#FF6B35',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 20,
-  },
-  backButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 24,
+    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 53, 0.2)',
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  saveStatusText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: '500',
   },
   modalContainer: {
     flex: 1,
@@ -529,23 +515,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   modalCloseButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    minWidth: 60,
+    width: 60,
+    height: 40,
+    justifyContent: 'center',
   },
   modalCloseText: {
     fontSize: 16,
-    color: '#666',
+    color: '#FF6B35',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   modalContent: {
     flex: 1,
@@ -555,27 +540,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginBottom: 24,
-    textAlign: 'center',
   },
-  folderOption: {
+  folderList: {
+    flex: 1,
+  },
+  folderItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  folderColorIndicator: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 12,
+  folderIcon: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
-  folderOptionText: {
-    flex: 1,
+  folderName: {
     fontSize: 16,
-    fontWeight: '500',
+    flex: 1,
     color: '#000',
+  },
+  emptyFolders: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyFoldersText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
+    marginTop: 16,
+  },
+  emptyFoldersSubtext: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center',
   },
 }); 

@@ -1,5 +1,8 @@
 import { AuthProvider } from '@/contexts/AuthContext';
+import { BlogProvider } from '@/contexts/BlogContext';
+import { CategoryProvider } from '@/contexts/CategoryContext';
 import { LookbookProvider } from '@/contexts/LookbookContext';
+import { OutfitProvider } from '@/contexts/OutfitContext';
 import { LikeProvider } from '@/contexts/SaveContext';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -80,11 +83,17 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <LikeProvider>
-        <LookbookProvider>
-          <RootLayoutNav />
-        </LookbookProvider>
-      </LikeProvider>
+      <CategoryProvider>
+        <BlogProvider>
+          <OutfitProvider>
+            <LikeProvider>
+              <LookbookProvider>
+                <RootLayoutNav />
+              </LookbookProvider>
+            </LikeProvider>
+          </OutfitProvider>
+        </BlogProvider>
+      </CategoryProvider>
     </AuthProvider>
   );
 }

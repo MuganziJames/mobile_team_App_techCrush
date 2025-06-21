@@ -1,11 +1,14 @@
 import FolderCard from '@/components/FolderCard';
+import EmptyState from '@/components/ui/EmptyState';
 import { useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Modal,
+    RefreshControl,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -23,12 +26,16 @@ export default function LookbookScreen() {
     folders, 
     getStylesInFolder, 
     createFolder, 
-    deleteFolder 
+    deleteFolder,
+    loading,
+    error,
+    refreshFolders
   } = useLookbook();
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [selectedColor, setSelectedColor] = useState(folderColors[0]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleFolderPress = (folder: any) => {
     router.push({
@@ -43,8 +50,8 @@ export default function LookbookScreen() {
 
   const handleDeleteFolder = (folderId: string) => {
     Alert.alert(
-      'Delete Folder',
-      'Are you sure you want to delete this folder? All styles in this folder will be removed.',
+      'Delete Lookbook',
+      'Are you sure you want to delete this lookbook? All styles in this lookbook will be removed.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -65,6 +72,75 @@ export default function LookbookScreen() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshFolders();
+    setRefreshing(false);
+  };
+
+  const renderContent = () => {
+    if (loading && folders.length === 0) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+          <Text style={styles.loadingText}>Loading your lookbooks...</Text>
+        </View>
+      );
+    }
+
+    if (error && folders.length === 0) {
+      return (
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Error Loading Lookbooks"
+          description={error}
+          actionText="Try Again"
+          onActionPress={refreshFolders}
+        />
+      );
+    }
+
+    if (folders.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="folder-outline" size={80} color="#E0E0E0" />
+          <Text style={styles.emptyTitle}>No Lookbooks Yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Create your first lookbook to start organizing your saved styles
+          </Text>
+          <TouchableOpacity 
+            style={styles.createFirstButton}
+            onPress={() => setShowCreateModal(true)}
+          >
+            <Ionicons name="add" size={20} color="#fff" />
+            <Text style={styles.createFirstButtonText}>Create Lookbook</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.foldersContainer}>
+        {folders.map((folder, index) => {
+          const folderStyles = getStylesInFolder(folder.id);
+          return (
+            <View key={folder.id} style={[
+              styles.folderWrapper,
+              index % 2 === 0 ? styles.leftFolder : styles.rightFolder
+            ]}>
+              <FolderCard
+                folder={folder}
+                styles={folderStyles}
+                onPress={handleFolderPress}
+                onDelete={handleDeleteFolder}
+              />
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -72,9 +148,17 @@ export default function LookbookScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#FF6B35']}
+            tintColor="#FF6B35"
+          />
+        }
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>My Lookbook</Text>
+          <Text style={styles.headerTitle}>My Lookbooks</Text>
           <TouchableOpacity 
             style={styles.addButton}
             onPress={() => setShowCreateModal(true)}
@@ -83,48 +167,16 @@ export default function LookbookScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>
-            {folders.length} folder{folders.length !== 1 ? 's' : ''} • {' '}
-            {folders.reduce((total, folder) => total + getStylesInFolder(folder.id).length, 0)} styles saved
-          </Text>
-        </View>
-
-        {folders.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="folder-outline" size={80} color="#E0E0E0" />
-            <Text style={styles.emptyTitle}>No Folders Yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Create your first folder to start organizing your saved styles
+        {!loading && (
+          <View style={styles.statsContainer}>
+            <Text style={styles.statsText}>
+              {folders.length} lookbook{folders.length !== 1 ? 's' : ''} • {' '}
+              {folders.reduce((total, folder) => total + getStylesInFolder(folder.id).length, 0)} styles saved
             </Text>
-            <TouchableOpacity 
-              style={styles.createFirstButton}
-              onPress={() => setShowCreateModal(true)}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.createFirstButtonText}>Create Folder</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.foldersContainer}>
-            {folders.map((folder, index) => {
-              const folderStyles = getStylesInFolder(folder.id);
-              return (
-                <View key={folder.id} style={[
-                  styles.folderWrapper,
-                  index % 2 === 0 ? styles.leftFolder : styles.rightFolder
-                ]}>
-                  <FolderCard
-                    folder={folder}
-                    styles={folderStyles}
-                    onPress={handleFolderPress}
-                    onDelete={handleDeleteFolder}
-                  />
-                </View>
-              );
-            })}
           </View>
         )}
+
+        {renderContent()}
       </ScrollView>
 
       <Modal
@@ -142,7 +194,7 @@ export default function LookbookScreen() {
             >
               <Text style={styles.modalCloseText}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>New Folder</Text>
+            <Text style={styles.modalTitle}>New Lookbook</Text>
             <TouchableOpacity 
               onPress={handleCreateFolder}
               style={styles.modalSaveButton}
@@ -159,12 +211,12 @@ export default function LookbookScreen() {
 
           <View style={styles.modalContent}>
             <View style={styles.inputSection}>
-              <Text style={styles.inputLabel}>Folder Name</Text>
+              <Text style={styles.inputLabel}>Lookbook Name</Text>
               <TextInput
                 style={styles.textInput}
                 value={newFolderName}
                 onChangeText={setNewFolderName}
-                placeholder="Enter folder name..."
+                placeholder="Enter lookbook name..."
                 placeholderTextColor="#999"
                 autoFocus
                 maxLength={30}
@@ -197,7 +249,7 @@ export default function LookbookScreen() {
               <View style={styles.previewCard}>
                 <View style={[styles.previewColor, { backgroundColor: selectedColor }]} />
                 <Text style={styles.previewText}>
-                  {newFolderName.trim() || 'Folder Name'}
+                  {newFolderName.trim() || 'Lookbook Name'}
                 </Text>
               </View>
             </View>
@@ -249,6 +301,17 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: 14,
     color: '#666',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 16,
   },
   emptyContainer: {
     flex: 1,

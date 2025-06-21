@@ -1,14 +1,16 @@
+import { BlogPost } from '@/api/types';
+import EmptyState from '@/components/ui/EmptyState';
 import Colors from '@/constants/Colors';
-import { blogPosts, blogPostsContent } from '@/data/blogData';
+import { useBlog } from '@/contexts/BlogContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Dimensions,
     Image,
-    ImageSourcePropType,
     Modal,
     ScrollView,
     Share,
@@ -21,34 +23,47 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
-// Helper function to handle image sources
-const getImageSource = (image: string | ImageSourcePropType): ImageSourcePropType => {
-  return typeof image === 'string' ? { uri: image } : image;
-};
-
 export default function BlogDetailScreen() {
   const { id } = useLocalSearchParams();
   const [isSharing, setIsSharing] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const postId = parseInt(id as string);
-  const post = blogPosts.find(p => p.id === postId);
-  
-  // Use the content from blogPostsContent but ensure we use the image from the post preview
-  const content = blogPostsContent[postId as keyof typeof blogPostsContent];
+  const { getBlogById } = useBlog();
 
-  if (!post || !content) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Post not found</Text>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const postId = id as string;
+
+  // Fetch blog post
+  useEffect(() => {
+    const fetchPost = async () => {
+      if (!postId) {
+        setError('Blog post ID is required');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const blogPost = await getBlogById(postId);
+        
+        if (blogPost) {
+          setPost(blogPost);
+        } else {
+          setError('Blog post not found');
+        }
+      } catch (err: any) {
+        console.error('Error fetching blog post:', err);
+        setError(err.message || 'Failed to load blog post');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [postId, getBlogById]);
 
   const handleBack = () => {
     router.back();
@@ -59,11 +74,13 @@ export default function BlogDetailScreen() {
   };
 
   const handleShareText = async () => {
+    if (!post) return;
+    
     setIsSharing(true);
     setShowShareModal(false);
     try {
       const shareTitle = `${post.title} | AfriStyle`;
-      const shareContent = `${post.title}\n\n${content.content.substring(0, 300)}...\n\n📱 Read the full article on AfriStyle - Discover African Fashion & Style`;
+      const shareContent = `${post.title}\n\n${post.content.substring(0, 300)}...\n\nBy ${post.creator.name}\nCategory: ${post.category.name}\n\n📱 Read the full article on AfriStyle - Discover African Fashion & Style`;
       
       await Share.share({
         title: shareTitle,
@@ -78,31 +95,20 @@ export default function BlogDetailScreen() {
   };
 
   const handleShareImage = async () => {
+    if (!post) return;
+    
     setIsSharing(true);
     setShowShareModal(false);
     try {
       const shareTitle = `${post.title} | AfriStyle`;
       
-      if (typeof post.image === 'string') {
-        // Handle URL images
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(post.image, {
-            mimeType: 'image/jpeg',
-            dialogTitle: shareTitle,
-          });
-        } else {
-          Alert.alert("Not Available", "Image sharing is not available on this device.");
-        }
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(post.imageUrl, {
+          mimeType: 'image/jpeg',
+          dialogTitle: shareTitle,
+        });
       } else {
-        // Handle local images (require() objects)
-        Alert.alert(
-          "Share Image", 
-          "Local images cannot be shared directly. Please share the text version instead.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Share Text", onPress: handleShareText }
-          ]
-        );
+        Alert.alert("Not Available", "Image sharing is not available on this device.");
       }
     } catch (error) {
       console.error('Error sharing image:', error);
@@ -111,6 +117,42 @@ export default function BlogDetailScreen() {
       setIsSharing(false);
     }
   };
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading article...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error state
+  if (error || !post) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Article not found"
+          description={error || "The article you're looking for doesn't exist or has been removed."}
+          actionText="Go Back"
+          onActionPress={handleBack}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -133,24 +175,30 @@ export default function BlogDetailScreen() {
                 color={isSharing ? "#ccc" : "#fff"} 
               />
             </TouchableOpacity>
-            
-
           </View>
         </View>
 
-        {/* Hero Image - Use the image from the post preview */}
+        {/* Hero Image */}
         <View style={styles.heroContainer}>
-          <Image source={getImageSource(post.image)} style={styles.heroImage} />
-
+          <Image source={{ uri: post.imageUrl }} style={styles.heroImage} />
         </View>
 
         {/* Content */}
         <View style={styles.contentContainer}>
+          <View style={styles.metaContainer}>
+            <Text style={styles.category}>{post.category.name}</Text>
+            <Text style={styles.date}>{formatDate(post.createdAt)}</Text>
+          </View>
+          
           <Text style={styles.title}>{post.title}</Text>
-          <Text style={styles.date}>{post.date}</Text>
+          
+          <View style={styles.authorContainer}>
+            <Text style={styles.author}>By {post.creator.name}</Text>
+            <Text style={styles.views}>{post.views} views</Text>
+          </View>
           
           <View style={styles.contentText}>
-            {content.content.split('\n\n').map((paragraph, index) => (
+            {post.content.split('\n\n').map((paragraph, index) => (
               <Text key={index} style={styles.paragraph}>
                 {paragraph}
               </Text>
@@ -200,14 +248,12 @@ export default function BlogDetailScreen() {
               </View>
             </View>
 
-            {/* Content */}
             <View style={styles.shareModalContent}>
               <Text style={styles.shareModalTitle}>Share Article</Text>
               <Text style={styles.shareModalSubtitle}>
-                How would you like to share "{post.title}"?
+                Choose how you'd like to share this article
               </Text>
 
-              {/* Share Options */}
               <View style={styles.shareOptions}>
                 <TouchableOpacity 
                   style={styles.shareOption}
@@ -215,15 +261,10 @@ export default function BlogDetailScreen() {
                   disabled={isSharing}
                 >
                   <View style={styles.shareOptionIcon}>
-                    <Ionicons name="text" size={24} color={Colors.primary} />
+                    <Ionicons name="text-outline" size={24} color={Colors.primary} />
                   </View>
-                  <View style={styles.shareOptionContent}>
-                    <Text style={styles.shareOptionTitle}>Share Text</Text>
-                    <Text style={styles.shareOptionDescription}>
-                      Share article with title and excerpt
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                  <Text style={styles.shareOptionText}>Share Text</Text>
+                  <Text style={styles.shareOptionSubtext}>Share article content</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -232,34 +273,19 @@ export default function BlogDetailScreen() {
                   disabled={isSharing}
                 >
                   <View style={styles.shareOptionIcon}>
-                    <Ionicons name="image" size={24} color={Colors.primary} />
+                    <Ionicons name="image-outline" size={24} color={Colors.primary} />
                   </View>
-                  <View style={styles.shareOptionContent}>
-                    <Text style={styles.shareOptionTitle}>Share Image</Text>
-                    <Text style={styles.shareOptionDescription}>
-                      Share the article's featured image
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                  <Text style={styles.shareOptionText}>Share Image</Text>
+                  <Text style={styles.shareOptionSubtext}>Share article image</Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Cancel Button */}
               <TouchableOpacity 
-                style={styles.cancelButton}
+                style={styles.shareModalClose}
                 onPress={() => setShowShareModal(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.shareModalCloseText}>Cancel</Text>
               </TouchableOpacity>
-            </View>
-
-            {/* Decorative footer dots */}
-            <View style={styles.modalFooter}>
-              <View style={styles.decorativeDots}>
-                <View style={[styles.dot, { backgroundColor: Colors.primary }]} />
-                <View style={[styles.dot, { backgroundColor: '#ddd' }]} />
-                <View style={[styles.dot, { backgroundColor: '#ddd' }]} />
-              </View>
             </View>
           </View>
         </View>
@@ -273,77 +299,104 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
   header: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 20,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
     zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   headerButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   headerButtonDisabled: {
     opacity: 0.5,
   },
-  scrollView: {
-    flex: 1,
+  headerActions: {
+    flexDirection: 'row',
   },
   heroContainer: {
-    position: 'relative',
+    width: '100%',
     height: 300,
+    position: 'relative',
   },
   heroImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#f0f0f0',
-  },
-  heroOverlay: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-  },
-  likeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    resizeMode: 'cover',
   },
   contentContainer: {
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 8,
-    lineHeight: 32,
+  metaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  category: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   date: {
     fontSize: 14,
     color: '#666',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 16,
+    lineHeight: 32,
+  },
+  authorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  author: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  views: {
+    fontSize: 12,
+    color: '#999',
   },
   contentText: {
-    marginTop: 8,
+    marginBottom: 32,
   },
   paragraph: {
     fontSize: 16,
@@ -352,193 +405,149 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'justify',
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#666',
-  },
-  backButton: {
-    width: 100,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-  },
-  bottomSpacing: {
-    height: 100,
-  },
   shareSection: {
-    marginTop: 32,
-    marginBottom: 16,
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
     alignItems: 'center',
+    paddingVertical: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
   },
   sharePrompt: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    color: '#666',
     marginBottom: 16,
-    textAlign: 'center',
   },
   shareButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
     backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 25,
     elevation: 2,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    minWidth: 180,
   },
   shareIcon: {
     marginRight: 8,
   },
   shareButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+  },
+  bottomSpacing: {
+    height: 40,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   shareModal: {
     backgroundColor: '#fff',
     borderRadius: 20,
-    padding: 20,
-    width: '80%',
-    maxHeight: '80%',
-    alignItems: 'center',
+    width: '100%',
+    maxWidth: 350,
+    overflow: 'hidden',
   },
   shareModalHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
   },
   modalTopBar: {
-    width: '100%',
+    width: 40,
     height: 4,
-    backgroundColor: '#ccc',
+    backgroundColor: '#E0E0E0',
     borderRadius: 2,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   shareIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#f0f0f0',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#F8F8F8',
     justifyContent: 'center',
     alignItems: 'center',
   },
   shareIconRing: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  shareModalContent: {
-    width: '100%',
-  },
-  shareModalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 8,
-  },
-  shareModalSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 24,
-  },
-  shareOptions: {
-    width: '100%',
-  },
-  shareOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  shareOptionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-    elevation: 2,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 2,
   },
-  shareOptionContent: {
-    flex: 1,
+  shareModalContent: {
+    padding: 20,
   },
-  shareOptionTitle: {
-    fontSize: 18,
+  shareModalTitle: {
+    fontSize: 20,
     fontWeight: '600',
     color: '#000',
-    marginBottom: 4,
+    textAlign: 'center',
+    marginBottom: 8,
   },
-  shareOptionDescription: {
+  shareModalSubtitle: {
     fontSize: 14,
     color: '#666',
-    flex: 1,
+    textAlign: 'center',
+    marginBottom: 24,
   },
-
-  cancelButton: {
-    width: '100%',
-    padding: 16,
-    backgroundColor: Colors.primary,
-    borderRadius: 25,
-    alignItems: 'center',
+  shareOptions: {
+    marginBottom: 24,
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  modalFooter: {
-    width: '100%',
-    marginTop: 20,
-  },
-  decorativeDots: {
+  shareOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#F8F8F8',
+    marginBottom: 12,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
+  shareOptionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  shareOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    flex: 1,
+  },
+  shareOptionSubtext: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  shareModalClose: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  shareModalCloseText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
 }); 

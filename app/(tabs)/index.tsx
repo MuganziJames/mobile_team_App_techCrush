@@ -1,13 +1,19 @@
 import StyleCard from '@/components/StyleCard';
+import EmptyState from '@/components/ui/EmptyState';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Style, useLookbook } from '@/contexts/LookbookContext';
+import { useOutfit } from '@/contexts/OutfitContext';
+import { outfitsToStyles } from '@/utils/outfitAdapter';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Modal,
+    RefreshControl,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -16,129 +22,9 @@ import {
     View
 } from 'react-native';
 
-// Sample style data - African Fashion Collection
-const sampleStyles: Style[] = [
-  {
-    id: 1,
-    title: 'Elegant Ankara Evening Gown',
-    image: require('../../assets/images/modernAfrican.jpg'),
-    category: 'Evening Wear',
-    tags: ['elegant', 'formal', 'ankara', 'african'],
-    color: '#8B4513',
-    description: 'A stunning Ankara evening gown that celebrates African heritage with modern elegance. This sophisticated piece features traditional African prints with contemporary tailoring, perfect for formal occasions, cultural events, and celebrations that honor African beauty and craftsmanship.'
-  },
-  {
-    id: 2,
-    title: 'Kente Casual Chic',
-    image: require('../../assets/images/elegantAfrican.jpg'),
-    category: 'Casual',
-    tags: ['kente', 'casual', 'comfortable', 'african'],
-    color: '#DAA520',
-    description: 'Light and stylish casual wear featuring authentic Kente patterns. This comfortable ensemble combines traditional African textiles with modern cuts, perfect for cultural events, everyday wear, or any occasion where you want to showcase your African pride with contemporary flair.'
-  },
-  {
-    id: 3,
-    title: 'Professional Dashiki Look',
-    image: require('../../assets/images/tropicalAfricanParadise.jpg'),
-    category: 'Business',
-    tags: ['professional', 'dashiki', 'formal', 'african'],
-    color: '#2F4F4F',
-    description: 'Sharp and professional business attire featuring modern Dashiki elements. This polished look combines traditional African aesthetics with contemporary tailoring, perfect for boardroom meetings, professional events, and showcasing cultural pride in corporate settings.'
-  },
-  {
-    id: 4,
-    title: 'Bohemian Mudcloth Style',
-    image: require('../../assets/images/kenteCasual.jpg'),
-    category: 'Bohemian',
-    tags: ['boho', 'mudcloth', 'artistic', 'african'],
-    color: '#8B4513',
-    description: 'Free-spirited bohemian style featuring authentic African mudcloth patterns. This artistic look embraces traditional African textiles with flowing silhouettes, perfect for creative events, cultural festivals, or expressing your connection to African artistic heritage.'
-  },
-  {
-    id: 5,
-    title: 'Sporty African Print Athleisure',
-    image: require('../../assets/images/AfricanPrintRomanticDress.jpg'),
-    category: 'Athleisure',
-    tags: ['sporty', 'african print', 'active', 'comfortable'],
-    color: '#FF6347',
-    description: 'Dynamic athleisure wear featuring vibrant African prints and modern athletic cuts. This versatile outfit seamlessly blends traditional African patterns with contemporary sportswear, perfect for active lifestyles while celebrating African design heritage.'
-  },
-  {
-    id: 6,
-    title: 'Vintage African Inspired',
-    image: require('../../assets/images/vintageAfrican.jpg'),
-    category: 'Vintage',
-    tags: ['vintage', 'retro', 'african', 'classic', 'heritage'],
-    color: '#8B4513',
-    description: 'Timeless vintage African ensemble featuring traditional patterns and classic silhouettes. This sophisticated look combines authentic African textiles with retro styling, celebrating the golden era of African fashion while maintaining contemporary elegance and cultural pride.'
-  },
-  {
-    id: 7,
-    title: 'Modern African Minimalist',
-    image: require('../../assets/images/bohemianCloth.jpg'),
-    category: 'Minimalist',
-    tags: ['minimal', 'clean', 'modern', 'african'],
-    color: '#F5F5F5',
-    description: 'Clean and modern minimalist style with subtle African influences. This sophisticated approach combines neutral tones with carefully chosen African-inspired details, creating maximum impact through thoughtful design that celebrates African aesthetics with contemporary elegance.'
-  },
-  {
-    id: 8,
-    title: 'Afrocentric Street Style',
-    image: require('../../assets/images/afroCentricStyle.jpg'),
-    category: 'Street Style',
-    tags: ['afrocentric', 'urban', 'trendy', 'african'],
-    color: '#696969',
-    description: 'Bold Afrocentric street style that celebrates African culture in urban settings. This contemporary look combines traditional African elements with modern streetwear trends, perfect for making a cultural statement while navigating city life with confidence and pride.'
-  },
-  {
-    id: 9,
-    title: 'African Print Romantic Dress',
-    image: require('../../assets/images/afroCentricStyle.jpg'),
-    category: 'Romantic',
-    tags: ['romantic', 'african print', 'feminine', 'floral'],
-    color: '#FFB6C1',
-    description: 'Dreamy romantic dress featuring beautiful African floral prints. This enchanting piece combines traditional African textile artistry with feminine silhouettes, perfect for special occasions, cultural celebrations, or any moment that calls for romantic African elegance.'
-  },
-  {
-    id: 10,
-    title: 'Afropunk Rebellion',
-    image: require('../../assets/images/africaGothicElegance.jpg'),
-    category: 'Punk',
-    tags: ['afropunk', 'rebellious', 'alternative', 'african'],
-    color: '#8B0000',
-    description: 'Bold Afropunk style that merges African heritage with rebellious spirit. This fierce look combines traditional African elements with punk aesthetics, perfect for music festivals, alternative events, or expressing your unique blend of cultural pride and non-conformist attitude.'
-  },
-  {
-    id: 11,
-    title: 'Tropical African Paradise',
-    image: require('../../assets/images/afroPunk.jpg'),
-    category: 'Resort',
-    tags: ['tropical', 'vacation', 'colorful', 'african'],
-    color: '#00CED1',
-    description: 'Vibrant tropical-inspired outfit featuring authentic African prints and colors. This colorful ensemble captures the essence of African paradise with bold patterns and breezy fabrics, perfect for beach vacations, resort wear, or bringing African sunshine to your wardrobe.'
-  },
-  {
-    id: 12,
-    title: 'African Gothic Elegance',
-    image: require('../../assets/images/danshikiLook.jpg'),
-    category: 'Gothic',
-    tags: ['gothic', 'dark', 'mysterious', 'african'],
-    color: '#2F2F2F',
-    description: 'Mysterious gothic elegance with African influences. This dramatic look combines rich African textiles with dark, sophisticated styling to create an aura of cultural mystery, perfect for evening events or expressing your unique blend of African heritage and gothic aesthetics.'
-  },
-  {
-    id: 13,
-    title: 'Afrocentric Academia Style',
-    image: require('../../assets/images/afroCentricStyle.jpg'),
-    category: 'Preppy',
-    tags: ['preppy', 'academic', 'classic', 'african'],
-    color: '#8B4513',
-    description: 'Classic academic style celebrating African intellectual heritage. This sophisticated look features traditional African elements with scholarly charm, perfect for academic settings, cultural institutions, or any environment where African intelligence meets impeccable style and cultural pride.'
-  }
-];
-
 export default function FeedScreen() {
   const { user } = useAuth();
+  const { outfits, loading, error, refreshOutfits } = useOutfit();
   const { 
     folders, 
     saveStyleToFolder, 
@@ -147,6 +33,10 @@ export default function FeedScreen() {
   
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  
+  // Convert outfits to styles for display
+  const styleItems = outfitsToStyles(outfits);
 
   const handleSaveStyle = (style: Style) => {
     if (isStyleSaved(style.id)) {
@@ -185,6 +75,16 @@ export default function FeedScreen() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshOutfits();
+    setRefreshing(false);
+  };
+
+  const handleSearchPress = () => {
+    router.push('/(tabs)/explore');
+  };
+
   const renderStyleCard = ({ item }: { item: Style }) => (
     <StyleCard
       style={item}
@@ -193,28 +93,89 @@ export default function FeedScreen() {
     />
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+  const renderHeader = () => (
+    <View style={componentStyles.headerContainer}>
+      <View style={componentStyles.welcomeSection}>
+        <Text style={componentStyles.welcomeText}>
+          Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+        </Text>
+        <Text style={componentStyles.subText}>
+          Discover new styles and save them to your lookbook
+        </Text>
+      </View>
+      
+      <TouchableOpacity 
+        style={componentStyles.searchButton}
+        onPress={handleSearchPress}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="search" size={20} color={Colors.white} />
+        <Text style={componentStyles.searchButtonText}>Search Styles</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderContent = () => {
+    if (loading && !refreshing) {
+      return (
+        <View style={componentStyles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={componentStyles.loadingText}>Loading styles...</Text>
+        </View>
+      );
+    }
+
+    if (error && styleItems.length === 0) {
+      return (
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Unable to Load Styles"
+          description={error}
+          actionText="Try Again"
+          onActionPress={refreshOutfits}
+        />
+      );
+    }
+
+    if (styleItems.length === 0) {
+      return (
+        <EmptyState
+          icon="shirt-outline"
+          title="No Styles Available"
+          description="Check back later for new styles and outfits"
+          actionText="Refresh"
+          onActionPress={refreshOutfits}
+        />
+      );
+    }
+
+    return (
       <FlatList
-        data={sampleStyles}
+        data={styleItems}
         renderItem={renderStyleCard}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.feedContent}
+        columnWrapperStyle={componentStyles.row}
+        contentContainerStyle={componentStyles.feedContent}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={() => (
-          <View style={styles.welcomeSection}>
-            <Text style={styles.welcomeText}>
-              Welcome back, {user?.name?.split(' ')[0] || 'User'}!
-            </Text>
-            <Text style={styles.subText}>
-              Discover new styles and save them to your lookbook
-            </Text>
-          </View>
-        )}
+        ListHeaderComponent={renderHeader}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
       />
+    );
+  };
+
+  return (
+    <SafeAreaView style={componentStyles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      {renderContent()}
 
       <Modal
         visible={showFolderModal}
@@ -222,20 +183,20 @@ export default function FeedScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowFolderModal(false)}
       >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+        <SafeAreaView style={componentStyles.modalContainer}>
+          <View style={componentStyles.modalHeader}>
             <TouchableOpacity 
               onPress={() => setShowFolderModal(false)}
-              style={styles.modalCloseButton}
+              style={componentStyles.modalCloseButton}
             >
-              <Text style={styles.modalCloseText}>Cancel</Text>
+              <Text style={componentStyles.modalCloseText}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Save to Folder</Text>
-            <View style={styles.modalCloseButton} />
+            <Text style={componentStyles.modalTitle}>Save to Folder</Text>
+            <View style={componentStyles.modalCloseButton} />
           </View>
 
-          <View style={styles.modalContent}>
-            <Text style={styles.modalSubtitle}>
+          <View style={componentStyles.modalContent}>
+            <Text style={componentStyles.modalSubtitle}>
               Choose a folder for "{selectedStyle?.title}"
             </Text>
             
@@ -244,22 +205,22 @@ export default function FeedScreen() {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity 
-                  style={styles.folderItem}
+                  style={componentStyles.folderItem}
                   onPress={() => handleFolderSelect(item.id)}
                 >
-                  <View style={styles.folderIcon}>
+                  <View style={componentStyles.folderIcon}>
                     <Ionicons name="folder" size={24} color={Colors.primary} />
                   </View>
-                  <Text style={styles.folderName}>{item.name}</Text>
+                  <Text style={componentStyles.folderName}>{item.name}</Text>
                   <Ionicons name="chevron-forward" size={20} color="#999" />
                 </TouchableOpacity>
               )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ItemSeparatorComponent={() => <View style={componentStyles.separator} />}
               ListEmptyComponent={() => (
-                <View style={styles.emptyState}>
+                <View style={componentStyles.emptyState}>
                   <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
-                  <Text style={styles.emptyStateText}>No folders yet</Text>
-                  <Text style={styles.emptyStateSubtext}>
+                  <Text style={componentStyles.emptyStateText}>No folders yet</Text>
+                  <Text style={componentStyles.emptyStateSubtext}>
                     Create a folder in your lookbook first
                   </Text>
                 </View>
@@ -272,19 +233,32 @@ export default function FeedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const componentStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
   },
-
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.darkGray,
+  },
+  headerContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
   feedContent: {
     paddingTop: 42,
     paddingBottom: 30,
   },
   welcomeSection: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    marginBottom: 20,
   },
   welcomeText: {
     fontSize: 22,
@@ -296,6 +270,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.darkGray,
     marginBottom: 16,
+  },
+  searchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   row: {
     justifyContent: 'space-between',
