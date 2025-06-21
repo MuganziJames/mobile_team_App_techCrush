@@ -13,6 +13,14 @@
       "distribution": "internal",
       "channel": "preview"
     },
+    "share": {
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "distribution": "internal",
+      "channel": "share"
+    },
     "production": {
       "autoIncrement": true,
       "channel": "production"
