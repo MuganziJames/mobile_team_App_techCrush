@@ -170,14 +170,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ...state,
     
     /**
-     * Update the currently authenticated user's profile locally.
-     * Optionally, you could call an API endpoint here to persist the change.
+     * Update the currently authenticated user's profile locally and persist to storage.
+     * This ensures data persists across app sessions.
      */
-    updateProfile: (updates: Partial<User>) => {
-      setState(prev => ({
-        ...prev,
-        user: prev.user ? { ...prev.user, ...updates } : prev.user,
-      }));
+    updateProfile: async (updates: Partial<User>) => {
+      try {
+        const updatedUser = state.user ? { ...state.user, ...updates } : null;
+        
+        if (updatedUser) {
+          // Update state
+          setState(prev => ({
+            ...prev,
+            user: updatedUser,
+          }));
+          
+          // Persist to AsyncStorage
+          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+          console.log('Profile updated and saved to storage:', updatedUser);
+          
+          // Optionally, you could also call an API endpoint here to sync with server
+          // await authService.updateProfile(updates);
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+      }
     },
     
     login: async ({ email, password }: LoginParams, rememberMe: boolean = false): Promise<AuthResult> => {

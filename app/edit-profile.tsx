@@ -1,4 +1,5 @@
 import CountryCodePicker, { CountryCode } from '@/components/ui/CountryCodePicker';
+import SuccessCard from '@/components/ui/SuccessCard';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +31,8 @@ export default function EditProfileScreen() {
   const defaultCountry = { name: 'Nigeria', code: 'NG', dial_code: '+234', flag: '🇳🇬' } as CountryCode;
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(defaultCountry);
   const [location, setLocation] = useState(user?.location || '');
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const showDatePicker = () => setDatePickerVisible(true);
   const hideDatePicker = () => setDatePickerVisible(false);
@@ -38,7 +41,7 @@ export default function EditProfileScreen() {
     hideDatePicker();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!fullName.trim()) {
       Alert.alert('Validation', 'Full name is required.');
       return;
@@ -50,22 +53,33 @@ export default function EditProfileScreen() {
       return;
     }
 
-    const updated = {
-      name: fullName.trim(),
-      email: email.trim(),
-      phone: phone ? `${selectedCountry.dial_code}${phone}` : undefined,
-      dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : undefined,
-      location: location.trim() || undefined,
-    };
+    setIsLoading(true);
 
-    updateProfile(updated);
+    try {
+      const updated = {
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone ? `${selectedCountry.dial_code}${phone}` : undefined,
+        dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : undefined,
+        location: location.trim() || undefined,
+      };
 
-    Alert.alert('Success', 'Profile updated successfully!', [
-      {
-        text: 'OK',
-        onPress: () => router.back(),
-      },
-    ]);
+      await updateProfile(updated);
+
+      // Show success card
+      setShowSuccessCard(true);
+      
+      // Navigate back after a short delay
+      setTimeout(() => {
+        router.back();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatDate = (date: Date | null) => {
@@ -76,6 +90,16 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      {/* Success Card */}
+      <SuccessCard
+        visible={showSuccessCard}
+        title="Profile Updated!"
+        message="Your profile information has been saved successfully."
+        onClose={() => setShowSuccessCard(false)}
+        autoHide={true}
+        duration={3000}
+      />
       
       {/* Header */}
       <View style={styles.header}>
@@ -108,11 +132,12 @@ export default function EditProfileScreen() {
           value={fullName}
           placeholder="Enter full name"
           onChangeText={setFullName}
+          editable={!isLoading}
         />
 
         {/* Date of Birth */}
         <Text style={styles.label}>Date of Birth</Text>
-        <TouchableOpacity onPress={showDatePicker} style={styles.inputRow} activeOpacity={0.8}>
+        <TouchableOpacity onPress={showDatePicker} style={styles.inputRow} activeOpacity={0.8} disabled={isLoading}>
           <Text style={styles.dateText}>{formatDate(dateOfBirth)}</Text>
           <Ionicons name="calendar" size={20} color={Colors.darkGray} />
         </TouchableOpacity>
@@ -126,6 +151,7 @@ export default function EditProfileScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           onChangeText={setEmail}
+          editable={!isLoading}
         />
 
         {/* Phone */}
@@ -141,6 +167,7 @@ export default function EditProfileScreen() {
             placeholder="8012345678"
             keyboardType="number-pad"
             onChangeText={setPhone}
+            editable={!isLoading}
           />
         </View>
 
@@ -151,11 +178,23 @@ export default function EditProfileScreen() {
           value={location}
           placeholder="Enter location"
           onChangeText={setLocation}
+          editable={!isLoading}
         />
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <TouchableOpacity 
+          style={[styles.saveButton, isLoading && styles.saveButtonDisabled]} 
+          onPress={handleSave} 
+          activeOpacity={0.8}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.saveButtonText}>Saving...</Text>
+            </View>
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
         </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -277,5 +316,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#CCCCCC',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 }); 

@@ -1,3 +1,4 @@
+import SuccessCard from '@/components/ui/SuccessCard';
 import { useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -149,6 +150,8 @@ export default function StyleDetailScreen() {
   } = useLookbook();
   
   const [showFolderModal, setShowFolderModal] = useState(false);
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const style = sampleStyles.find(s => s.id === parseInt(id as string));
 
@@ -195,16 +198,24 @@ export default function StyleDetailScreen() {
     setShowFolderModal(false);
     
     const folderName = folders.find(f => f.id === folderId)?.name || 'folder';
-    Alert.alert(
-      'Style Saved!',
-      `"${style.title}" has been saved to ${folderName}.`,
-      [{ text: 'OK' }]
-    );
+    setSuccessMessage(`"${style.title}" has been saved to ${folderName}.`);
+    setShowSuccessCard(true);
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
+      {/* Success Card */}
+      <SuccessCard
+        visible={showSuccessCard}
+        title="Style Saved!"
+        message={successMessage}
+        onClose={() => setShowSuccessCard(false)}
+        autoHide={true}
+        duration={3000}
+      />
+      
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header - now scrollable */}
         <View style={styles.header}>
