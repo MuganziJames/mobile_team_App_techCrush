@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Dimensions,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -87,8 +88,9 @@ export default function ResetPasswordScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View style={styles.header}>
           <TouchableOpacity 
@@ -104,6 +106,9 @@ export default function ResetPasswordScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          bounces={false}
+          scrollEnabled={true}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         >
           <View style={styles.content}>
             <Text style={styles.title}>Reset Password</Text>
@@ -144,27 +149,27 @@ export default function ResetPasswordScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+              <View style={styles.errorContainer}>
+                {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+              </View>
               
               {/* Password Strength Indicator */}
-              {password.length > 0 && (
-                <View style={styles.strengthContainer}>
-                  <View style={styles.strengthBar}>
-                    <View 
-                      style={[
-                        styles.strengthFill, 
-                        { 
-                          width: `${(passwordStrength.strength / 5) * 100}%`,
-                          backgroundColor: passwordStrength.color 
-                        }
-                      ]} 
-                    />
-                  </View>
-                  <Text style={[styles.strengthText, { color: passwordStrength.color }]}>
-                    {passwordStrength.text}
-                  </Text>
+              <View style={[styles.strengthContainer, { opacity: password.length > 0 ? 1 : 0 }]}>
+                <View style={styles.strengthBar}>
+                  <View 
+                    style={[
+                      styles.strengthFill, 
+                      { 
+                        width: `${(passwordStrength.strength / 5) * 100}%`,
+                        backgroundColor: passwordStrength.color 
+                      }
+                    ]} 
+                  />
                 </View>
-              )}
+                <Text style={[styles.strengthText, { color: passwordStrength.color }]}>
+                  {passwordStrength.text}
+                </Text>
+              </View>
               
               <Text style={styles.label}>Confirm New Password</Text>
               <View style={[styles.passwordContainer, errors.confirmPassword && styles.inputError]}>
@@ -199,7 +204,9 @@ export default function ResetPasswordScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              <View style={styles.errorContainer}>
+                {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              </View>
               
               <View style={styles.passwordRules}>
                 <Text style={styles.passwordRulesTitle}>Password Requirements:</Text>
@@ -276,7 +283,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 80,
+    minHeight: Dimensions.get('window').height - 200,
   },
   content: {
     paddingHorizontal: 24,
@@ -327,10 +335,13 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 8,
   },
+  errorContainer: {
+    minHeight: 20,
+    marginBottom: 16,
+  },
   errorText: {
     color: Colors.errorRed,
     fontSize: 14,
-    marginBottom: 16,
     fontWeight: '500',
   },
   strengthContainer: {

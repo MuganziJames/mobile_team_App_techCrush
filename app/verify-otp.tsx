@@ -81,16 +81,20 @@ export default function VerifyOTPScreen() {
     const boxes = [];
     
     for (let i = 0; i < 6; i++) {
+      const isFocused = otpValue.length === i;
+      const hasValue = otpValue.length > i;
+      
       boxes.push(
         <View
           key={i}
           style={[
             styles.otpBox,
-            otpValue.length === i && styles.otpBoxFocused
+            isFocused && styles.otpBoxFocused,
+            hasValue && styles.otpBoxFilled
           ]}
         >
           <Text style={styles.otpText}>
-            {otpValue.length > i ? otpValue[i] : ''}
+            {hasValue ? otpValue[i] : ''}
           </Text>
         </View>
       );
@@ -102,8 +106,9 @@ export default function VerifyOTPScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardAvoidingView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View style={styles.header}>
           <TouchableOpacity 
@@ -119,6 +124,9 @@ export default function VerifyOTPScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          bounces={false}
+          scrollEnabled={true}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         >
           <View style={styles.content}>
             <Text style={styles.title}>Verification Code</Text>
@@ -199,7 +207,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 50,
+    paddingBottom: Platform.OS === 'ios' ? 50 : 100,
+    minHeight: Dimensions.get('window').height - 200,
   },
   content: {
     paddingHorizontal: 24,
@@ -249,14 +258,10 @@ const styles = StyleSheet.create({
   otpBoxFocused: {
     borderColor: Colors.primary,
     backgroundColor: '#FFF8F5',
-    shadowColor: Colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  },
+  otpBoxFilled: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
   },
   otpText: {
     fontSize: 24,

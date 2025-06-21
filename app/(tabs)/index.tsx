@@ -5,15 +5,15 @@ import { Style, useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    Modal,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 // Sample style data - African Fashion Collection
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 22,
     fontWeight: '600',
-    color: Colors.black,
+    color: Colors.primary,
     marginBottom: 4,
   },
   subText: {

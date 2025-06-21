@@ -26,6 +26,7 @@ interface AuthState {
   isSignout: boolean;
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
+  hasRememberedOnboarding: boolean;
 }
 
 interface LoginParams {
@@ -53,7 +54,8 @@ interface AuthContextProps {
   isSignout: boolean;
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
-  login: (params: LoginParams) => Promise<AuthResult>;
+  hasRememberedOnboarding: boolean;
+  login: (params: LoginParams, rememberMe?: boolean) => Promise<AuthResult>;
   logout: () => Promise<void>;
   register: (params: RegisterParams) => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
@@ -61,7 +63,9 @@ interface AuthContextProps {
   setNewPassword: (email: string, newPassword: string, resetToken: string) => Promise<AuthResult>;
   updateProfile: (updates: Partial<User>) => void;
   completeOnboarding: () => Promise<void>;
+  rememberOnboarding: () => Promise<void>;
   checkOnboardingStatus: () => Promise<boolean>;
+  tryAutoLogin: () => Promise<boolean>;
 }
 
 // Context
@@ -91,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isSignout: false,
     isAuthenticated: false,
     hasCompletedOnboarding: false,
+    hasRememberedOnboarding: false,
   });
 
   // Load token and user from storage on mount
@@ -102,6 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check onboarding completion status first
         const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
         const hasCompletedOnboarding = onboardingCompleted === 'true';
+        
+        // Check if user has chosen to remember onboarding
+        const rememberedOnboarding = await AsyncStorage.getItem('hasRememberedOnboarding');
+        const hasRememberedOnboarding = rememberedOnboarding === 'true';
         
         // Use auth service to bootstrap authentication
         const { user: apiUser, token } = await authService.bootstrapAuth();
@@ -116,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isSignout: false,
             isAuthenticated: true,
             hasCompletedOnboarding,
+            hasRememberedOnboarding,
           });
         } else {
           console.log('No valid auth state found');
@@ -126,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isSignout: false,
             isAuthenticated: false,
             hasCompletedOnboarding,
+            hasRememberedOnboarding,
           });
         }
       } catch (e) {
@@ -133,6 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check onboarding status even on error
         const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
         const hasCompletedOnboarding = onboardingCompleted === 'true';
+        
+        // Check if user has chosen to remember onboarding
+        const rememberedOnboarding = await AsyncStorage.getItem('hasRememberedOnboarding');
+        const hasRememberedOnboarding = rememberedOnboarding === 'true';
         
         // Clear any stale auth data
         setState({
@@ -142,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isSignout: false,
           isAuthenticated: false,
           hasCompletedOnboarding,
+          hasRememberedOnboarding,
         });
       }
     };
@@ -164,8 +180,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }));
     },
     
-    login: async ({ email, password }: LoginParams): Promise<AuthResult> => {
-      console.log('Login attempt:', { email });
+    login: async ({ email, password }: LoginParams, rememberMe: boolean = false): Promise<AuthResult> => {
+      console.log('Login attempt:', { email, rememberMe });
       
       setState(prev => ({ ...prev, isLoading: true }));
       
@@ -174,6 +190,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (result.success && result.user && result.token) {
           const user = convertApiUserToUser(result.user);
+          
+          // Save credentials for auto-login if remember me is checked
+          if (rememberMe) {
+            try {
+              await AsyncStorage.setItem('rememberedEmail', email);
+              await AsyncStorage.setItem('rememberedPassword', password);
+              await AsyncStorage.setItem('autoLoginEnabled', 'true');
+              console.log('Credentials saved for auto-login');
+            } catch (error) {
+              console.error('Error saving credentials:', error);
+            }
+          }
           
           setState(prev => ({
             ...prev,
@@ -249,6 +277,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('Logout error:', error);
       } finally {
+        // Clear saved credentials on logout
+        try {
+          await AsyncStorage.removeItem('rememberedEmail');
+          await AsyncStorage.removeItem('rememberedPassword');
+          await AsyncStorage.removeItem('autoLoginEnabled');
+          console.log('Saved credentials cleared');
+        } catch (error) {
+          console.error('Error clearing saved credentials:', error);
+        }
+        
         // Always clear state even if API call fails
         setState({
           user: null,
@@ -257,6 +295,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isSignout: false,
           isAuthenticated: false,
           hasCompletedOnboarding: false,
+          hasRememberedOnboarding: false,
         });
         
         console.log('Auth state cleared, navigating to signin...');
@@ -349,12 +388,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
 
+    rememberOnboarding: async () => {
+      try {
+        await AsyncStorage.setItem('hasRememberedOnboarding', 'true');
+        setState(prev => ({
+          ...prev,
+          hasRememberedOnboarding: true,
+        }));
+        console.log('Onboarding remembered and saved');
+      } catch (error) {
+        console.error('Error saving onboarding remember preference:', error);
+      }
+    },
+
     checkOnboardingStatus: async () => {
       try {
         const completed = await AsyncStorage.getItem('hasCompletedOnboarding');
         return completed === 'true';
       } catch (error) {
         console.error('Error checking onboarding status:', error);
+        return false;
+      }
+    },
+
+    tryAutoLogin: async (): Promise<boolean> => {
+      try {
+        const autoLoginEnabled = await AsyncStorage.getItem('autoLoginEnabled');
+        if (autoLoginEnabled !== 'true') {
+          return false;
+        }
+
+        const email = await AsyncStorage.getItem('rememberedEmail');
+        const password = await AsyncStorage.getItem('rememberedPassword');
+        
+        if (!email || !password) {
+          return false;
+        }
+
+        console.log('Attempting auto-login for:', email);
+        const result = await authService.login({ email, password });
+        
+        if (result.success && result.user && result.token) {
+          const user = convertApiUserToUser(result.user);
+          
+          setState(prev => ({
+            ...prev,
+            user,
+            token: result.token || null,
+            isLoading: false,
+            isSignout: false,
+            isAuthenticated: true,
+          }));
+
+          console.log('Auto-login successful for:', user.email);
+          return true;
+        } else {
+          // Clear invalid credentials
+          await AsyncStorage.removeItem('rememberedEmail');
+          await AsyncStorage.removeItem('rememberedPassword');
+          await AsyncStorage.removeItem('autoLoginEnabled');
+          return false;
+        }
+      } catch (error) {
+        console.error('Auto-login error:', error);
+        // Clear credentials on error
+        await AsyncStorage.removeItem('rememberedEmail');
+        await AsyncStorage.removeItem('rememberedPassword');
+        await AsyncStorage.removeItem('autoLoginEnabled');
         return false;
       }
     },

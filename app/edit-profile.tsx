@@ -8,13 +8,14 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
@@ -73,18 +74,32 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.black} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <View style={styles.headerRight} />
+      </View>
+
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Text style={styles.title}>Edit Profile</Text>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
 
         {/* Full Name */}
         <Text style={styles.label}>Full Name</Text>
@@ -142,7 +157,8 @@ export default function EditProfileScreen() {
         <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
           <Text style={styles.saveButtonText}>Save Changes</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Date Picker */}
       <DateTimePickerModal
@@ -154,7 +170,7 @@ export default function EditProfileScreen() {
         maximumDate={new Date(2025, 11, 31)}
         date={dateOfBirth || new Date(1990, 0, 1)}
       />
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -162,6 +178,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 32,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.black,
+  },
+  headerRight: {
+    width: 40,
+    height: 40,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

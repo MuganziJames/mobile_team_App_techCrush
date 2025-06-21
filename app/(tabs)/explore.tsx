@@ -3,16 +3,16 @@ import { Style, useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 // Sample style data - African Fashion Collection (same as feed)
@@ -56,7 +56,7 @@ const allStyles: Style[] = [
   {
     id: 5,
     title: 'Sporty African Print Athleisure',
-    image: require('../../assets/images/afroPunk.jpg'),
+    image: require('../../assets/images/AfricanPrintRomanticDress.jpg'),
     category: 'Athleisure',
     tags: ['sporty', 'african print', 'active', 'comfortable'],
     color: '#FF6347',
@@ -83,7 +83,7 @@ const allStyles: Style[] = [
   {
     id: 8,
     title: 'Afrocentric Street Style',
-    image: require('../../assets/images/danshikiLook.jpg'),
+    image: require('../../assets/images/afroCentricStyle.jpg'),
     category: 'Street Style',
     tags: ['afrocentric', 'urban', 'trendy', 'african'],
     color: '#696969',
@@ -110,7 +110,7 @@ const allStyles: Style[] = [
   {
     id: 11,
     title: 'Tropical African Paradise',
-    image: require('../../assets/images/AfricanPrintRomanticDress.jpg'),
+    image: require('../../assets/images/afroPunk.jpg'),
     category: 'Resort',
     tags: ['tropical', 'vacation', 'colorful', 'african'],
     color: '#00CED1',
@@ -119,7 +119,7 @@ const allStyles: Style[] = [
   {
     id: 12,
     title: 'African Gothic Elegance',
-    image: require('../../assets/images/africaGothicElegance.jpg'),
+    image: require('../../assets/images/danshikiLook.jpg'),
     category: 'Gothic',
     tags: ['gothic', 'dark', 'mysterious', 'african'],
     color: '#2F2F2F',
@@ -231,6 +231,12 @@ export default function SearchScreen() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
+  const [showAllTags, setShowAllTags] = useState(false);
+
+  // Number of tags to show initially
+  const INITIAL_TAGS_COUNT = 8;
+  const visibleTags = showAllTags ? tags : tags.slice(0, INITIAL_TAGS_COUNT);
+  const hasMoreTags = tags.length > INITIAL_TAGS_COUNT;
 
   // Filter styles based on search criteria
   const filteredStyles = allStyles.filter(style => {
@@ -384,7 +390,7 @@ export default function SearchScreen() {
         <View style={styles.filterSection}>
           <Text style={styles.filterTitle}>Tags</Text>
           <View style={styles.tagsContainer}>
-            {tags.map((tag) => (
+            {visibleTags.map((tag) => (
               <TouchableOpacity
                 key={tag}
                 style={[
@@ -402,12 +408,29 @@ export default function SearchScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          
+          {/* Show More/Show Less Button */}
+          {hasMoreTags && (
+            <TouchableOpacity 
+              style={styles.showMoreButton}
+              onPress={() => setShowAllTags(!showAllTags)}
+            >
+              <Text style={styles.showMoreText}>
+                {showAllTags ? 'Show Less' : `Show More (${tags.length - INITIAL_TAGS_COUNT} more)`}
+              </Text>
+              <Ionicons 
+                name={showAllTags ? 'chevron-up' : 'chevron-down'} 
+                size={16} 
+                color="#E9642C" 
+              />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Clear All Filters */}
         <View style={styles.clearAllContainer}>
           <TouchableOpacity onPress={clearAllFilters} style={styles.clearAllButton}>
-            <Ionicons name="refresh-outline" size={16} color="#007AFF" />
+            <Ionicons name="refresh-outline" size={16} color="#E9642C" />
             <Text style={styles.clearAllText}>Clear All Filters</Text>
           </TouchableOpacity>
         </View>
@@ -620,6 +643,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '500',
   },
+  showMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 8,
+  },
+  showMoreText: {
+    fontSize: 14,
+    color: '#E9642C',
+    fontWeight: '500',
+    marginRight: 4,
+  },
   clearAllContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -631,14 +668,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#FFF8F5',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: '#E9642C',
   },
   clearAllText: {
     marginLeft: 6,
     fontSize: 14,
-    color: '#007AFF',
+    color: '#E9642C',
     fontWeight: '500',
   },
   resultsSection: {

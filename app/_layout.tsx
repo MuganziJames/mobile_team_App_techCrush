@@ -103,6 +103,7 @@ function RootLayoutNav() {
         <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
         <Stack.Screen name="verify-otp" options={{ headerShown: false }} />
         <Stack.Screen name="reset-password" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
         <Stack.Screen name="privacy-security" options={{ headerShown: false }} />
         <Stack.Screen name="privacy-settings" options={{ headerShown: false }} />
         <Stack.Screen name="blog-detail" options={{ headerShown: false }} />

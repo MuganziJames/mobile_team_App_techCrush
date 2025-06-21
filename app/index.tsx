@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function SplashScreen() {
-  const { user, isLoading, hasCompletedOnboarding } = useAuth();
+  const { user, isLoading, hasRememberedOnboarding } = useAuth();
   const hasNavigated = useRef(false);
   const [showLoader, setShowLoader] = useState(true);
 
@@ -32,11 +32,11 @@ export default function SplashScreen() {
           if (user) {
             // User is logged in, go to main app
             router.replace('/(tabs)');
-          } else if (hasCompletedOnboarding) {
-            // User has completed onboarding but not logged in, go to signin
+          } else if (hasRememberedOnboarding) {
+            // User has chosen to remember onboarding, go to signin
             router.replace('/signin');
           } else {
-            // User hasn't completed onboarding, show onboarding
+            // Show onboarding for everyone else
             router.replace('/onboarding');
           }
         }, 200);
@@ -44,7 +44,7 @@ export default function SplashScreen() {
     }, 1800);
     
     return () => clearTimeout(timer);
-  }, [user, isLoading, hasCompletedOnboarding]);
+  }, [user, isLoading, hasRememberedOnboarding]);
 
   return (
     <View style={styles.container}>

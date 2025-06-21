@@ -2,29 +2,50 @@ import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export default function SignInScreen() {
-  const { login } = useAuth();
+  const { login, tryAutoLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Try auto-login when component mounts
+  useEffect(() => {
+    const attemptAutoLogin = async () => {
+      setIsLoading(true);
+      try {
+        const autoLoginSuccess = await tryAutoLogin();
+        if (autoLoginSuccess) {
+          console.log('Auto-login successful, navigating to tabs');
+          router.replace('/(tabs)');
+        }
+      } catch (error) {
+        console.error('Auto-login error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    attemptAutoLogin();
+  }, []);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -56,8 +77,8 @@ export default function SignInScreen() {
     console.log('Login validation passed, proceeding with login');
     
     try {
-      console.log('Attempting login with:', { email, password });
-      const result = await login({ email, password });
+      console.log('Attempting login with:', { email, password, rememberMe });
+      const result = await login({ email, password }, rememberMe);
       console.log('Login result:', result);
       
       if (result.success) {
@@ -141,6 +162,22 @@ export default function SignInScreen() {
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
+            
+            {/* Remember Me Toggle */}
+            <TouchableOpacity 
+              style={styles.rememberContainer}
+              onPress={() => setRememberMe(!rememberMe)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
+                {rememberMe && (
+                  <Ionicons name="checkmark" size={14} color={Colors.white} />
+                )}
+              </View>
+              <Text style={styles.rememberText}>
+                Remember me
+              </Text>
+            </TouchableOpacity>
             
             <Link href="/forgot-password" style={styles.forgotPasswordLink}>
               Forgot Password?
@@ -249,6 +286,31 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     paddingHorizontal: 16,
+  },
+  rememberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 3,
+    borderWidth: 2,
+    borderColor: Colors.midGray,
+    backgroundColor: Colors.white,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  rememberText: {
+    fontSize: 14,
+    color: Colors.darkGray,
+    fontWeight: '500',
   },
   forgotPasswordLink: {
     fontSize: 14,
