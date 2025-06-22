@@ -160,7 +160,7 @@ export default function BlogScreen() {
               <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search posts..."
+                placeholder="Search"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholderTextColor="#999"
@@ -313,9 +313,13 @@ export default function BlogScreen() {
         {/* Popular Section */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Latest</Text>
-          {blogs.length > 4 && (
-            <TouchableOpacity onPress={handleShowAll}>
-              <Text style={styles.seeAllText}>See all</Text>
+          {blogs.length > 2 && (
+            <TouchableOpacity 
+              style={styles.showAllHeaderButton}
+              onPress={handleShowAll}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.showAllHeaderText}>Show All</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -329,38 +333,43 @@ export default function BlogScreen() {
             onActionPress={refreshBlogs}
           />
         ) : (
-          blogs.slice(0, 4).map((post) => (
-            <View key={post.id} style={styles.popularItem}>
-              <TouchableOpacity 
-                style={styles.popularContent}
-                onPress={() => handlePostPress(post.id)}
-                activeOpacity={0.7}
-              >
-                <Image source={{ uri: post.imageUrl }} style={styles.popularImage} />
-                <View style={styles.popularInfo}>
-                  <Text style={styles.popularTitle}>{post.title}</Text>
-                  <View style={styles.popularMeta}>
-                    <Text style={styles.popularDate}>{formatDate(post.createdAt)}</Text>
-                    <Text style={styles.popularCategory}>{post.category.name}</Text>
-                  </View>
-                  <Text style={styles.popularAuthor}>By {post.creator.name}</Text>
-                </View>
-              </TouchableOpacity>
-              <View style={styles.popularActions}>
+          <>
+            {blogs.slice(0, 4).map((post) => (
+              <View key={post.id} style={styles.popularItem}>
                 <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => handleShare(post)}
+                  style={styles.popularContent}
+                  onPress={() => handlePostPress(post.id)}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons 
-                    name="share-outline" 
-                    size={20} 
-                    color="#666"
-                  />
+                  <Image source={{ uri: post.imageUrl }} style={styles.popularImage} />
+                  <View style={styles.popularInfo}>
+                    <Text style={styles.popularTitle}>{post.title}</Text>
+                    <View style={styles.popularMeta}>
+                      <Text style={styles.popularDate}>{formatDate(post.createdAt)}</Text>
+                      <Text style={styles.popularCategory}>{post.category.name}</Text>
+                    </View>
+                    <Text style={styles.popularAuthor}>By {post.creator.name}</Text>
+                  </View>
                 </TouchableOpacity>
+                <View style={styles.popularActions}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleShare(post)}
+                  >
+                    <Ionicons 
+                      name="share-outline" 
+                      size={20} 
+                      color="#666"
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          ))
-        )}
+            ))}
+            
+                        {/* Bottom spacing */}
+            <View style={styles.bottomSpacing} />
+            </>
+          )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -451,18 +460,30 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   searchIcon: {
     marginRight: 12,
+    opacity: 0.6,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: '#000',
+    paddingVertical: 0,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -478,6 +499,17 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 16,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  showAllHeaderButton: {
+    backgroundColor: '#E8E8E8',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  showAllHeaderText: {
+    fontSize: 14,
     color: Colors.primary,
     fontWeight: '500',
   },
@@ -649,5 +681,36 @@ const styles = StyleSheet.create({
   actionButton: {
     padding: 8,
     marginLeft: 8,
+  },
+  showAllContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    paddingBottom: 32,
+  },
+  showAllButton: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+  },
+  showAllButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginRight: 8,
+  },
+  bottomSpacing: {
+    height: 32,
   },
 }); 
