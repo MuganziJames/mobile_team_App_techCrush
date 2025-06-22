@@ -1,19 +1,21 @@
 import NoteEditor from '@/components/NoteEditor';
 import StyleCard from '@/components/StyleCard';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import SuccessCard from '@/components/ui/SuccessCard';
 import { useLookbook } from '@/contexts/LookbookContext';
 import { exportFolderAsPDF } from '@/utils/exportUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -28,6 +30,10 @@ export default function LookbookFolderScreen() {
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<any>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [styleToRemove, setStyleToRemove] = useState<any>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const folderStyles = getStylesInFolder(folderId as string);
 
@@ -39,18 +45,18 @@ export default function LookbookFolderScreen() {
   };
 
   const handleRemoveStyle = (style: any) => {
-    Alert.alert(
-      'Remove Style',
-      `Remove "${style.title}" from ${folderName}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Remove', 
-          style: 'destructive', 
-          onPress: () => removeStyleFromFolder(style.id, folderId as string)
-        }
-      ]
-    );
+    setStyleToRemove(style);
+    setShowConfirmModal(true);
+  };
+
+  const confirmRemoveStyle = () => {
+    if (styleToRemove) {
+      removeStyleFromFolder(styleToRemove.id, folderId as string);
+      setSuccessMessage(`Style Removed! "${styleToRemove.title}" has been removed from ${folderName}.`);
+      setShowSuccessMessage(true);
+      setShowConfirmModal(false);
+      setStyleToRemove(null);
+    }
   };
 
   const handleAddNote = (style: any) => {
@@ -248,6 +254,28 @@ export default function LookbookFolderScreen() {
           }}
         />
       )}
+
+      <ConfirmationModal
+        visible={showConfirmModal}
+        iconName="trash"
+        iconBackground="#FF3B30"
+        title="Remove Style"
+        message={styleToRemove ? `Remove "${styleToRemove.title}" from ${folderName}?` : ''}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        onConfirm={confirmRemoveStyle}
+        onCancel={() => {
+          setShowConfirmModal(false);
+          setStyleToRemove(null);
+        }}
+      />
+
+      <SuccessCard
+        visible={showSuccessMessage}
+        title="Style Removed!"
+        message={successMessage}
+        onClose={() => setShowSuccessMessage(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -279,6 +307,7 @@ const styles = StyleSheet.create({
   },
   headerInfo: {
     flex: 1,
+    marginLeft: 16,
   },
   headerTitle: {
     flexDirection: 'row',

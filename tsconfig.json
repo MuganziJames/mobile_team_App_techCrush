@@ -7,7 +7,9 @@
       "dom",
       "esnext"
     ],
-    "moduleResolution": "bundler",
+    "module": "esnext",
+    "moduleResolution": "node",
+
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
@@ -29,5 +31,5 @@
     "node_modules",
     "config"
   ],
-  "extends": "expo/tsconfig.base"
+
 }
