@@ -213,6 +213,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.7,
     fontWeight: '400',
+
   },
   bottomContainer: {
     position: 'absolute',
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   paginationContainer: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
 
   buttonContainer: {

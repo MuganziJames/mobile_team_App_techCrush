@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mystylemag",
-    "userInterfaceStyle": "automatic",      
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mystylemag.app",
-      "buildNumber": "1", 
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -62,12 +62,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "96f5cd40-902b-4b96-95c0-167ca24fbdfa"
+        "projectId": "355f0642-59be-43f2-a1f5-b48cadcccdec"
       }
     },
-    "owner": "muganzijames",
-    "updates": {
-      "url": "https://u.expo.dev/96f5cd40-902b-4b96-95c0-167ca24fbdfa"
-    }
+    "owner": "muganzijames"
   }
 }
