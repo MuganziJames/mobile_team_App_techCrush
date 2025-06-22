@@ -17,6 +17,8 @@ interface User {
   phone?: string;
   dateOfBirth?: string; // ISO string or formatted date
   location?: string;
+  countryCode?: string;
+  dialCode?: string;
 }
 
 interface AuthState {

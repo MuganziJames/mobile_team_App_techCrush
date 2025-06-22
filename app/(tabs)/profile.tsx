@@ -284,6 +284,11 @@ export default function ProfileScreen() {
 
   // Get user initials for avatar
   const getInitials = () => {
+    // Prefer stored firstName and lastName
+    if (localUser?.firstName && localUser?.lastName) {
+      return localUser.firstName.charAt(0) + localUser.lastName.charAt(0);
+    }
+    // Fallback to parsing name
     if (localUser?.name) {
       const nameParts = localUser.name.split(' ');
       return (nameParts[0]?.charAt(0) || '') + (nameParts[1]?.charAt(0) || '');
@@ -293,6 +298,10 @@ export default function ProfileScreen() {
 
   // Get first name for greeting
   const getFirstName = () => {
+    // Prefer stored firstName, fallback to parsing name
+    if (localUser?.firstName) {
+      return localUser.firstName;
+    }
     if (localUser?.name) {
       return localUser.name.split(' ')[0];
     }
@@ -348,15 +357,28 @@ export default function ProfileScreen() {
               <Text style={styles.fieldLabel}>Full Name</Text>
               <View style={styles.fieldContainer}>
                 <Text style={styles.fieldValue}>
-                  {localUser?.name || 'Not provided'}
+                  {localUser?.name || 
+                   (localUser?.firstName && localUser?.lastName ? 
+                    `${localUser.firstName} ${localUser.lastName}` : 'Not provided')}
                 </Text>
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Date Of Birth</Text>
+              <Text style={styles.fieldLabel}>First Name</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{localUser?.dateOfBirth ? new Date(localUser.dateOfBirth).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>
+                  {localUser?.firstName || 'Not provided'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Last Name</Text>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.fieldValue}>
+                  {localUser?.lastName || 'Not provided'}
+                </Text>
               </View>
             </View>
 
@@ -370,7 +392,16 @@ export default function ProfileScreen() {
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Phone Number</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{localUser?.phone || 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>
+                  {localUser?.phone || 'Not provided'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>Date Of Birth</Text>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.fieldValue}>{localUser?.dateOfBirth ? new Date(localUser.dateOfBirth).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'Not provided'}</Text>
               </View>
             </View>
 

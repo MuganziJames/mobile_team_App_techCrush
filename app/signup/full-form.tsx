@@ -3,6 +3,7 @@ import TextField from '@/components/ui/TextField';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -164,7 +165,29 @@ export default function SignUpFullForm() {
       console.log('Registration result:', result);
       
       if (result.success) {
-        console.log('Registration successful, showing success modal');
+        console.log('Registration successful, storing additional user details');
+        
+        // Store additional user details locally for profile use
+        const additionalUserData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: fullPhoneNumber,
+          countryCode: selectedCountry.code,
+          dialCode: selectedCountry.dial_code,
+        };
+        
+        // Get the registered user data and merge with additional details
+        if (result.user) {
+          const completeUserData = {
+            ...result.user,
+            ...additionalUserData,
+          };
+          
+          // Store the complete user data locally
+          await AsyncStorage.setItem('user', JSON.stringify(completeUserData));
+          console.log('Stored complete user data:', completeUserData);
+        }
+        
         // Clear form data
         setFormData({
           firstName: '',
