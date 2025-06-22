@@ -1,5 +1,6 @@
 import StyleCard from '@/components/StyleCard';
 import EmptyState from '@/components/ui/EmptyState';
+import SuccessCard from '@/components/ui/SuccessCard';
 import Colors from '@/constants/Colors';
 import { useCategory } from '@/contexts/CategoryContext';
 import { Style, useLookbook } from '@/contexts/LookbookContext';
@@ -9,7 +10,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Modal,
     SafeAreaView,
@@ -54,7 +54,9 @@ export default function SearchScreen() {
   const { 
     folders, 
     saveStyleToFolder, 
-    isStyleSaved 
+    isStyleSaved,
+    removeStyleFromFolder,
+    getStyleFolder
   } = useLookbook();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +66,8 @@ export default function SearchScreen() {
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [searchResults, setSearchResults] = useState<Style[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
   
   // Convert outfits to styles for display
   const allStyles = outfitsToStyles(outfits);
@@ -137,23 +141,22 @@ export default function SearchScreen() {
     }
   };
 
-  const handleSaveStyle = (style: Style) => {
+  const handleSaveStyle = async (style: Style) => {
     if (isStyleSaved(style.id)) {
-      Alert.alert(
-        'Style Already Saved',
-        'This style is already in your lookbook. What would you like to do?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Move to Different Folder', 
-            onPress: () => {
-              setSelectedStyle(style);
-              setShowFolderModal(true);
-            }
-          }
-        ]
-      );
+      // Style is already saved - directly remove it
+      const folderId = getStyleFolder(style.id);
+      const folderName = folders.find(f => f.id === folderId)?.name || 'lookbook';
+      
+      if (folderId) {
+        await removeStyleFromFolder(style.id, folderId);
+        setSuccessMessage({
+          title: 'Style Removed!',
+          message: `"${style.title}" has been removed from ${folderName}.`
+        });
+        setShowSuccessCard(true);
+      }
     } else {
+      // Style not saved - show folder selection
       setSelectedStyle(style);
       setShowFolderModal(true);
     }
@@ -166,11 +169,11 @@ export default function SearchScreen() {
       setSelectedStyle(null);
       
       const folderName = folders.find(f => f.id === folderId)?.name || 'folder';
-      Alert.alert(
-        'Style Saved!',
-        `"${selectedStyle.title}" has been saved to ${folderName}.`,
-        [{ text: 'OK' }]
-      );
+      setSuccessMessage({
+        title: 'Style Saved!',
+        message: `"${selectedStyle.title}" has been saved to ${folderName}.`
+      });
+      setShowSuccessCard(true);
     }
   };
 
@@ -366,11 +369,18 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={componentStyles.container}>
-            <FlatList
-              data={filteredStyles}
-              renderItem={renderStyleCard}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={2}
+      <SuccessCard
+        visible={showSuccessCard}
+        title={successMessage.title}
+        message={successMessage.message}
+        onClose={() => setShowSuccessCard(false)}
+      />
+      
+      <FlatList
+        data={filteredStyles}
+        renderItem={renderStyleCard}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
         columnWrapperStyle={componentStyles.row}
         ListHeaderComponent={renderListHeader}
         ListEmptyComponent={renderEmptyComponent}

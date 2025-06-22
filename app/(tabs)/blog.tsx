@@ -2,7 +2,6 @@ import { BlogPost } from '@/api/types';
 import EmptyState from '@/components/ui/EmptyState';
 import Colors from '@/constants/Colors';
 import { useBlog } from '@/contexts/BlogContext';
-import { useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -11,7 +10,6 @@ import {
   Alert,
   Dimensions,
   Image,
-  Modal,
   RefreshControl,
   ScrollView,
   Share,
@@ -29,16 +27,8 @@ export default function BlogScreen() {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showFolderModal, setShowFolderModal] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<BlogPost[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
-  const { 
-    folders, 
-    saveStyleToFolder, 
-    isStyleSaved 
-  } = useLookbook();
 
   const {
     blogs,
@@ -79,54 +69,6 @@ export default function BlogScreen() {
     setShowAll(false);
     setSearchQuery('');
     setSearchResults([]);
-  };
-
-  const handleSave = (post: BlogPost) => {
-    const styleId = post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0));
-    const style = {
-      id: styleId,
-      title: post.title,
-      image: post.imageUrl,
-      category: post.category.name,
-      tags: [post.category.name.toLowerCase()],
-      color: Colors.primary,
-      description: post.title
-    };
-
-    if (isStyleSaved(styleId)) {
-      Alert.alert(
-        'Post Already Saved',
-        'This post is already in your lookbook. What would you like to do?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Move to Different Folder', 
-            onPress: () => {
-              setSelectedPost(style);
-              setShowFolderModal(true);
-            }
-          }
-        ]
-      );
-    } else {
-      setSelectedPost(style);
-      setShowFolderModal(true);
-    }
-  };
-
-  const handleFolderSelect = async (folderId: string) => {
-    if (selectedPost) {
-      await saveStyleToFolder(selectedPost, folderId);
-      setShowFolderModal(false);
-      setSelectedPost(null);
-      
-      const folderName = folders.find((f: any) => f.id === folderId)?.name || 'folder';
-      Alert.alert(
-        'Post Saved!',
-        `"${selectedPost.title}" has been saved to ${folderName}.`,
-        [{ text: 'OK' }]
-      );
-    }
   };
 
   const handlePostPress = (postId: string) => {
@@ -278,56 +220,11 @@ export default function BlogScreen() {
                       color="#666"
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={() => handleSave(post)}
-                  >
-                    <Ionicons 
-                      name={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? "bookmark" : "bookmark-outline"} 
-                      size={22} 
-                      color={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? Colors.primary : "#666"}
-                    />
-                  </TouchableOpacity>
                 </View>
               </View>
             ))
           )}
         </ScrollView>
-
-        {/* Folder Selection Modal */}
-        <Modal
-          visible={showFolderModal}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowFolderModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.folderModal}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Save to Folder</Text>
-                <TouchableOpacity onPress={() => setShowFolderModal(false)}>
-                  <Ionicons name="close" size={24} color="#666" />
-                </TouchableOpacity>
-              </View>
-              
-              <ScrollView style={styles.folderList}>
-                {folders.map((folder: any) => (
-                  <TouchableOpacity
-                    key={folder.id}
-                    style={styles.folderItem}
-                    onPress={() => handleFolderSelect(folder.id)}
-                  >
-                    <View style={styles.folderInfo}>
-                      <Text style={styles.folderName}>{folder.name}</Text>
-                      <Text style={styles.folderCount}>{folder.styles?.length || 0} items</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={20} color="#999" />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </View>
-        </Modal>
       </SafeAreaView>
     );
   }
@@ -460,56 +357,11 @@ export default function BlogScreen() {
                     color="#666"
                   />
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => handleSave(post)}
-                >
-                  <Ionicons 
-                    name={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? "bookmark" : "bookmark-outline"} 
-                    size={20} 
-                    color={isStyleSaved(post.id.hashCode ? post.id.hashCode() : Math.abs(post.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0))) ? Colors.primary : "#666"}
-                  />
-                </TouchableOpacity>
               </View>
             </View>
           ))
         )}
       </ScrollView>
-
-      {/* Folder Selection Modal */}
-      <Modal
-        visible={showFolderModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowFolderModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.folderModal}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Save to Folder</Text>
-              <TouchableOpacity onPress={() => setShowFolderModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.folderList}>
-              {folders.map((folder: any) => (
-                <TouchableOpacity
-                  key={folder.id}
-                  style={styles.folderItem}
-                  onPress={() => handleFolderSelect(folder.id)}
-                >
-                  <View style={styles.folderInfo}>
-                    <Text style={styles.folderName}>{folder.name}</Text>
-                    <Text style={styles.folderCount}>{folder.styles?.length || 0} items</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#999" />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -795,53 +647,5 @@ const styles = StyleSheet.create({
   actionButton: {
     padding: 8,
     marginLeft: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  folderModal: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  folderList: {
-    maxHeight: 300,
-  },
-  folderItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  folderInfo: {
-    flex: 1,
-  },
-  folderName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    marginBottom: 4,
-  },
-  folderCount: {
-    fontSize: 12,
-    color: '#666',
   },
 }); 

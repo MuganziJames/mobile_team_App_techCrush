@@ -4,7 +4,7 @@ import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
@@ -33,6 +33,31 @@ export default function EditProfileScreen() {
   const [location, setLocation] = useState(user?.location || '');
   const [showSuccessCard, setShowSuccessCard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update form fields when user data changes
+  useEffect(() => {
+    if (user) {
+      setFullName(user.name || '');
+      setEmail(user.email || '');
+      setPhone(user.phone?.replace(/^\+\d+/, '') || ''); // Remove country code from phone
+      setLocation(user.location || '');
+      setDateOfBirth(user.dateOfBirth ? new Date(user.dateOfBirth) : null);
+      
+      // Extract country code from phone number if present
+      if (user.phone) {
+        if (user.phone.startsWith('+234')) {
+          setSelectedCountry({ name: 'Nigeria', code: 'NG', dial_code: '+234', flag: '🇳🇬' } as CountryCode);
+          setPhone(user.phone.replace('+234', ''));
+        } else if (user.phone.startsWith('+254')) {
+          setSelectedCountry({ name: 'Kenya', code: 'KE', dial_code: '+254', flag: '🇰🇪' } as CountryCode);
+          setPhone(user.phone.replace('+254', ''));
+        } else if (user.phone.startsWith('+233')) {
+          setSelectedCountry({ name: 'Ghana', code: 'GH', dial_code: '+233', flag: '🇬🇭' } as CountryCode);
+          setPhone(user.phone.replace('+233', ''));
+        }
+      }
+    }
+  }, [user]);
 
   const showDatePicker = () => setDatePickerVisible(true);
   const hideDatePicker = () => setDatePickerVisible(false);
@@ -64,15 +89,19 @@ export default function EditProfileScreen() {
         location: location.trim() || undefined,
       };
 
+      // Update profile using AuthContext (this saves to AsyncStorage)
       await updateProfile(updated);
+
+      console.log('Profile updated successfully:', updated);
 
       // Show success card
       setShowSuccessCard(true);
       
-      // Navigate back after a short delay
+      // Navigate back after a short delay to show success message
       setTimeout(() => {
+        setShowSuccessCard(false);
         router.back();
-      }, 2000);
+      }, 1500);
 
     } catch (error) {
       console.error('Error saving profile:', error);

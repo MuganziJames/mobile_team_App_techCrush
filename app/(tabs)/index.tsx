@@ -1,5 +1,6 @@
 import StyleCard from '@/components/StyleCard';
 import EmptyState from '@/components/ui/EmptyState';
+import SuccessCard from '@/components/ui/SuccessCard';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Style, useLookbook } from '@/contexts/LookbookContext';
@@ -10,7 +11,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   RefreshControl,
@@ -28,33 +28,36 @@ export default function FeedScreen() {
   const { 
     folders, 
     saveStyleToFolder, 
-    isStyleSaved 
+    isStyleSaved,
+    removeStyleFromFolder,
+    getStyleFolder
   } = useLookbook();
   
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
   
   // Convert outfits to styles for display
   const styleItems = outfitsToStyles(outfits);
 
-  const handleSaveStyle = (style: Style) => {
+  const handleSaveStyle = async (style: Style) => {
     if (isStyleSaved(style.id)) {
-      Alert.alert(
-        'Style Already Saved',
-        'This style is already in your lookbook. What would you like to do?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Move to Different Folder', 
-            onPress: () => {
-              setSelectedStyle(style);
-              setShowFolderModal(true);
-            }
-          }
-        ]
-      );
+      // Style is already saved - directly remove it
+      const folderId = getStyleFolder(style.id);
+      const folderName = folders.find(f => f.id === folderId)?.name || 'lookbook';
+      
+      if (folderId) {
+        await removeStyleFromFolder(style.id, folderId);
+        setSuccessMessage({
+          title: 'Style Removed!',
+          message: `"${style.title}" has been removed from ${folderName}.`
+        });
+        setShowSuccessCard(true);
+      }
     } else {
+      // Style not saved - show folder selection
       setSelectedStyle(style);
       setShowFolderModal(true);
     }
@@ -67,11 +70,11 @@ export default function FeedScreen() {
       setSelectedStyle(null);
       
       const folderName = folders.find(f => f.id === folderId)?.name || 'folder';
-      Alert.alert(
-        'Style Saved!',
-        `"${selectedStyle.title}" has been saved to ${folderName}.`,
-        [{ text: 'OK' }]
-      );
+      setSuccessMessage({
+        title: 'Style Saved!',
+        message: `"${selectedStyle.title}" has been saved to ${folderName}.`
+      });
+      setShowSuccessCard(true);
     }
   };
 
@@ -177,6 +180,13 @@ export default function FeedScreen() {
     <SafeAreaView style={componentStyles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
+      <SuccessCard
+        visible={showSuccessCard}
+        title={successMessage.title}
+        message={successMessage.message}
+        onClose={() => setShowSuccessCard(false)}
+      />
+      
       {renderContent()}
 
       <Modal
@@ -209,15 +219,15 @@ export default function FeedScreen() {
                 <TouchableOpacity 
                   style={componentStyles.folderItem}
                   onPress={() => handleFolderSelect(item.id)}
+                  activeOpacity={0.7}
                 >
                   <View style={componentStyles.folderIcon}>
-                    <Ionicons name="folder" size={24} color={Colors.primary} />
+                    <Ionicons name="folder" size={20} color="#FFFFFF" />
                   </View>
                   <Text style={componentStyles.folderName}>{item.name}</Text>
                   <Ionicons name="chevron-forward" size={20} color="#999" />
                 </TouchableOpacity>
               )}
-              ItemSeparatorComponent={() => <View style={componentStyles.separator} />}
               ListEmptyComponent={() => (
                 <View style={componentStyles.emptyState}>
                   <Ionicons name="folder-open-outline" size={60} color="#E0E0E0" />
@@ -298,16 +308,16 @@ const componentStyles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8F8F8',
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 20,
+    backgroundColor: '#F8F8F8',
   },
   modalCloseButton: {
     width: 60,
@@ -317,39 +327,47 @@ const componentStyles = StyleSheet.create({
   modalCloseText: {
     fontSize: 16,
     color: Colors.primary,
+    fontWeight: '600',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '600',
+    color: '#000000',
   },
   modalContent: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 24,
   },
   modalSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: '600',
     color: '#666',
-    marginBottom: 24,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
   },
   folderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 1,
+    borderRadius: 8,
   },
   folderIcon: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   folderName: {
-    fontSize: 16,
+    fontSize: 14,
+    color: '#000000',
     flex: 1,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
   },
   emptyState: {
     alignItems: 'center',

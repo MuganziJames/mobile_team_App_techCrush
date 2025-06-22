@@ -85,8 +85,9 @@ export default function StyleCard({
           >
             <Ionicons 
               name={isSaved ? "bookmark" : "bookmark-outline"} 
-              size={20} 
-              color={isSaved ? "#FF6B35" : "#fff"} 
+              size={24} 
+              color={isSaved ? "#FF6B35" : "#FFFFFF"} 
+              style={styles.saveIcon}
             />
           </TouchableOpacity>
         )}
@@ -159,11 +160,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   content: {
     padding: 14,
@@ -239,5 +238,10 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+  saveIcon: {
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 }); 

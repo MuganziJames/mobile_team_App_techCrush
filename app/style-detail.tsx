@@ -34,7 +34,8 @@ export default function StyleDetailScreen() {
     folders, 
     saveStyleToFolder, 
     isStyleSaved, 
-    getStyleFolder 
+    getStyleFolder,
+    removeStyleFromFolder
   } = useLookbook();
   
   const [outfit, setOutfit] = useState<Outfit | null>(null);
@@ -42,7 +43,7 @@ export default function StyleDetailScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [showSuccessCard, setShowSuccessCard] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
 
   // Load outfit data
   useEffect(() => {
@@ -105,20 +106,27 @@ export default function StyleDetailScreen() {
   const isSaved = isStyleSaved(style.id);
   const currentFolder = getStyleFolder(style.id);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isSaved) {
-      Alert.alert(
-        'Style Already Saved',
-        'This style is already in your lookbook. What would you like to do?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Move to Different Folder', 
-            onPress: () => setShowFolderModal(true)
-          }
-        ]
-      );
+      // Style is already saved - directly remove it
+      const folderId = getStyleFolder(style.id);
+      const folderName = folders.find(f => f.id === folderId)?.name || 'lookbook';
+      
+      if (folderId) {
+        await removeStyleFromFolder(style.id, folderId);
+        setSuccessMessage({
+          title: 'Style Removed!',
+          message: `"${style.title}" has been removed from ${folderName}.`
+        });
+        setShowSuccessCard(true);
+        
+        // Hide success card after 2 seconds
+        setTimeout(() => {
+          setShowSuccessCard(false);
+        }, 2000);
+      }
     } else {
+      // Style not saved - show folder selection
       setShowFolderModal(true);
     }
   };
@@ -128,7 +136,10 @@ export default function StyleDetailScreen() {
     setShowFolderModal(false);
     
     const folderName = folders.find(f => f.id === folderId)?.name || 'folder';
-    setSuccessMessage(`Saved to ${folderName}!`);
+    setSuccessMessage({
+      title: 'Style Saved!',
+      message: `"${style.title}" has been saved to ${folderName}.`
+    });
     setShowSuccessCard(true);
     
     // Hide success card after 2 seconds
@@ -322,8 +333,8 @@ export default function StyleDetailScreen() {
       {/* Success Card */}
       <SuccessCard 
         visible={showSuccessCard}
-        title="Style Saved!"
-        message={successMessage}
+        title={successMessage.title}
+        message={successMessage.message}
         onClose={() => setShowSuccessCard(false)}
       />
     </SafeAreaView>

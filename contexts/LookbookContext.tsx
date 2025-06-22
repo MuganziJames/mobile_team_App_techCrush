@@ -2,7 +2,7 @@ import LookbookService from '@/api/lookbook.service';
 import { LookbookWithOutfits } from '@/api/types';
 import { getOutfitIdFromStyleId, isOutfitStyle } from '@/utils/outfitAdapter';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { Alert, ImageSourcePropType } from 'react-native';
+import { ImageSourcePropType } from 'react-native';
 
 // Types
 export interface Style {
@@ -34,8 +34,8 @@ interface LookbookContextProps {
   savedStyles: SavedStyle[];
   loading: boolean;
   error: string | null;
-  createFolder: (name: string, color: string) => Promise<void>;
-  deleteFolder: (folderId: string) => Promise<void>;
+  createFolder: (name: string, color: string) => Promise<{ success: boolean; folderName?: string; error?: string }>;
+  deleteFolder: (folderId: string) => Promise<{ success: boolean; error?: string }>;
   updateFolder: (folderId: string, name: string) => Promise<void>;
   refreshFolders: () => Promise<void>;
   saveStyleToFolder: (style: Style, folderId: string) => Promise<void>;
@@ -136,13 +136,13 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
         };
         
         setFolders(prev => [...prev, newFolder]);
-        Alert.alert('Success', 'Lookbook created successfully!');
+        return { success: true, folderName: response.data.name };
       } else {
-        Alert.alert('Error', response.message || 'Failed to create lookbook');
+        return { success: false, error: response.message || 'Failed to create lookbook' };
       }
     } catch (error: any) {
       console.error('Error creating folder:', error);
-      Alert.alert('Error', error.message || 'Failed to create lookbook');
+      return { success: false, error: error.message || 'Failed to create lookbook' };
     }
   };
 
@@ -154,13 +154,13 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
       if (response.success) {
         setFolders(prev => prev.filter(folder => folder.id !== folderId));
         setSavedStyles(prev => prev.filter(style => style.folderId !== folderId));
-        Alert.alert('Success', 'Lookbook deleted successfully!');
+        return { success: true };
       } else {
-        Alert.alert('Error', response.message || 'Failed to delete lookbook');
+        return { success: false, error: response.message || 'Failed to delete lookbook' };
       }
     } catch (error: any) {
       console.error('Error deleting folder:', error);
-      Alert.alert('Error', error.message || 'Failed to delete lookbook');
+      return { success: false, error: error.message || 'Failed to delete lookbook' };
     }
   };
 
@@ -177,13 +177,9 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
               : folder
           )
         );
-        Alert.alert('Success', 'Lookbook updated successfully!');
-      } else {
-        Alert.alert('Error', response.message || 'Failed to update lookbook');
       }
     } catch (error: any) {
       console.error('Error updating folder:', error);
-      Alert.alert('Error', error.message || 'Failed to update lookbook');
     }
   };
 
@@ -196,14 +192,14 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
       if (isOutfitStyle(style.id)) {
         const originalOutfitId = getOutfitIdFromStyleId(style.id);
         if (!originalOutfitId) {
-          Alert.alert('Error', 'Could not find original outfit ID');
+          console.error('Could not find original outfit ID');
           return;
         }
         outfitId = originalOutfitId;
       } else {
         // For non-outfit styles, we might need to handle differently
         // For now, we'll show an error since the API expects outfit IDs
-        Alert.alert('Error', 'Can only save outfit-based styles to lookbooks');
+        console.error('Can only save outfit-based styles to lookbooks');
         return;
       }
 
@@ -222,15 +218,12 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
           return [...filtered, savedStyle];
         });
         
-        // Show success message
-        const folderName = folders.find(f => f.id === folderId)?.name || 'lookbook';
-        Alert.alert('Success', `Style saved to ${folderName}!`);
+        // Success handled by the calling component
       } else {
-        Alert.alert('Error', response.message || 'Failed to save style');
+        console.error('Failed to save style:', response.message);
       }
     } catch (error: any) {
       console.error('Error saving style:', error);
-      Alert.alert('Error', error.message || 'Failed to save style');
     }
   };
 
@@ -243,12 +236,12 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
       if (isOutfitStyle(styleId)) {
         const originalOutfitId = getOutfitIdFromStyleId(styleId);
         if (!originalOutfitId) {
-          Alert.alert('Error', 'Could not find original outfit ID');
+          console.error('Could not find original outfit ID');
           return;
         }
         outfitId = originalOutfitId;
       } else {
-        Alert.alert('Error', 'Can only remove outfit-based styles from lookbooks');
+        console.error('Can only remove outfit-based styles from lookbooks');
         return;
       }
 
@@ -258,13 +251,12 @@ export function LookbookProvider({ children }: { children: ReactNode }) {
         setSavedStyles(prev => 
           prev.filter(style => !(style.id === styleId && style.folderId === folderId))
         );
-        Alert.alert('Success', 'Style removed from lookbook!');
+        // Success handled by the calling component
       } else {
-        Alert.alert('Error', response.message || 'Failed to remove style');
+        console.error('Failed to remove style:', response.message);
       }
     } catch (error: any) {
       console.error('Error removing style:', error);
-      Alert.alert('Error', error.message || 'Failed to remove style');
     }
   };
 

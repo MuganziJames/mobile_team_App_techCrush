@@ -61,7 +61,7 @@ interface AuthContextProps {
   resetPassword: (email: string) => Promise<AuthResult>;
   verifyOtp: (email: string, resetToken: string) => Promise<AuthResult>;
   setNewPassword: (email: string, newPassword: string, resetToken: string) => Promise<AuthResult>;
-  updateProfile: (updates: Partial<User>) => void;
+  updateProfile: (updates: Partial<User>) => Promise<User>;
   completeOnboarding: () => Promise<void>;
   rememberOnboarding: () => Promise<void>;
   checkOnboardingStatus: () => Promise<boolean>;
@@ -112,11 +112,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const rememberedOnboarding = await AsyncStorage.getItem('hasRememberedOnboarding');
         const hasRememberedOnboarding = rememberedOnboarding === 'true';
         
-        // Use auth service to bootstrap authentication
+        // Try to get locally stored user data first (this includes profile updates)
+        const storedUserData = await AsyncStorage.getItem('user');
+        let localUser: User | null = null;
+        
+        if (storedUserData) {
+          try {
+            localUser = JSON.parse(storedUserData);
+            console.log('Found locally stored user data:', localUser);
+          } catch (error) {
+            console.error('Error parsing stored user data:', error);
+          }
+        }
+        
+        // Use auth service to bootstrap authentication (this verifies with server)
         const { user: apiUser, token } = await authService.bootstrapAuth();
         
         if (token && apiUser) {
-          const user = convertApiUserToUser(apiUser);
+          let user = convertApiUserToUser(apiUser);
+          
+          // If we have locally stored user data, merge it with API data
+          // This preserves profile updates that were made locally
+          if (localUser) {
+            user = {
+              ...user, // API data as base
+              ...localUser, // Local updates take priority
+              id: user.id, // Always keep API ID
+              email: user.email, // Always keep API email for security
+            };
+            console.log('Merged local and API user data:', user);
+            
+            // Save the merged data back to storage
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+          }
+          
           console.log('Restored auth state:', { user });
           setState({
             user,
@@ -128,9 +157,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasRememberedOnboarding,
           });
         } else {
-          console.log('No valid auth state found');
+          // No valid API auth, but check if we have local user data for offline mode
+          if (localUser) {
+            console.log('No API auth but found local user data - using offline mode');
+            setState({
+              user: localUser,
+              token: null,
+              isLoading: false,
+              isSignout: false,
+              isAuthenticated: false, // Not authenticated with server
+              hasCompletedOnboarding,
+              hasRememberedOnboarding,
+            });
+          } else {
+            console.log('No valid auth state found');
+            setState({
+              user: null,
+              token: null,
+              isLoading: false,
+              isSignout: false,
+              isAuthenticated: false,
+              hasCompletedOnboarding,
+              hasRememberedOnboarding,
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auth check error:', e);
+        
+        // On error, try to load local user data
+        try {
+          const storedUserData = await AsyncStorage.getItem('user');
+          let localUser: User | null = null;
+          
+          if (storedUserData) {
+            localUser = JSON.parse(storedUserData);
+            console.log('Error occurred, but found local user data:', localUser);
+          }
+          
+          // Check onboarding status even on error
+          const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
+          const hasCompletedOnboarding = onboardingCompleted === 'true';
+          
+          // Check if user has chosen to remember onboarding
+          const rememberedOnboarding = await AsyncStorage.getItem('hasRememberedOnboarding');
+          const hasRememberedOnboarding = rememberedOnboarding === 'true';
+          
           setState({
-            user: null,
+            user: localUser,
             token: null,
             isLoading: false,
             isSignout: false,
@@ -138,27 +212,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasCompletedOnboarding,
             hasRememberedOnboarding,
           });
+        } catch (storageError) {
+          console.error('Error loading local user data:', storageError);
+          
+          // Complete fallback - clear everything
+          setState({
+            user: null,
+            token: null,
+            isLoading: false,
+            isSignout: false,
+            isAuthenticated: false,
+            hasCompletedOnboarding: false,
+            hasRememberedOnboarding: false,
+          });
         }
-      } catch (e) {
-        console.error('Auth check error:', e);
-        // Check onboarding status even on error
-        const onboardingCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
-        const hasCompletedOnboarding = onboardingCompleted === 'true';
-        
-        // Check if user has chosen to remember onboarding
-        const rememberedOnboarding = await AsyncStorage.getItem('hasRememberedOnboarding');
-        const hasRememberedOnboarding = rememberedOnboarding === 'true';
-        
-        // Clear any stale auth data
-        setState({
-          user: null,
-          token: null,
-          isLoading: false,
-          isSignout: false,
-          isAuthenticated: false,
-          hasCompletedOnboarding,
-          hasRememberedOnboarding,
-        });
       }
     };
 
@@ -178,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const updatedUser = state.user ? { ...state.user, ...updates } : null;
         
         if (updatedUser) {
-          // Update state
+          // Update state first
           setState(prev => ({
             ...prev,
             user: updatedUser,
@@ -190,6 +257,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           // Optionally, you could also call an API endpoint here to sync with server
           // await authService.updateProfile(updates);
+          
+          return updatedUser;
+        } else {
+          throw new Error('No user found to update');
         }
       } catch (error) {
         console.error('Error updating profile:', error);

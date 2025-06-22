@@ -1,21 +1,23 @@
 import FolderCard from '@/components/FolderCard';
+import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import EmptyState from '@/components/ui/EmptyState';
+import ErrorCard from '@/components/ui/ErrorCard';
+import SuccessCard from '@/components/ui/SuccessCard';
 import { useLookbook } from '@/contexts/LookbookContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -36,6 +38,12 @@ export default function LookbookScreen() {
   const [newFolderName, setNewFolderName] = useState('');
   const [selectedColor, setSelectedColor] = useState(folderColors[0]);
   const [refreshing, setRefreshing] = useState(false);
+  const [showSuccessCard, setShowSuccessCard] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
+  const [showErrorCard, setShowErrorCard] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({ title: '', message: '' });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const handleFolderPress = (folder: any) => {
     router.push({
@@ -49,26 +57,56 @@ export default function LookbookScreen() {
   };
 
   const handleDeleteFolder = (folderId: string) => {
-    Alert.alert(
-      'Delete Lookbook',
-      'Are you sure you want to delete this lookbook? All styles in this lookbook will be removed.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive', 
-          onPress: () => deleteFolder(folderId)
-        }
-      ]
-    );
+    const folder = folders.find(f => f.id === folderId);
+    if (folder) {
+      setFolderToDelete({ id: folderId, name: folder.name });
+      setShowDeleteConfirmation(true);
+    }
+  };
+
+  const confirmDeleteFolder = async () => {
+    if (folderToDelete) {
+      const result = await deleteFolder(folderToDelete.id);
+      setShowDeleteConfirmation(false);
+      
+      if (result.success) {
+        setSuccessMessage({
+          title: 'Lookbook Deleted!',
+          message: `"${folderToDelete.name}" has been deleted successfully.`
+        });
+        setShowSuccessCard(true);
+      } else {
+        setErrorMessage({
+          title: 'Delete Failed',
+          message: result.error || 'Failed to delete lookbook. Please try again.'
+        });
+        setShowErrorCard(true);
+      }
+      
+      setFolderToDelete(null);
+    }
   };
 
   const handleCreateFolder = async () => {
     if (newFolderName.trim()) {
-      await createFolder(newFolderName.trim(), selectedColor);
-      setNewFolderName('');
-      setSelectedColor(folderColors[0]);
-      setShowCreateModal(false);
+      const result = await createFolder(newFolderName.trim(), selectedColor);
+      if (result.success) {
+        setNewFolderName('');
+        setSelectedColor(folderColors[0]);
+        setShowCreateModal(false);
+        setSuccessMessage({
+          title: 'Lookbook Created!',
+          message: `"${result.folderName}" has been created successfully.`
+        });
+        setShowSuccessCard(true);
+      } else {
+        setShowCreateModal(false);
+        setErrorMessage({
+          title: 'Creation Failed',
+          message: result.error || 'Failed to create lookbook. Please try again.'
+        });
+        setShowErrorCard(true);
+      }
     }
   };
 
@@ -144,6 +182,36 @@ export default function LookbookScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
+      <SuccessCard
+        visible={showSuccessCard}
+        title={successMessage.title}
+        message={successMessage.message}
+        onClose={() => setShowSuccessCard(false)}
+      />
+
+      <ErrorCard
+        visible={showErrorCard}
+        title={errorMessage.title}
+        message={errorMessage.message}
+        onClose={() => setShowErrorCard(false)}
+      />
+
+      <ConfirmationModal
+        visible={showDeleteConfirmation}
+        iconName="trash"
+        iconBackground="#FF3B30"
+        title="Delete Lookbook"
+        message={`Are you sure you want to delete "${folderToDelete?.name}"? All styles in this lookbook will be removed.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteFolder}
+        onCancel={() => {
+          setShowDeleteConfirmation(false);
+          setFolderToDelete(null);
+        }}
+      />
+      
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}

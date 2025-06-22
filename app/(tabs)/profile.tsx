@@ -1,13 +1,15 @@
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
   const { user } = useAuth();
+  const [localUser, setLocalUser] = useState(user);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -15,9 +17,41 @@ export default function ProfileScreen() {
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
   const [countryCode, setCountryCode] = useState('NG+234');
 
+  // Function to refresh user data from storage
+  const refreshUserData = useCallback(async () => {
+    try {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setLocalUser(userData);
+        console.log('Profile data refreshed from storage:', userData);
+      } else if (user) {
+        // Fallback to context user if no storage data
+        setLocalUser(user);
+        console.log('Using context user data:', user);
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      // Fallback to context user on error
+      if (user) {
+        setLocalUser(user);
+      }
+    }
+  }, [user]);
+
+  // Update local user when context user changes
+  useEffect(() => {
+    if (user) {
+      setLocalUser(user);
+    }
+  }, [user]);
+
   // Ensure status bar settings are applied when screen is focused
   useFocusEffect(
     useCallback(() => {
+      // Refresh user data when screen is focused (this ensures profile edits are reflected)
+      refreshUserData();
+
       // Apply status bar settings when screen is focused
       const applyStatusBarSettings = () => {
         StatusBar.setBarStyle('light-content', true);
@@ -37,7 +71,7 @@ export default function ProfileScreen() {
         StatusBar.setBackgroundColor('#FFFFFF', true);
         StatusBar.setTranslucent(false);
       };
-    }, [])
+    }, [refreshUserData])
   );
 
   const handleEditAvatar = () => {
@@ -250,8 +284,8 @@ export default function ProfileScreen() {
 
   // Get user initials for avatar
   const getInitials = () => {
-    if (user?.name) {
-      const nameParts = user.name.split(' ');
+    if (localUser?.name) {
+      const nameParts = localUser.name.split(' ');
       return (nameParts[0]?.charAt(0) || '') + (nameParts[1]?.charAt(0) || '');
     }
     return 'AU';
@@ -259,8 +293,8 @@ export default function ProfileScreen() {
 
   // Get first name for greeting
   const getFirstName = () => {
-    if (user?.name) {
-      return user.name.split(' ')[0];
+    if (localUser?.name) {
+      return localUser.name.split(' ')[0];
     }
     return 'User';
   };
@@ -314,7 +348,7 @@ export default function ProfileScreen() {
               <Text style={styles.fieldLabel}>Full Name</Text>
               <View style={styles.fieldContainer}>
                 <Text style={styles.fieldValue}>
-                  {user?.name || 'Not provided'}
+                  {localUser?.name || 'Not provided'}
                 </Text>
               </View>
             </View>
@@ -322,28 +356,28 @@ export default function ProfileScreen() {
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Date Of Birth</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{user?.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>{localUser?.dateOfBirth ? new Date(localUser.dateOfBirth).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : 'Not provided'}</Text>
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Email</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{user?.email || 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>{localUser?.email || 'Not provided'}</Text>
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Phone Number</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{user?.phone || 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>{localUser?.phone || 'Not provided'}</Text>
               </View>
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Location</Text>
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldValue}>{user?.location || 'Not provided'}</Text>
+                <Text style={styles.fieldValue}>{localUser?.location || 'Not provided'}</Text>
               </View>
             </View>
 
