@@ -482,7 +482,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   featuredContainer: {
-    paddingLeft: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   featuredCard: {
     width: width - 40,
@@ -502,8 +503,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    paddingTop: 0
   },
   featuredCategory: {
     fontSize: 12,
