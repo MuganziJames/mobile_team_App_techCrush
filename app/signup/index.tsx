@@ -9,6 +9,7 @@ import {
     Platform,
     SafeAreaView,
     ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -53,6 +54,7 @@ export default function SignUpEmailScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS==='ios'?'padding':undefined}>
+    <StatusBar barStyle="dark-content" backgroundColor="#fff" />
     <SafeAreaView style={{flex:1}}>
       <ScrollView 
         style={styles.scrollView}

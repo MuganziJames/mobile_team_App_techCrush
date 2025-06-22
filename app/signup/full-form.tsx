@@ -9,9 +9,12 @@ import {
     ActivityIndicator,
     Alert,
     Keyboard,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     SafeAreaView,
     ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TextInput,
@@ -203,350 +206,353 @@ export default function SignUpFullForm() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={goBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={Colors.black} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Account</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.content}>
-          <Text style={styles.title}>Join MyStyleMag Today!</Text>
-          <Text style={styles.subtitle}>
-            Explore exclusive, modern and exquisite African Designs at your fingertips.
-          </Text>
-          
-          <View style={styles.form}>
-            <Text style={styles.fieldLabel}>First name</Text>
-            <TextField
-              placeholder="Adams"
-              value={formData.firstName}
-              onChangeText={(text) => handleChange('firstName', text)}
-              hasError={!!errors.firstName}
-              errorText={errors.firstName}
-              style={styles.textInput}
-            />
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.black} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create Account</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+        
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            <Text style={styles.title}>Join MyStyleMag Today!</Text>
+            <Text style={styles.subtitle}>
+              Explore exclusive, modern and exquisite African Designs at your fingertips.
+            </Text>
             
-            <Text style={styles.fieldLabel}>Last name</Text>
-            <TextField
-              placeholder="Agbaifa"
-              value={formData.lastName}
-              onChangeText={(text) => handleChange('lastName', text)}
-              hasError={!!errors.lastName}
-              errorText={errors.lastName}
-              style={styles.textInput}
-            />
-            
-            <Text style={styles.fieldLabel}>Email address</Text>
-            <TextField
-              placeholder="youremail@gmail.com"
-              value={formData.email}
-              onChangeText={(text) => handleChange('email', text)}
-              keyboardType="email-address"
-              hasError={!!errors.email}
-              errorText={errors.email}
-              style={styles.textInput}
-            />
-            
-            <Text style={styles.fieldLabel}>Phone Number</Text>
-            <View style={styles.phoneInputContainer}>
-              <View style={styles.countryCodeContainer}>
-                <CountryCodePicker
-                  selectedCountry={selectedCountry}
-                  onSelect={setSelectedCountry}
+            <View style={styles.form}>
+              <Text style={styles.fieldLabel}>First name</Text>
+              <TextField
+                placeholder="Adams"
+                value={formData.firstName}
+                onChangeText={(text) => handleChange('firstName', text)}
+                hasError={!!errors.firstName}
+                errorText={errors.firstName}
+                style={styles.textInput}
+              />
+              
+              <Text style={styles.fieldLabel}>Last name</Text>
+              <TextField
+                placeholder="Agbaifa"
+                value={formData.lastName}
+                onChangeText={(text) => handleChange('lastName', text)}
+                hasError={!!errors.lastName}
+                errorText={errors.lastName}
+                style={styles.textInput}
+              />
+              
+              <Text style={styles.fieldLabel}>Email address</Text>
+              <TextField
+                placeholder="youremail@gmail.com"
+                value={formData.email}
+                onChangeText={(text) => handleChange('email', text)}
+                keyboardType="email-address"
+                hasError={!!errors.email}
+                errorText={errors.email}
+                style={styles.textInput}
+              />
+              
+              <Text style={styles.fieldLabel}>Phone Number</Text>
+              <View style={styles.phoneInputContainer}>
+                <View style={styles.countryCodeContainer}>
+                  <CountryCodePicker
+                    selectedCountry={selectedCountry}
+                    onSelect={setSelectedCountry}
+                  />
+                </View>
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="7682 36713"
+                  value={formData.phone}
+                  onChangeText={(text) => handleChange('phone', text)}
+                  keyboardType="phone-pad"
                 />
               </View>
-              <TextInput
-                style={styles.phoneInput}
-                placeholder="7682 36713"
-                value={formData.phone}
-                onChangeText={(text) => handleChange('phone', text)}
-                keyboardType="phone-pad"
-              />
-            </View>
-            {!!errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-            
-            <Text style={styles.fieldLabel}>Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Create a password"
-                placeholderTextColor="#999"
-                value={formData.password}
-                onChangeText={(text) => handleChange('password', text)}
-                secureTextEntry={!passwordVisible}
-                autoCapitalize="none"
-                autoCorrect={false}
-                textContentType="newPassword"
-                autoComplete="password-new"
-              />
-              <TouchableOpacity 
-                style={styles.eyeIcon}
-                onPress={() => setPasswordVisible(!passwordVisible)}
-              >
-                <Ionicons 
-                  name={passwordVisible ? "eye-off" : "eye"} 
-                  size={22} 
-                  color="#666" 
+              {!!errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+              
+              <Text style={styles.fieldLabel}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Create a password"
+                  placeholderTextColor="#999"
+                  value={formData.password}
+                  onChangeText={(text) => handleChange('password', text)}
+                  secureTextEntry={!passwordVisible}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="newPassword"
+                  autoComplete="password-new"
                 />
-              </TouchableOpacity>
-            </View>
-            {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-            
-            {/* Password Requirements */}
-            {formData.password.length > 0 && (
-              <View style={styles.passwordRules}>
-                <Text style={styles.passwordRulesTitle}>Password Requirements:</Text>
-                
-                {(() => {
-                  const hasLength = formData.password.length >= 8;
-                  const hasUpperCase = /[A-Z]/.test(formData.password);
-                  const hasNumber = /[0-9]/.test(formData.password);
-                  const hasSpecialChar = /[^A-Za-z0-9]/.test(formData.password);
+                <TouchableOpacity 
+                  style={styles.eyeIcon}
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                >
+                  <Ionicons 
+                    name={passwordVisible ? "eye-off" : "eye"} 
+                    size={22} 
+                    color="#666" 
+                  />
+                </TouchableOpacity>
+              </View>
+              {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+              
+              {/* Password Requirements */}
+              {formData.password.length > 0 && (
+                <View style={styles.passwordRules}>
+                  <Text style={styles.passwordRulesTitle}>Password Requirements:</Text>
                   
-                  const completedRules = [hasLength, hasUpperCase, hasNumber, hasSpecialChar].filter(Boolean).length;
-                  const strengthColors = ['#FF6B6B', '#FFD93D', '#6BCF7F', '#4ECDC4'];
-                  const strengthTexts = ['Weak', 'Fair', 'Good', 'Strong'];
-                  const strengthColor = strengthColors[Math.min(completedRules - 1, 3)] || '#E0E0E0';
-                  const strengthText = strengthTexts[Math.min(completedRules - 1, 3)] || 'Too Weak';
-                  
-                  return (
-                    <View style={styles.strengthIndicator}>
-                      <View style={styles.strengthBar}>
-                        <View 
-                          style={[
-                            styles.strengthFill, 
-                            { 
-                              width: `${(completedRules / 4) * 100}%`,
-                              backgroundColor: strengthColor 
-                            }
-                          ]} 
-                        />
+                  {(() => {
+                    const hasLength = formData.password.length >= 8;
+                    const hasUpperCase = /[A-Z]/.test(formData.password);
+                    const hasNumber = /[0-9]/.test(formData.password);
+                    const hasSpecialChar = /[^A-Za-z0-9]/.test(formData.password);
+                    
+                    const completedRules = [hasLength, hasUpperCase, hasNumber, hasSpecialChar].filter(Boolean).length;
+                    const strengthColors = ['#FF6B6B', '#FFD93D', '#6BCF7F', '#4ECDC4'];
+                    const strengthTexts = ['Weak', 'Fair', 'Good', 'Strong'];
+                    const strengthColor = strengthColors[Math.min(completedRules - 1, 3)] || '#E0E0E0';
+                    const strengthText = strengthTexts[Math.min(completedRules - 1, 3)] || 'Too Weak';
+                    
+                    return (
+                      <View style={styles.strengthIndicator}>
+                        <View style={styles.strengthBar}>
+                          <View 
+                            style={[
+                              styles.strengthFill, 
+                              { 
+                                width: `${(completedRules / 4) * 100}%`,
+                                backgroundColor: strengthColor 
+                              }
+                            ]} 
+                          />
+                        </View>
+                        <Text style={[styles.strengthText, { color: strengthColor }]}>
+                          {strengthText}
+                        </Text>
                       </View>
-                      <Text style={[styles.strengthText, { color: strengthColor }]}>
-                        {strengthText}
-                      </Text>
-                    </View>
-                  );
-                })()}
-                
-                <View style={styles.ruleRow}>
-                  <Ionicons 
-                    name={formData.password.length >= 8 ? "checkmark-circle" : "ellipse-outline"} 
-                    size={16} 
-                    color={formData.password.length >= 8 ? '#4ECDC4' : Colors.darkGray} 
-                  />
-                  <Text style={[styles.passwordRule, formData.password.length >= 8 && styles.ruleCompleted]}>
-                    At least 8 characters
-                  </Text>
-                </View>
-                <View style={styles.ruleRow}>
-                  <Ionicons 
-                    name={/[A-Z]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
-                    size={16} 
-                    color={/[A-Z]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
-                  />
-                  <Text style={[styles.passwordRule, /[A-Z]/.test(formData.password) && styles.ruleCompleted]}>
-                    At least one uppercase letter
-                  </Text>
-                </View>
-                <View style={styles.ruleRow}>
-                  <Ionicons 
-                    name={/[0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
-                    size={16} 
-                    color={/[0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
-                  />
-                  <Text style={[styles.passwordRule, /[0-9]/.test(formData.password) && styles.ruleCompleted]}>
-                    At least one number
-                  </Text>
-                </View>
-                <View style={styles.ruleRow}>
-                  <Ionicons 
-                    name={/[^A-Za-z0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
-                    size={16} 
-                    color={/[^A-Za-z0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
-                  />
-                  <Text style={[styles.passwordRule, /[^A-Za-z0-9]/.test(formData.password) && styles.ruleCompleted]}>
-                    At least one special character
-                  </Text>
-                </View>
-              </View>
-            )}
-            
-            <Text style={styles.fieldLabel}>Confirm Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Confirm your password"
-                placeholderTextColor="#999"
-                value={formData.confirmPassword}
-                onChangeText={(text) => handleChange('confirmPassword', text)}
-                secureTextEntry={!confirmPasswordVisible}
-                autoCapitalize="none"
-                autoCorrect={false}
-                textContentType="newPassword"
-                autoComplete="password-new"
-              />
-              <TouchableOpacity 
-                style={styles.eyeIcon}
-                onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-              >
-                <Ionicons 
-                  name={confirmPasswordVisible ? "eye-off" : "eye"} 
-                  size={22} 
-                  color="#666" 
-                />
-              </TouchableOpacity>
-            </View>
-            {!!errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
-            
-            <View style={styles.termsContainer}>
-              <TouchableOpacity
-                style={styles.checkbox}
-                onPress={() => setAgreeToTerms(!agreeToTerms)}
-              >
-                {agreeToTerms && (
-                  <View style={styles.checkboxInner}>
-                    <Ionicons name="checkmark" size={14} color="#fff" />
+                    );
+                  })()}
+                  
+                  <View style={styles.ruleRow}>
+                    <Ionicons 
+                      name={formData.password.length >= 8 ? "checkmark-circle" : "ellipse-outline"} 
+                      size={16} 
+                      color={formData.password.length >= 8 ? '#4ECDC4' : Colors.darkGray} 
+                    />
+                    <Text style={[styles.passwordRule, formData.password.length >= 8 && styles.ruleCompleted]}>
+                      At least 8 characters
+                    </Text>
                   </View>
+                  <View style={styles.ruleRow}>
+                    <Ionicons 
+                      name={/[A-Z]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                      size={16} 
+                      color={/[A-Z]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                    />
+                    <Text style={[styles.passwordRule, /[A-Z]/.test(formData.password) && styles.ruleCompleted]}>
+                      At least one uppercase letter
+                    </Text>
+                  </View>
+                  <View style={styles.ruleRow}>
+                    <Ionicons 
+                      name={/[0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                      size={16} 
+                      color={/[0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                    />
+                    <Text style={[styles.passwordRule, /[0-9]/.test(formData.password) && styles.ruleCompleted]}>
+                      At least one number
+                    </Text>
+                  </View>
+                  <View style={styles.ruleRow}>
+                    <Ionicons 
+                      name={/[^A-Za-z0-9]/.test(formData.password) ? "checkmark-circle" : "ellipse-outline"} 
+                      size={16} 
+                      color={/[^A-Za-z0-9]/.test(formData.password) ? '#4ECDC4' : Colors.darkGray} 
+                    />
+                    <Text style={[styles.passwordRule, /[^A-Za-z0-9]/.test(formData.password) && styles.ruleCompleted]}>
+                      At least one special character
+                    </Text>
+                  </View>
+                </View>
+              )}
+              
+              <Text style={styles.fieldLabel}>Confirm Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Confirm your password"
+                  placeholderTextColor="#999"
+                  value={formData.confirmPassword}
+                  onChangeText={(text) => handleChange('confirmPassword', text)}
+                  secureTextEntry={!confirmPasswordVisible}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="newPassword"
+                  autoComplete="password-new"
+                />
+                <TouchableOpacity 
+                  style={styles.eyeIcon}
+                  onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                >
+                  <Ionicons 
+                    name={confirmPasswordVisible ? "eye-off" : "eye"} 
+                    size={22} 
+                    color="#666" 
+                  />
+                </TouchableOpacity>
+              </View>
+              {!!errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              
+              <View style={styles.termsContainer}>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => setAgreeToTerms(!agreeToTerms)}
+                >
+                  {agreeToTerms && (
+                    <View style={styles.checkboxInner}>
+                      <Ionicons name="checkmark" size={14} color="#fff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.termsText}>
+                  By signing up, you agree to our{' '}
+                  <Text style={styles.termsLink}>Terms and Conditions</Text> and{' '}
+                  <Text style={styles.termsLink}>Privacy Policy</Text>
+                </Text>
+              </View>
+              {!!errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
+              
+              <TouchableOpacity
+                style={[styles.submitButton, (isLoading || authLoading) && styles.disabledButton]}
+                onPress={handleSubmit}
+                disabled={isLoading || authLoading}
+                activeOpacity={0.7}
+              >
+                {(isLoading || authLoading) ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <Text style={styles.submitButtonText}>Create Account</Text>
                 )}
               </TouchableOpacity>
-              <Text style={styles.termsText}>
-                By signing up, you agree to our{' '}
-                <Text style={styles.termsLink}>Terms and Conditions</Text> and{' '}
-                <Text style={styles.termsLink}>Privacy Policy</Text>
-              </Text>
             </View>
-            {!!errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
-            
-            <TouchableOpacity
-              style={[styles.submitButton, (isLoading || authLoading) && styles.disabledButton]}
-              onPress={handleSubmit}
-              disabled={isLoading || authLoading}
-              activeOpacity={0.7}
-            >
-              {(isLoading || authLoading) ? (
-                <ActivityIndicator color={Colors.white} />
-              ) : (
-                <Text style={styles.submitButtonText}>Create Account</Text>
-              )}
-            </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      {/* Registration Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.successModalContainer}>
-            <View style={styles.modalIconContainer}>
-              <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
-            </View>
-            
-            <Text style={styles.successModalTitle}>Account Created Successfully!</Text>
-            <Text style={styles.modalMessage}>
-              Welcome to MyStyleMag! Your account has been created successfully. 
-              You can now sign in with your credentials to start exploring amazing African fashion and styles.
-            </Text>
-            
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                setShowSuccessModal(false);
-                router.replace('/signin');
-              }}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.modalButtonText}>Continue to Sign In</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Account Already Exists Modal */}
-      <Modal
-        visible={showAccountExistsModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowAccountExistsModal(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity 
-              onPress={() => setShowAccountExistsModal(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalCloseText}>Cancel</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Account Found</Text>
-            <View style={styles.modalSpacer} />
-          </View>
-
-          <View style={styles.modalContent}>
-            {/* Icon */}
-            <View style={styles.iconContainer}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="person-circle" size={48} color={Colors.primary} />
+        {/* Registration Success Modal */}
+        <Modal
+          visible={showSuccessModal}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setShowSuccessModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.successModalContainer}>
+              <View style={styles.modalIconContainer}>
+                <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
               </View>
-            </View>
-
-            {/* Content */}
-            <Text style={styles.accountExistsTitle}>Welcome Back!</Text>
-            <Text style={styles.accountExistsMessage}>
-              An account with{' '}
-              <Text style={styles.emailHighlight}>{formData.email}</Text>
-              {' '}already exists. Choose an option below to continue.
-            </Text>
-
-            {/* Action Buttons */}
-            <View style={styles.buttonContainer}>
+              
+              <Text style={styles.successModalTitle}>Account Created Successfully!</Text>
+              <Text style={styles.modalMessage}>
+                Welcome to MyStyleMag! Your account has been created successfully. 
+                You can now sign in with your credentials to start exploring amazing African fashion and styles.
+              </Text>
+              
               <TouchableOpacity
-                style={styles.primaryActionButton}
+                style={styles.modalButton}
                 onPress={() => {
-                  setShowAccountExistsModal(false);
+                  setShowSuccessModal(false);
                   router.replace('/signin');
                 }}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Ionicons name="log-in" size={20} color={Colors.white} />
-                <Text style={styles.primaryActionText}>Sign In to Account</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.secondaryActionButton}
-                onPress={() => setShowAccountExistsModal(false)}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="mail" size={20} color={Colors.primary} />
-                <Text style={styles.secondaryActionText}>Use Different Email</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.tertiaryActionButton}
-                onPress={() => {
-                  setShowAccountExistsModal(false);
-                  router.push('/forgot-password');
-                }}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.tertiaryActionText}>Forgot Password?</Text>
+                <Text style={styles.modalButtonText}>Continue to Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+
+        {/* Account Already Exists Modal */}
+        <Modal
+          visible={showAccountExistsModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setShowAccountExistsModal(false)}
+        >
+          <SafeAreaView style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity 
+                onPress={() => setShowAccountExistsModal(false)}
+                style={styles.modalCloseButton}
+              >
+                <Text style={styles.modalCloseText}>Cancel</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Account Found</Text>
+              <View style={styles.modalSpacer} />
+            </View>
+
+            <View style={styles.modalContent}>
+              {/* Icon */}
+              <View style={styles.iconContainer}>
+                <View style={styles.iconCircle}>
+                  <Ionicons name="person-circle" size={48} color={Colors.primary} />
+                </View>
+              </View>
+
+              {/* Content */}
+              <Text style={styles.accountExistsTitle}>Welcome Back!</Text>
+              <Text style={styles.accountExistsMessage}>
+                An account with{' '}
+                <Text style={styles.emailHighlight}>{formData.email}</Text>
+                {' '}already exists. Choose an option below to continue.
+              </Text>
+
+              {/* Action Buttons */}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.primaryActionButton}
+                  onPress={() => {
+                    setShowAccountExistsModal(false);
+                    router.replace('/signin');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="log-in" size={20} color={Colors.white} />
+                  <Text style={styles.primaryActionText}>Sign In to Account</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.secondaryActionButton}
+                  onPress={() => setShowAccountExistsModal(false)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="mail" size={20} color={Colors.primary} />
+                  <Text style={styles.secondaryActionText}>Use Different Email</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.tertiaryActionButton}
+                  onPress={() => {
+                    setShowAccountExistsModal(false);
+                    router.push('/forgot-password');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.tertiaryActionText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

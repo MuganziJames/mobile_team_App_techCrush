@@ -1,7 +1,7 @@
 import SafeIcon from '@/components/ui/SafeIcon';
 import Colors from '@/constants/Colors';
 import { router } from 'expo-router';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TermsScreen() {
   const sections = [
@@ -57,6 +57,7 @@ export default function TermsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       {/* Back button only for accessibility */}
       <View style={styles.backButtonContainer}>
         <TouchableOpacity
