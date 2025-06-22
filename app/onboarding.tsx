@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Dimensions, FlatList, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
@@ -35,6 +36,7 @@ export default function OnboardingScreen() {
 
   const flatListRef = useRef<FlatList>(null);
   const { completeOnboarding, rememberOnboarding } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleSkip = async () => {
     await completeOnboarding();
@@ -82,7 +84,7 @@ export default function OnboardingScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       {/* Skip button positioned at top right - no background overlay */}
-      <SafeAreaView style={styles.topContainer}>
+      <SafeAreaView style={[styles.topContainer, { paddingTop: insets.top + 16 }]}>
         <View style={styles.backButton} />
         <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
           <Text style={styles.skipText}>Skip</Text>
@@ -104,15 +106,13 @@ export default function OnboardingScreen() {
       />
 
       {/* Bottom controls positioned over the gradient */}
-      <SafeAreaView style={styles.bottomContainer}>
+      <View style={[styles.bottomContainer, { paddingBottom: Math.max(insets.bottom, 20) + 30 }]}>
         <View style={styles.paginationContainer}>
           <PaginationDots
             count={onboardingData.length}
             activeIndex={currentIndex}
           />
         </View>
-        
-
         
         <View style={styles.buttonContainer}>
           <Button
@@ -133,7 +133,7 @@ export default function OnboardingScreen() {
             textStyle={styles.loginButtonText}
           />
         </View>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }
@@ -141,7 +141,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.black,
+    backgroundColor: Colors.white,
   },
   topContainer: {
     position: 'absolute',
@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    paddingTop: 40,
     zIndex: 10,
   },
   backButton: {
@@ -214,7 +213,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.7,
     fontWeight: '400',
-
   },
   bottomContainer: {
     position: 'absolute',
@@ -222,14 +220,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
-    paddingBottom: 50,
     alignItems: 'center',
     zIndex: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
   },
   paginationContainer: {
     marginBottom: 10,
   },
-
   buttonContainer: {
     width: '100%',
     gap: 16,
