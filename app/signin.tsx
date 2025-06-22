@@ -2,10 +2,10 @@ import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
+    Animated,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -15,7 +15,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 export default function SignInScreen() {
@@ -26,6 +26,8 @@ export default function SignInScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const slideAnim = useRef(new Animated.Value(-100)).current;
 
   // Try auto-login when component mounts
   useEffect(() => {
@@ -46,6 +48,30 @@ export default function SignInScreen() {
 
     attemptAutoLogin();
   }, []);
+
+  const showError = (message: string) => {
+    setLoginError(message);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      hideError();
+    }, 5000);
+  };
+
+  const hideError = () => {
+    Animated.timing(slideAnim, {
+      toValue: -100,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setLoginError('');
+    });
+  };
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -93,11 +119,11 @@ export default function SignInScreen() {
         }, 500);
       } else {
         // Show error
-        Alert.alert('Login Failed', result.message || 'Invalid email or password');
+        showError(result.message || 'Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      showError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -118,37 +144,63 @@ export default function SignInScreen() {
           <Text style={styles.subtitle}>
             Log in to your account to continue shopping
           </Text>
+
+          {/* Error Banner */}
+          {loginError ? (
+            <Animated.View
+              style={[
+                styles.errorBanner,
+                {
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              <View style={styles.errorContent}>
+                <Ionicons name="alert-circle" size={20} color={Colors.white} />
+                <Text style={styles.errorBannerText}>{loginError}</Text>
+                <TouchableOpacity onPress={hideError} style={styles.errorCloseButton}>
+                  <Ionicons name="close" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          ) : null}
           
           <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={[styles.input, errors.email && styles.inputError]}
-                placeholder="youremail@gmail.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+                              <TextInput
+                  style={[styles.input, errors.email && styles.inputError]}
+                  placeholder="youremail@gmail.com"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (loginError) hideError();
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
             
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password</Text>
               <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
-                <TextInput
-                  style={[styles.passwordInput, errors.password && styles.inputError]}
-                  placeholder="********"
-                  placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!passwordVisible}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  textContentType="password"
-                  autoComplete="password"
-                />
+                                  <TextInput
+                    style={[styles.passwordInput, errors.password && styles.inputError]}
+                    placeholder="********"
+                    placeholderTextColor="#999"
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (loginError) hideError();
+                    }}
+                    secureTextEntry={!passwordVisible}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    textContentType="password"
+                    autoComplete="password"
+                  />
                 <TouchableOpacity 
                   style={styles.eyeIcon}
                   onPress={() => setPasswordVisible(!passwordVisible)}
@@ -346,5 +398,36 @@ const styles = StyleSheet.create({
   signUpLink: {
     color: Colors.primary,
     fontWeight: "600",
+  },
+  errorBanner: {
+    backgroundColor: Colors.errorRed,
+    borderRadius: 12,
+    marginBottom: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  errorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorBannerText: {
+    flex: 1,
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 12,
+    lineHeight: 20,
+  },
+  errorCloseButton: {
+    padding: 4,
+    marginLeft: 8,
   },
 }); 

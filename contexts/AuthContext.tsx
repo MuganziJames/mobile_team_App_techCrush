@@ -66,6 +66,7 @@ interface AuthContextProps {
   rememberOnboarding: () => Promise<void>;
   checkOnboardingStatus: () => Promise<boolean>;
   tryAutoLogin: () => Promise<boolean>;
+  deleteAccount: () => Promise<AuthResult>;
 }
 
 // Context
@@ -544,6 +545,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await AsyncStorage.removeItem('rememberedPassword');
         await AsyncStorage.removeItem('autoLoginEnabled');
         return false;
+      }
+    },
+
+    deleteAccount: async (): Promise<AuthResult> => {
+      console.log('Delete account initiated');
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      try {
+        const result = await authService.deleteAccount();
+        
+        if (result.success) {
+          // Clear all local data
+          await AsyncStorage.removeItem('rememberedEmail');
+          await AsyncStorage.removeItem('rememberedPassword');
+          await AsyncStorage.removeItem('autoLoginEnabled');
+          await AsyncStorage.removeItem('hasCompletedOnboarding');
+          await AsyncStorage.removeItem('hasRememberedOnboarding');
+          
+          // Clear auth state
+          setState({
+            user: null,
+            token: null,
+            isLoading: false,
+            isSignout: false,
+            isAuthenticated: false,
+            hasCompletedOnboarding: false,
+            hasRememberedOnboarding: false,
+          });
+          
+          console.log('Account deleted successfully, navigating to signin...');
+          
+          // Navigate to signin screen
+          setTimeout(() => {
+            router.replace('/signin');
+          }, 100);
+        }
+        
+        setState(prev => ({ ...prev, isLoading: false }));
+        return {
+          success: result.success,
+          message: result.message
+        };
+      } catch (error: any) {
+        console.error('Delete account error:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
+        return {
+          success: false,
+          message: error.message || 'An error occurred while deleting account'
+        };
       }
     },
   };

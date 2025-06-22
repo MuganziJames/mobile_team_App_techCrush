@@ -8,6 +8,7 @@ import {
     Alert,
     Dimensions,
     KeyboardAvoidingView,
+    Modal,
     Platform,
     SafeAreaView,
     ScrollView,
@@ -29,6 +30,7 @@ export default function ResetPasswordScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const validateForm = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
@@ -55,13 +57,7 @@ export default function ResetPasswordScreen() {
     const result = await setNewPassword(email, password, resetToken);
     
     if (result.success) {
-      Alert.alert(
-        '✅ Password Reset Successful',
-        'Your password has been reset successfully. You can now login with your new password.',
-        [
-          { text: 'Login', onPress: () => router.replace('/signin') }
-        ]
-      );
+      setShowSuccessModal(true);
     } else {
       Alert.alert('❌ Error', result.message || 'Failed to reset password. Please try again.');
     }
@@ -258,6 +254,44 @@ export default function ResetPasswordScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {/* Success Icon */}
+            <View style={styles.successIconContainer}>
+              <View style={styles.successIconCircle}>
+                <Ionicons name="checkmark" size={40} color={Colors.white} />
+              </View>
+            </View>
+
+            {/* Content */}
+            <Text style={styles.successTitle}>Password Reset Successful!</Text>
+            <Text style={styles.successMessage}>
+              Your password has been reset successfully. You can now login with your new password.
+            </Text>
+
+            {/* Action Button */}
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => {
+                setShowSuccessModal(false);
+                router.replace('/signin');
+              }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="log-in" size={20} color={Colors.white} />
+              <Text style={styles.loginButtonText}>Continue to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -416,5 +450,73 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 18,
     fontWeight: "700",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  successIconContainer: {
+    marginBottom: 32,
+  },
+  successIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#4CAF50',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  successTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: Colors.black,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  successMessage: {
+    fontSize: 16,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 40,
+    paddingHorizontal: 20,
+  },
+  loginButton: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    gap: 8,
+    minWidth: 200,
+    shadowColor: Colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  loginButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 

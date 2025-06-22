@@ -449,12 +449,12 @@ export default function SignUpFullForm() {
         onRequestClose={() => setShowSuccessModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+          <View style={styles.successModalContainer}>
             <View style={styles.modalIconContainer}>
               <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
             </View>
             
-            <Text style={styles.modalTitle}>Account Created Successfully!</Text>
+            <Text style={styles.successModalTitle}>Account Created Successfully!</Text>
             <Text style={styles.modalMessage}>
               Welcome to MyStyleMag! Your account has been created successfully. 
               You can now sign in with your credentials to start exploring amazing African fashion and styles.
@@ -477,77 +477,74 @@ export default function SignUpFullForm() {
       {/* Account Already Exists Modal */}
       <Modal
         visible={showAccountExistsModal}
-        animationType="fade"
-        transparent={true}
+        animationType="slide"
+        presentationStyle="pageSheet"
         onRequestClose={() => setShowAccountExistsModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.accountExistsContainer}>
-            {/* Warning indicator */}
-            <View style={styles.warningHeader}>
-              <View style={styles.warningIconContainer}>
-                <Ionicons name="warning" size={32} color="#FF9500" />
-              </View>
-              <View style={styles.pulseRing} />
-            </View>
-            
-            <Text style={styles.accountExistsTitle}>Account Already Exists</Text>
-            <View style={styles.accountExistsMessageContainer}>
-              <Text style={styles.accountExistsMessage}>
-                An account with the email{'\n'}
-                <Text style={styles.emailHighlight}>"{formData.email}"</Text>{'\n'}
-                is already registered.
-              </Text>
-            </View>
-            
-            {/* Options */}
-            <View style={styles.optionsContainer}>
-              <View style={styles.optionItem}>
-                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-                <Text style={styles.optionText}>Sign in with your existing account</Text>
-              </View>
-              <View style={styles.optionItem}>
-                <Ionicons name="mail" size={20} color="#2196F3" />
-                <Text style={styles.optionText}>Use a different email address</Text>
-              </View>
-              <View style={styles.optionItem}>
-                <Ionicons name="key" size={20} color="#FF6B35" />
-                <Text style={styles.optionText}>Use "Forgot Password" to recover</Text>
-              </View>
-            </View>
-            
-            {/* Action Buttons */}
-            <View style={styles.accountExistsButtonContainer}>
-              <TouchableOpacity
-                style={styles.differentEmailButton}
-                onPress={() => setShowAccountExistsModal(false)}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="create" size={16} color="#666" />
-                <Text style={styles.differentEmailButtonText}>Use Different Email</Text>
-              </TouchableOpacity>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity 
+              onPress={() => setShowAccountExistsModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Text style={styles.modalCloseText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Account Found</Text>
+            <View style={styles.modalSpacer} />
+          </View>
 
+          <View style={styles.modalContent}>
+            {/* Icon */}
+            <View style={styles.iconContainer}>
+              <View style={styles.iconCircle}>
+                <Ionicons name="person-circle" size={48} color={Colors.primary} />
+              </View>
+            </View>
+
+            {/* Content */}
+            <Text style={styles.accountExistsTitle}>Welcome Back!</Text>
+            <Text style={styles.accountExistsMessage}>
+              An account with{' '}
+              <Text style={styles.emailHighlight}>{formData.email}</Text>
+              {' '}already exists. Choose an option below to continue.
+            </Text>
+
+            {/* Action Buttons */}
+            <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={styles.signInInsteadButton}
+                style={styles.primaryActionButton}
                 onPress={() => {
                   setShowAccountExistsModal(false);
                   router.replace('/signin');
                 }}
                 activeOpacity={0.8}
               >
-                <Ionicons name="log-in" size={16} color={Colors.white} />
-                <Text style={styles.signInInsteadButtonText}>Sign In Instead</Text>
+                <Ionicons name="log-in" size={20} color={Colors.white} />
+                <Text style={styles.primaryActionText}>Sign In to Account</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.secondaryActionButton}
+                onPress={() => setShowAccountExistsModal(false)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="mail" size={20} color={Colors.primary} />
+                <Text style={styles.secondaryActionText}>Use Different Email</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.tertiaryActionButton}
+                onPress={() => {
+                  setShowAccountExistsModal(false);
+                  router.push('/forgot-password');
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.tertiaryActionText}>Forgot Password?</Text>
               </TouchableOpacity>
             </View>
-            
-            {/* Bottom decoration */}
-            <View style={styles.bottomDecoration}>
-              <View style={styles.decorativeDot} />
-              <View style={[styles.decorativeDot, { opacity: 0.6 }]} />
-              <View style={[styles.decorativeDot, { opacity: 0.3 }]} />
-            </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -714,7 +711,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContainer: {
+  successModalContainer: {
     backgroundColor: Colors.white,
     padding: 24,
     borderRadius: 12,
@@ -727,7 +724,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
   },
-  modalTitle: {
+  successModalTitle: {
     fontSize: 24,
     fontWeight: '600',
     color: Colors.black,
@@ -754,114 +751,114 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  accountExistsContainer: {
+  modalContainer: {
+    flex: 1,
     backgroundColor: Colors.white,
-    padding: 24,
-    borderRadius: 12,
-    width: '80%',
-    alignItems: 'center',
   },
-  warningHeader: {
+  modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
   },
-  warningIconContainer: {
-    backgroundColor: Colors.primary,
-    borderRadius: 60,
-    padding: 12,
-    marginRight: 16,
+  modalCloseButton: {
+    padding: 4,
   },
-  pulseRing: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-    opacity: 0.5,
+  modalCloseText: {
+    fontSize: 16,
+    color: Colors.darkGray,
   },
-  accountExistsTitle: {
-    fontSize: 24,
+  modalTitle: {
+    fontSize: 18,
     fontWeight: '600',
     color: Colors.black,
-    marginBottom: 16,
-    textAlign: 'center',
   },
-  accountExistsMessageContainer: {
+  modalSpacer: {
+    width: 60,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
     marginBottom: 24,
   },
-  accountExistsMessage: {
-    color: Colors.darkGray,
-    fontSize: 14,
+  iconCircle: {
+    backgroundColor: Colors.lightGray,
+    borderRadius: 50,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountExistsTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: Colors.black,
+    marginBottom: 12,
     textAlign: 'center',
-    lineHeight: 20,
+  },
+  accountExistsMessage: {
+    fontSize: 16,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
   emailHighlight: {
     color: Colors.primary,
-    fontWeight: '500',
-  },
-  optionsContainer: {
-    width: '100%',
-    marginBottom: 24,
-  },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  optionText: {
-    fontSize: 12,
-    color: Colors.darkGray,
-    marginLeft: 8,
-    flex: 1,
-  },
-  accountExistsButtonContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    gap: 12,
-  },
-  differentEmailButton: {
-    flex: 1,
-    backgroundColor: Colors.lightGray,
-    padding: 16,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  differentEmailButtonText: {
-    color: Colors.darkGray,
     fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 8,
   },
-  signInInsteadButton: {
-    flex: 1,
+  buttonContainer: {
+    width: '100%',
+    gap: 16,
+  },
+  primaryActionButton: {
     backgroundColor: Colors.primary,
-    padding: 16,
-    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    gap: 8,
   },
-  signInInsteadButtonText: {
+  primaryActionText: {
     color: Colors.white,
+    fontSize: 16,
     fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 8,
   },
-  bottomDecoration: {
+  secondaryActionButton: {
+    backgroundColor: Colors.lightGray,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    gap: 8,
   },
-  decorativeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.primary,
-    marginHorizontal: 4,
+  secondaryActionText: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  tertiaryActionButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  tertiaryActionText: {
+    color: Colors.darkGray,
+    fontSize: 16,
+    textDecorationLine: 'underline',
   },
   passwordRules: {
     backgroundColor: '#F8F9FA',

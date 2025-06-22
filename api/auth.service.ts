@@ -244,6 +244,29 @@ class AuthService {
       return null;
     }
   }
+
+  // Delete account
+  async deleteAccount(): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await apiClient.delete<ApiResponse>('/deleteAccount');
+      
+      // Clear local data after successful deletion
+      await clearAuthData();
+      
+      console.log('Account deleted successfully');
+      
+      return {
+        success: true,
+        message: response.data.message || 'Account deleted successfully'
+      };
+    } catch (error: any) {
+      console.error('Delete account error:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to delete account'
+      };
+    }
+  }
 }
 
 // Export singleton instance

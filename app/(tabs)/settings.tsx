@@ -1,13 +1,14 @@
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import ErrorModal from '@/components/ui/ErrorModal';
 import ModalCard from '@/components/ui/ModalCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsTabScreen() {
-  const { logout, user } = useAuth();
+  const { logout, user, deleteAccount } = useAuth();
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [accountVisible, setAccountVisible] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
@@ -15,6 +16,8 @@ export default function SettingsTabScreen() {
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [preferencesVisible, setPreferencesVisible] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({ title: '', message: '' });
 
   const handleAccountInfo = () => {
     setAccountVisible(true);
@@ -41,7 +44,11 @@ export default function SettingsTabScreen() {
   };
 
   const handlePrivacyPolicy = () => {
-    Alert.alert('Privacy Policy', 'Privacy policy coming soon!');
+    setErrorMessage({
+      title: 'Coming Soon',
+      message: 'Privacy policy feature is coming soon!'
+    });
+    setErrorVisible(true);
   };
 
   const handleLogout = () => {
@@ -69,6 +76,28 @@ export default function SettingsTabScreen() {
 
   const handleDeleteAccount = () => {
     setDeleteVisible(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    setDeleteVisible(false);
+    try {
+      console.log('Starting delete account process...');
+      const result = await deleteAccount();
+      if (!result.success) {
+        setErrorMessage({
+          title: 'Delete Failed',
+          message: result.message || 'Failed to delete account. Please try again.'
+        });
+        setErrorVisible(true);
+      }
+    } catch (error) {
+      console.error('Delete account failed:', error);
+      setErrorMessage({
+        title: 'Error',
+        message: 'An unexpected error occurred. Please try again.'
+      });
+      setErrorVisible(true);
+    }
   };
 
   return (
@@ -303,8 +332,17 @@ export default function SettingsTabScreen() {
         message="Are you sure you want to permanently delete your account? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
-        onConfirm={() => { setDeleteVisible(false); /* TODO call API */ performLogout(); }}
+        onConfirm={confirmDeleteAccount}
         onCancel={() => setDeleteVisible(false)}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        visible={errorVisible}
+        title={errorMessage.title}
+        message={errorMessage.message}
+        buttonText="OK"
+        onClose={() => setErrorVisible(false)}
       />
     </View>
   );
