@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   bottomSpacing: {
-    height: 40,
+    height: 100,
   },
   modalOverlay: {
     flex: 1,

@@ -10,16 +10,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  RefreshControl,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    FlatList,
+    Modal,
+    RefreshControl,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function FeedScreen() {
@@ -267,7 +267,7 @@ const componentStyles = StyleSheet.create({
   },
   feedContent: {
     paddingTop: 42,
-    paddingBottom: 30,
+    paddingBottom: 100,
   },
   welcomeSection: {
     marginBottom: 20,

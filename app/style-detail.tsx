@@ -274,6 +274,9 @@ export default function StyleDetailScreen() {
               </Text>
             </View>
           )}
+
+          {/* Bottom Spacing */}
+          <View style={styles.bottomSpacing} />
         </View>
       </ScrollView>
 
@@ -593,5 +596,8 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
     textAlign: 'center',
+  },
+  bottomSpacing: {
+    height: 100, // Space for bottom navigation and safe area
   },
 }); 

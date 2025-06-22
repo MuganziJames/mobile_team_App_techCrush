@@ -133,18 +133,19 @@ export default function BlogScreen() {
     const postsToShow = searchQuery ? searchResults : blogs;
     
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <ScrollView 
-          style={styles.scrollView} 
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={refreshBlogs}
-              colors={[Colors.primary]}
-            />
-          }
-        >
+          <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refreshBlogs}
+            colors={[Colors.primary]}
+          />
+        }
+      >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -233,6 +234,7 @@ export default function BlogScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView 
         style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -382,6 +384,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20, // Ensure content isn't cut off
   },
   loadingContainer: {
     flex: 1,
@@ -685,7 +690,7 @@ const styles = StyleSheet.create({
   showAllContainer: {
     paddingHorizontal: 20,
     paddingVertical: 24,
-    paddingBottom: 32,
+    paddingBottom: 150,
   },
   showAllButton: {
     backgroundColor: Colors.primary,
@@ -711,6 +716,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   bottomSpacing: {
-    height: 32,
+    height: 100,
   },
 }); 

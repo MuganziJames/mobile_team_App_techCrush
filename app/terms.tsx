@@ -85,7 +85,7 @@ export default function TermsScreen() {
               <Text style={styles.sectionBody}>{s.body}</Text>
             </View>
           ))}
-          <View style={{ height: 40 }} />
+          <View style={styles.bottomSpacing} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -148,5 +148,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.darkGray,
     lineHeight: 20,
+  },
+  bottomSpacing: {
+    height: 100, // Space for bottom navigation and safe area
   },
 }); 

@@ -450,6 +450,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   // Orange header with curved bottom - extends to full screen
   orangeHeader: {

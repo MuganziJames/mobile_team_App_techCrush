@@ -544,7 +544,7 @@ const componentStyles = StyleSheet.create({
     padding: 20,
   },
   flatListContent: {
-    paddingBottom: 20,
+    paddingBottom: 100,
   },
   modalContainer: {
     flex: 1,

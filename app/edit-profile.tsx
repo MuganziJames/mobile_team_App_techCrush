@@ -267,6 +267,9 @@ export default function EditProfileScreen() {
             <Text style={styles.saveButtonText}>Save Changes</Text>
           )}
         </TouchableOpacity>
+
+        {/* Bottom Spacing */}
+        <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -395,5 +398,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  bottomSpacing: {
+    height: 100, // Space for bottom navigation and safe area
   },
 }); 

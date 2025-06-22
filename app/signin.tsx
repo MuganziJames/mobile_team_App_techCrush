@@ -259,6 +259,9 @@ export default function SignInScreen() {
               </Link>
             </Text>
           </View>
+
+          {/* Bottom Spacing */}
+          <View style={styles.bottomSpacing} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -431,5 +434,8 @@ const styles = StyleSheet.create({
   errorCloseButton: {
     padding: 4,
     marginLeft: 8,
+  },
+  bottomSpacing: {
+    height: 100, // Space for bottom navigation and safe area
   },
 }); 
