@@ -2,7 +2,6 @@ import Button from '@/components/ui/Button';
 import PaginationDots from '@/components/ui/PaginationDots';
 import Colors from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -33,15 +32,12 @@ const onboardingData = [
 
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [rememberMe, setRememberMe] = useState(false);
+
   const flatListRef = useRef<FlatList>(null);
   const { completeOnboarding, rememberOnboarding } = useAuth();
 
   const handleSkip = async () => {
     await completeOnboarding();
-    if (rememberMe) {
-      await rememberOnboarding();
-    }
     router.replace('/signin');
   };
 
@@ -54,9 +50,6 @@ export default function OnboardingScreen() {
     } else {
       // User completed onboarding, mark it as complete
       await completeOnboarding();
-      if (rememberMe) {
-        await rememberOnboarding();
-      }
       router.replace('/signin');
     }
   };
@@ -68,10 +61,12 @@ export default function OnboardingScreen() {
         style={styles.backgroundImage}
         resizeMode="cover"
       >
-        {/* White gradient fade overlay at bottom - matching reference images */}
+        {/* Improved gradient overlay - smooth white fade from bottom */}
         <LinearGradient
-          colors={['transparent', 'rgba(255, 255, 255, 0.8)', 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.95)']}
-          style={styles.bottomGradient}
+          colors={['transparent', 'rgba(255,255,255,0.3)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', '#FFFFFF']}
+          locations={[0, 0.4, 0.55, 0.7, 1]}
+          style={styles.fadeOverlay}
+          pointerEvents="none"
         />
         
         {/* Content positioned at bottom */}
@@ -109,50 +104,32 @@ export default function OnboardingScreen() {
 
       {/* Bottom controls positioned over the gradient */}
       <SafeAreaView style={styles.bottomContainer}>
-        <PaginationDots
-          count={onboardingData.length}
-          activeIndex={currentIndex}
-        />
+        <View style={styles.paginationContainer}>
+          <PaginationDots
+            count={onboardingData.length}
+            activeIndex={currentIndex}
+          />
+        </View>
         
-        {/* Remember Me Toggle */}
-        <TouchableOpacity 
-          style={styles.rememberContainer}
-          onPress={() => setRememberMe(!rememberMe)}
-          activeOpacity={0.7}
-        >
-          <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
-            {rememberMe && (
-              <Ionicons name="checkmark" size={16} color={Colors.white} />
-            )}
-          </View>
-          <Text style={styles.rememberText}>
-            Don't show this again
-          </Text>
-        </TouchableOpacity>
+
         
         <View style={styles.buttonContainer}>
-          <Button
-            title="Log In"
-            onPress={async () => {
-              await completeOnboarding();
-              if (rememberMe) {
-                await rememberOnboarding();
-              }
-              router.replace('/signin');
-            }}
-            style={[styles.button, styles.loginButton]}
-            textStyle={styles.loginButtonText}
-          />
           <Button
             title="Sign Up"
             onPress={async () => {
               await completeOnboarding();
-              if (rememberMe) {
-                await rememberOnboarding();
-              }
               router.replace('/signup');
             }}
             style={[styles.button, styles.signupButton]}
+          />
+          <Button
+            title="Log In"
+            onPress={async () => {
+              await completeOnboarding();
+              router.replace('/signin');
+            }}
+            style={[styles.button, styles.loginButton]}
+            textStyle={styles.loginButtonText}
           />
         </View>
       </SafeAreaView>
@@ -182,11 +159,19 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 20,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   skipText: {
     color: Colors.primary,
@@ -202,70 +187,47 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  bottomGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 450,
-    zIndex: 2,
+  fadeOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
   },
   contentContainer: {
     position: 'absolute',
-    bottom: 240,
+    bottom: 180,
     left: 24,
     right: 24,
-    zIndex: 3,
+    zIndex: 2,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: Colors.black,
     textAlign: 'left',
-    marginBottom: 10,
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.black,
     textAlign: 'left',
-    lineHeight: 20,
-    opacity: 0.8,
+    lineHeight: 22,
+    opacity: 0.7,
+    fontWeight: '400',
   },
   bottomContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 32,
-    paddingBottom: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 50,
     alignItems: 'center',
+    zIndex: 2,
   },
-  rememberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 16,
+  paginationContainer: {
+    marginBottom: 8,
   },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.black,
-    backgroundColor: 'transparent',
-    marginRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  rememberText: {
-    fontSize: 15,
-    color: Colors.black,
-    fontWeight: '500',
-  },
+
   buttonContainer: {
     width: '100%',
     gap: 16,
@@ -283,16 +245,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  loginButton: {
-    backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  loginButtonText: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
   signupButton: {
     backgroundColor: Colors.primary,
     shadowColor: Colors.primary,
@@ -303,5 +255,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 8,
+  },
+  loginButton: {
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  loginButtonText: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 
