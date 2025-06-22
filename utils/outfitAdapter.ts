@@ -103,6 +103,8 @@ export function outfitToStyle(outfit: Outfit): Style {
   idMapping[styleId] = outfit.id;
   reverseIdMapping[outfit.id] = styleId;
   
+  console.log(`Created mapping: styleId ${styleId} -> outfitId ${outfit.id}`);
+  
   return {
     id: styleId,
     title: outfit.title,
@@ -121,15 +123,28 @@ export function outfitsToStyles(outfits: Outfit[]): Style[] {
 
 // Get outfit ID from style ID
 export function getOutfitIdFromStyleId(styleId: number): string | undefined {
-  return idMapping[styleId];
+  const outfitId = idMapping[styleId];
+  if (!outfitId) {
+    console.error('No outfit ID found for style ID:', styleId);
+    console.log('Available mappings:', Object.keys(idMapping));
+  }
+  return outfitId;
 }
 
 // Get style ID from outfit ID
 export function getStyleIdFromOutfitId(outfitId: string): number | undefined {
-  return reverseIdMapping[outfitId];
+  const styleId = reverseIdMapping[outfitId];
+  if (!styleId) {
+    console.error('No style ID found for outfit ID:', outfitId);
+  }
+  return styleId;
 }
 
 // Check if style ID corresponds to an outfit
 export function isOutfitStyle(styleId: number): boolean {
-  return styleId in idMapping;
+  const exists = styleId in idMapping;
+  if (!exists) {
+    console.warn('Style ID not found in outfit mapping:', styleId);
+  }
+  return exists;
 } 

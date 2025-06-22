@@ -331,7 +331,7 @@ export default function SearchScreen() {
           <Ionicons name="search" size={20} color="#999" style={componentStyles.searchIcon} />
           <TextInput
             style={componentStyles.searchInput}
-            placeholder="Search styles... (Press Enter to search)"
+            placeholder="Search styles..."
             value={searchInput}
             onChangeText={handleTextInputChange}
             onSubmitEditing={handleSearchSubmit}
@@ -347,18 +347,6 @@ export default function SearchScreen() {
             </TouchableOpacity>
           )}
         </View>
-        
-        {/* Show current active search query if different from input */}
-        {searchQuery && searchQuery !== searchInput && (
-          <View style={componentStyles.activeSearchContainer}>
-            <Text style={componentStyles.activeSearchText}>
-              Searching for: "{searchQuery}"
-            </Text>
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close" size={16} color={Colors.primary} />
-            </TouchableOpacity>
-          </View>
-        )}
         
         {(searchQuery || selectedCategory !== 'All' || selectedTags.length > 0) && (
           <TouchableOpacity 
@@ -628,22 +616,5 @@ const componentStyles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
     textAlign: 'center',
-  },
-  activeSearchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
-  },
-  activeSearchText: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-    fontWeight: '500',
   },
 });

@@ -54,12 +54,24 @@ export default function StyleCard({
       onPress(style);
     } else {
       // Check if this is an outfit-based style and get the original outfit ID
-      const outfitId = isOutfitStyle(style.id) ? getOutfitIdFromStyleId(style.id) : null;
-      
-      router.push({
-        pathname: '/style-detail',
-        params: { id: outfitId || style.id }
-      });
+      if (isOutfitStyle(style.id)) {
+        const outfitId = getOutfitIdFromStyleId(style.id);
+        if (outfitId) {
+          router.push({
+            pathname: '/style-detail',
+            params: { id: outfitId }
+          });
+        } else {
+          console.error('Could not find outfit ID for style:', style.id);
+          // Don't navigate if we can't find the proper outfit ID
+        }
+      } else {
+        // For non-outfit styles, use the style ID directly
+        router.push({
+          pathname: '/style-detail',
+          params: { id: style.id.toString() }
+        });
+      }
     }
   };
 

@@ -4,18 +4,19 @@ import ConfirmationModal from '@/components/ui/ConfirmationModal';
 import SuccessCard from '@/components/ui/SuccessCard';
 import { useLookbook } from '@/contexts/LookbookContext';
 import { exportFolderAsPDF } from '@/utils/exportUtils';
+import { getOutfitIdFromStyleId, isOutfitStyle } from '@/utils/outfitAdapter';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -38,10 +39,25 @@ export default function LookbookFolderScreen() {
   const folderStyles = getStylesInFolder(folderId as string);
 
   const handleStylePress = (style: any) => {
-    router.push({
-      pathname: '/style-detail',
-      params: { id: style.id }
-    });
+    // Check if this is an outfit-based style and get the original outfit ID
+    if (isOutfitStyle(style.id)) {
+      const outfitId = getOutfitIdFromStyleId(style.id);
+      if (outfitId) {
+        router.push({
+          pathname: '/style-detail',
+          params: { id: outfitId }
+        });
+      } else {
+        console.error('Could not find outfit ID for style:', style.id);
+        // Don't navigate if we can't find the proper outfit ID
+      }
+    } else {
+      // For non-outfit styles, use the style ID directly
+      router.push({
+        pathname: '/style-detail',
+        params: { id: style.id.toString() }
+      });
+    }
   };
 
   const handleRemoveStyle = (style: any) => {
