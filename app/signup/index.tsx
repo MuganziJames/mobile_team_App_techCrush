@@ -61,7 +61,7 @@ export default function SignUpEmailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <Text style={styles.title}>Join AfriStyle Today!</Text>
+          <Text style={styles.title}>Join MyStyleMag Today!</Text>
           <Text style={styles.subtitle}>
             Explore exclusive, modern and exquisite African Designs at your fingertips.
           </Text>

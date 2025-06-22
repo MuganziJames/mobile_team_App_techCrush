@@ -138,8 +138,8 @@ export default function BlogScreen() {
 
   const handleShare = async (post: BlogPost) => {
     try {
-      const shareTitle = `${post.title} | AfriStyle`;
-      const shareContent = `Check out this article: ${post.title}\n\nCategory: ${post.category.name}\nBy: ${post.creator.name}\n\n📱 Read more on AfriStyle - Discover African Fashion & Style`;
+      const shareTitle = `${post.title} | MyStyleMag`;
+      const shareContent = `Check out this article: ${post.title}\n\nCategory: ${post.category.name}\nBy: ${post.creator.name}\n\n📱 Read more on MyStyleMag - Discover African Fashion & Style`;
       
       await Share.share({
         title: shareTitle,

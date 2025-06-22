@@ -9,7 +9,7 @@ export default function Logo({ size = 160, style }: LogoProps) {
   return (
     <View style={[styles.container, { width: size, height: size }, style]}>
       <Image
-        source={require('../../assets/images/AfriStyle.png')}
+        source={require('../../assets/images/icon.png')}
         style={{ width: size, height: size, resizeMode: 'contain' }}
       />
     </View>

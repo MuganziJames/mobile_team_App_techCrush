@@ -7,7 +7,7 @@ export default function TermsScreen() {
   const sections = [
     {
       heading: '1. Eligibility',
-      body: 'You must be at least 13 years of age to use AfriStyle. By using the App, you confirm that you meet the eligibility criteria.'
+      body: 'You must be at least 13 years of age to use MyStyleMag. By using the App, you confirm that you meet the eligibility criteria.'
     },
     {
       heading: '2. User Accounts',
@@ -19,15 +19,15 @@ export default function TermsScreen() {
     },
     {
       heading: '4. Content Ownership',
-      body: 'All content available through the App, including images, text, logos, and code, is the property of AfriStyle or its content providers. You may not copy, reproduce, or distribute content without permission.'
+      body: 'All content available through the App, including images, text, logos, and code, is the property of MyStyleMag or its content providers. You may not copy, reproduce, or distribute content without permission.'
     },
     {
       heading: '5. User-Generated Content',
-      body: 'By submitting content (e.g., photos, reviews) you grant AfriStyle a non-exclusive, worldwide, royalty-free licence to use, display, and share that content for promotional and operational purposes. You are solely responsible for anything you upload.'
+      body: 'By submitting content (e.g., photos, reviews) you grant MyStyleMag a non-exclusive, worldwide, royalty-free licence to use, display, and share that content for promotional and operational purposes. You are solely responsible for anything you upload.'
     },
     {
       heading: '6. Purchases & Payments',
-      body: 'If AfriStyle offers e-commerce features, all transactions must be completed using secure payment methods. Prices are displayed in your local currency and you agree to pay all charges incurred by you or your account.'
+      body: 'If MyStyleMag offers e-commerce features, all transactions must be completed using secure payment methods. Prices are displayed in your local currency and you agree to pay all charges incurred by you or your account.'
     },
     {
       heading: '7. Privacy',
@@ -39,19 +39,19 @@ export default function TermsScreen() {
     },
     {
       heading: '9. Disclaimer',
-      body: 'AfriStyle is provided "as-is" and "as-available." We make no warranties regarding the accuracy, reliability, or availability of the App or its content.'
+      body: 'MyStyleMag is provided "as-is" and "as-available." We make no warranties regarding the accuracy, reliability, or availability of the App or its content.'
     },
     {
       heading: '10. Limitation of Liability',
-      body: 'To the maximum extent permitted by law, AfriStyle and its affiliates will not be liable for any indirect, incidental, or consequential damages arising out of your use of the App.'
+      body: 'To the maximum extent permitted by law, MyStyleMag and its affiliates will not be liable for any indirect, incidental, or consequential damages arising out of your use of the App.'
     },
     {
       heading: '11. Changes to Terms',
-      body: 'We may update these Terms from time to time. We will notify you via the App or e-mail. Continued use of AfriStyle after changes are made constitutes your acceptance of the new Terms.'
+      body: 'We may update these Terms from time to time. We will notify you via the App or e-mail. Continued use of MyStyleMag after changes are made constitutes your acceptance of the new Terms.'
     },
     {
       heading: '12. Contact Us',
-      body: 'Email: support@afristyle.app\nPhone: +234 801 234 5678\nAddress: Lagos, Nigeria'
+      body: 'Email: support@mystylemag.app\nPhone: +234 801 234 5678\nAddress: Lagos, Nigeria'
     }
   ];
 
@@ -74,8 +74,8 @@ export default function TermsScreen() {
           <Text style={styles.effectiveDate}>Effective Date: 19 June 2025</Text>
           
           <Text style={styles.introText}>
-            Welcome to AfriStyle. These Terms & Conditions govern your use of our application and services. 
-            By using AfriStyle, you agree to these terms in their entirety.
+                Welcome to MyStyleMag. These Terms & Conditions govern your use of our application and services.
+    By using MyStyleMag, you agree to these terms in their entirety.
           </Text>
           
           {sections.map((s) => (

@@ -1,7 +1,7 @@
-# AfriStyle - African Fashion & Culture Mobile App
+# MyStyleMag - African Fashion & Culture Mobile App
 
 <div align="center">
-  <img src="./assets/images/icon.png" alt="AfriStyle Logo" width="120" height="120">
+  <img src="./assets/images/icon.png" alt="MyStyleMag Logo" width="120" height="120">
   
   **Discover authentic African fashion and culture from the comfort of your mobile device**
   
@@ -11,9 +11,9 @@
   [![License](https://img.shields.io/badge/License-Private-red.svg)]()
 </div>
 
-## 📱 About AfriStyle
+## 📱 About MyStyleMag
 
-AfriStyle is a comprehensive mobile application that celebrates African fashion, culture, and style. The app provides users with an immersive experience to explore authentic African fashion trends, read inspiring blog content, and discover the rich cultural heritage behind African style.
+MyStyleMag is a comprehensive mobile application that celebrates African fashion, culture, and style. The app provides users with an immersive experience to explore authentic African fashion trends, read inspiring blog content, and discover the rich cultural heritage behind African style.
 
 ### 🌟 Key Features
 
@@ -52,7 +52,7 @@ AfriStyle is a comprehensive mobile application that celebrates African fashion,
 ## 📂 Project Structure
 
 ```
-AfriStyle/
+MyStyleMag/
 ├── app/                          # Main application screens
 │   ├── (tabs)/                   # Tab-based navigation screens
 │   │   ├── index.tsx            # Home screen
@@ -313,7 +313,7 @@ expo prebuild
 ## 📞 Support & Contact
 
 For support, feature requests, or bug reports:
-- **Email**: support@afristyle.com
+- **Email**: support@mystylemag.com
 - **GitHub Issues**: Create an issue in this repository
 - **Documentation**: Check the inline code documentation
 
@@ -325,5 +325,5 @@ This project is private and proprietary. All rights reserved.
 
 <div align="center">
   <p><strong>Built with ❤️ for African Fashion & Culture</strong></p>
-  <p>© 2025 AfriStyle. All rights reserved.</p>
+  <p>© 2025 MyStyleMag. All rights reserved.</p>
 </div> 

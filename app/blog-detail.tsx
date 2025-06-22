@@ -79,8 +79,8 @@ export default function BlogDetailScreen() {
     setIsSharing(true);
     setShowShareModal(false);
     try {
-      const shareTitle = `${post.title} | AfriStyle`;
-      const shareContent = `${post.title}\n\n${post.content.substring(0, 300)}...\n\nBy ${post.creator.name}\nCategory: ${post.category.name}\n\n📱 Read the full article on AfriStyle - Discover African Fashion & Style`;
+      const shareTitle = `${post.title} | MyStyleMag`;
+      const shareContent = `${post.title}\n\n${post.content.substring(0, 300)}...\n\nBy ${post.creator.name}\nCategory: ${post.category.name}\n\n📱 Read the full article on MyStyleMag - Discover African Fashion & Style`;
       
       await Share.share({
         title: shareTitle,
@@ -100,7 +100,7 @@ export default function BlogDetailScreen() {
     setIsSharing(true);
     setShowShareModal(false);
     try {
-      const shareTitle = `${post.title} | AfriStyle`;
+      const shareTitle = `${post.title} | MyStyleMag`;
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(post.imageUrl, {

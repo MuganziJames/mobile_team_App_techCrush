@@ -9,17 +9,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    RefreshControl,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function FeedScreen() {
@@ -96,22 +96,24 @@ export default function FeedScreen() {
   const renderHeader = () => (
     <View style={componentStyles.headerContainer}>
       <View style={componentStyles.welcomeSection}>
-        <Text style={componentStyles.welcomeText}>
-          Welcome back, {user?.name?.split(' ')[0] || 'User'}!
-        </Text>
-        <Text style={componentStyles.subText}>
-          Discover new styles and save them to your lookbook
-        </Text>
+        <View style={componentStyles.titleRow}>
+          <View style={componentStyles.titleContent}>
+            <Text style={componentStyles.welcomeText}>
+              Welcome back, {user?.name?.split(' ')[0] || 'User'}!
+            </Text>
+            <Text style={componentStyles.subText}>
+              Discover new styles and save them to your lookbook
+            </Text>
+          </View>
+          <TouchableOpacity 
+            style={componentStyles.searchIconButton}
+            onPress={handleSearchPress}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="search-outline" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
-      
-      <TouchableOpacity 
-        style={componentStyles.searchButton}
-        onPress={handleSearchPress}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="search" size={20} color={Colors.white} />
-        <Text style={componentStyles.searchButtonText}>Search Styles</Text>
-      </TouchableOpacity>
     </View>
   );
 
@@ -260,6 +262,15 @@ const componentStyles = StyleSheet.create({
   welcomeSection: {
     marginBottom: 20,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  titleContent: {
+    flex: 1,
+    paddingRight: 16,
+  },
   welcomeText: {
     fontSize: 22,
     fontWeight: '600',
@@ -271,25 +282,14 @@ const componentStyles = StyleSheet.create({
     color: Colors.darkGray,
     marginBottom: 16,
   },
-  searchButton: {
-    flexDirection: 'row',
+  searchIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  searchButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
+    marginTop: 2,
   },
   row: {
     justifyContent: 'space-between',

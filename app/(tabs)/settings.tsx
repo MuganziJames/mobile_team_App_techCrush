@@ -265,14 +265,14 @@ export default function SettingsTabScreen() {
         visible={helpVisible}
         iconName="help-circle"
         title="Help & Support"
-        message={'Email: support@afristyle.com\nPhone: +234 801 234 5678\nHours: Mon-Fri 9AM-6PM WAT\n\nLive Chat: Available in-app\nFAQ: Visit our help center'}
+                    message={'Email: support@mystylemag.com\nPhone: +234 801 234 5678\nHours: Mon-Fri 9AM-6PM WAT\n\nLive Chat: Available in-app\nFAQ: Visit our help center'}
         onClose={() => setHelpVisible(false)}
       />
 
       <ModalCard
         visible={aboutVisible}
         iconName="information-circle"
-        title="About AfriStyle"
+                    title="About MyStyleMag"
         message={'Version 1.0.0\n\nDiscover authentic African fashion and art from the comfort of your home.'}
         onClose={() => setAboutVisible(false)}
       />

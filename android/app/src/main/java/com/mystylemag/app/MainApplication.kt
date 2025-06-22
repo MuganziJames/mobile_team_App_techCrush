@@ -1,4 +1,4 @@
-package com.afristyle.app
+package com.mystylemag.app
 
 import android.app.Application
 import android.content.res.Configuration

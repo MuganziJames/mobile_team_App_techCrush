@@ -45,7 +45,7 @@ c. User-Generated Content
 • Secure cloud storage
 • Authentication and access controls
 
-However, no system is 100% secure. Use AfriStyle at your own risk, and help keep your data safe by protecting your account credentials.`
+However, no system is 100% secure. Use MyStyleMag at your own risk, and help keep your data safe by protecting your account credentials.`
     },
     {
       heading: '5. Your Rights',
@@ -55,7 +55,7 @@ However, no system is 100% secure. Use AfriStyle at your own risk, and help keep
 • Delete your data (right to be forgotten)
 • Object to data processing or withdraw consent
 
-To make a request, contact us at support@afristyle.app.`
+To make a request, contact us at support@mystylemag.app.`
     },
     {
       heading: '6. Data Retention',
@@ -63,7 +63,7 @@ To make a request, contact us at support@afristyle.app.`
     },
     {
       heading: '7. Children\'s Privacy',
-      body: 'AfriStyle is not intended for users under 13. We do not knowingly collect data from children under this age. If we learn we have collected data from a child, we will delete it promptly.'
+      body: 'MyStyleMag is not intended for users under 13. We do not knowingly collect data from children under this age. If we learn we have collected data from a child, we will delete it promptly.'
     },
     {
       heading: '8. Third-Party Links and Services',
@@ -77,8 +77,8 @@ To make a request, contact us at support@afristyle.app.`
       heading: '10. Contact Us',
       body: `If you have questions or concerns about your privacy or this policy, please reach out to us:
 
-AfriStyle Team
-Email: support@afristyle.app
+    MyStyleMag Team
+    Email: support@mystylemag.app
 Phone: +234 801 234 5678
 Location: Lagos, Nigeria`
     }
@@ -112,11 +112,11 @@ Location: Lagos, Nigeria`
           <Text style={styles.effectiveDate}>Effective Date: 20 June 2025</Text>
           
           <Text style={styles.introText}>
-            At AfriStyle, your privacy matters. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our mobile application ("App").
+            At MyStyleMag, your privacy matters. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our mobile application ("App").
           </Text>
           
           <Text style={styles.introText}>
-            By using AfriStyle, you agree to the practices described in this Privacy Policy.
+            By using MyStyleMag, you agree to the practices described in this Privacy Policy.
           </Text>
 
           {sections.map((s) => (

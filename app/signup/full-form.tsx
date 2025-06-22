@@ -217,7 +217,7 @@ export default function SignUpFullForm() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <Text style={styles.title}>Join AfriStyle Today!</Text>
+          <Text style={styles.title}>Join MyStyleMag Today!</Text>
           <Text style={styles.subtitle}>
             Explore exclusive, modern and exquisite African Designs at your fingertips.
           </Text>
@@ -456,7 +456,7 @@ export default function SignUpFullForm() {
             
             <Text style={styles.modalTitle}>Account Created Successfully!</Text>
             <Text style={styles.modalMessage}>
-              Welcome to AfriStyle! Your account has been created successfully. 
+              Welcome to MyStyleMag! Your account has been created successfully. 
               You can now sign in with your credentials to start exploring amazing African fashion and styles.
             </Text>
             

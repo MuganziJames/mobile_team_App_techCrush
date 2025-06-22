@@ -21,7 +21,7 @@ export default {
     tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
   },
-  primary: '#E9642C', // AfriStyle brand orange
+  primary: '#E9642C', // MyStyleMag brand orange
   secondary: '#034B45',
   white: '#FFFFFF',
   black: '#000000',

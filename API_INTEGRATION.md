@@ -1,7 +1,7 @@
-# TechCrush API Integration - AfriStyle Mobile App
+# TechCrush API Integration - MyStyleMag Mobile App
 
 ## Overview
-This document describes the integration of the TechCrush authentication API into the AfriStyle React Native mobile application.
+This document describes the integration of the TechCrush authentication API into the MyStyleMag React Native mobile application.
 
 ## 🔗 API Details
 - **Base URL**: `https://my-style-mag-backend.onrender.com/api/v1`
