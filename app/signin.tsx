@@ -142,7 +142,7 @@ export default function SignInScreen() {
         <View style={styles.content}>
           <Text style={styles.title}>Welcome Back!</Text>
           <Text style={styles.subtitle}>
-            Log in to your account to continue shopping
+            Explore exclusive, modern and exquisite African Designs at your fingertips.
           </Text>
 
           {/* Error Banner */}
