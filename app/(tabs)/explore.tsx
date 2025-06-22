@@ -7,7 +7,7 @@ import { Style, useLookbook } from '@/contexts/LookbookContext';
 import { useOutfit } from '@/contexts/OutfitContext';
 import { outfitsToStyles } from '@/utils/outfitAdapter';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -49,7 +49,7 @@ const tags = [
 ];
 
 export default function SearchScreen() {
-  const { outfits, loading, searchOutfits } = useOutfit();
+  const { outfits, loading } = useOutfit();
   const { categories } = useCategory();
   const { 
     folders, 
@@ -59,29 +59,54 @@ export default function SearchScreen() {
     getStyleFolder
   } = useLookbook();
   
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // What user types
+  const [searchQuery, setSearchQuery] = useState(''); // What actually gets searched
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
-  const [searchResults, setSearchResults] = useState<Style[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showSuccessCard, setShowSuccessCard] = useState(false);
   const [successMessage, setSuccessMessage] = useState({ title: '', message: '' });
   
-  // Convert outfits to styles for display
-  const allStyles = outfitsToStyles(outfits);
+  // Convert outfits to styles for display - memoize to prevent unnecessary recalculations
+  const allStyles = useMemo(() => outfitsToStyles(outfits), [outfits]);
 
-  // Create categories array with API data
-  const categoryOptions = ['All', ...categories.map(cat => cat.name)];
+  // Create categories array with API data - memoize to prevent unnecessary recreations
+  const categoryOptions = useMemo(() => ['All', ...categories.map(cat => cat.name)], [categories]);
 
-  // Filter styles based on search criteria
-  const getFilteredStyles = () => {
-    if (searchQuery.trim()) {
-      return searchResults;
-    }
+  // Frontend search function
+  const searchStyles = (styles: Style[], query: string): Style[] => {
+    if (!query.trim()) return styles;
+    
+    const searchTerm = query.toLowerCase().trim();
+    
+    return styles.filter(style => {
+      // Search in title
+      const titleMatch = style.title.toLowerCase().includes(searchTerm);
+      
+      // Search in description
+      const descriptionMatch = style.description?.toLowerCase().includes(searchTerm) || false;
+      
+      // Search in category
+      const categoryMatch = style.category.toLowerCase().includes(searchTerm);
+      
+      // Search in tags
+      const tagMatch = style.tags.some(tag => 
+        tag.toLowerCase().includes(searchTerm)
+      );
+      
+      return titleMatch || descriptionMatch || categoryMatch || tagMatch;
+    });
+  };
 
+  // Filter styles based on search criteria - only recalculate when search query or filters change
+  const filteredStyles = useMemo(() => {    
     let filtered = allStyles;
+
+    // Apply search filter first (only when there's an active search query)
+    if (searchQuery.trim()) {
+      filtered = searchStyles(filtered, searchQuery);
+    }
 
     // Filter by category
     if (selectedCategory !== 'All') {
@@ -102,34 +127,20 @@ export default function SearchScreen() {
     }
 
     return filtered;
-  };
+  }, [allStyles, searchQuery, selectedCategory, selectedTags]); // Only depend on actual search query, not input
 
-  const filteredStyles = getFilteredStyles();
+  // Handle search when user presses Enter
+  const handleSearchSubmit = useCallback(() => {
+    setSearchQuery(searchInput.trim());
+  }, [searchInput]);
 
-  // Handle search with debouncing
-  useEffect(() => {
-    const delayedSearch = setTimeout(async () => {
-      if (searchQuery.trim()) {
-        setIsSearching(true);
-        try {
-          const results = await searchOutfits(searchQuery);
-          setSearchResults(outfitsToStyles(results));
-        } catch (error) {
-          console.error('Search error:', error);
-          setSearchResults([]);
-        } finally {
-          setIsSearching(false);
-        }
-      } else {
-        setSearchResults([]);
-        setIsSearching(false);
-      }
-    }, 300);
+  // Handle clearing search
+  const handleClearSearch = useCallback(() => {
+    setSearchInput('');
+    setSearchQuery('');
+  }, []);
 
-    return () => clearTimeout(delayedSearch);
-  }, [searchQuery]);
-
-  const handleTagToggle = (tag: string) => {
+  const handleTagToggle = useCallback((tag: string) => {
     if (tag === 'All') {
       setSelectedTags([]);
     } else {
@@ -139,9 +150,13 @@ export default function SearchScreen() {
           : [...prev.filter(t => t !== 'All'), tag]
       );
     }
-  };
+  }, []);
 
-  const handleSaveStyle = async (style: Style) => {
+  const handleCategorySelect = useCallback((category: string) => {
+    setSelectedCategory(category);
+  }, []);
+
+  const handleSaveStyle = useCallback(async (style: Style) => {
     if (isStyleSaved(style.id)) {
       // Style is already saved - directly remove it
       const folderId = getStyleFolder(style.id);
@@ -160,9 +175,9 @@ export default function SearchScreen() {
       setSelectedStyle(style);
       setShowFolderModal(true);
     }
-  };
+  }, [isStyleSaved, getStyleFolder, folders, removeStyleFromFolder]);
 
-  const handleFolderSelect = async (folderId: string) => {
+  const handleFolderSelect = useCallback(async (folderId: string) => {
     if (selectedStyle) {
       await saveStyleToFolder(selectedStyle, folderId);
       setShowFolderModal(false);
@@ -175,56 +190,29 @@ export default function SearchScreen() {
       });
       setShowSuccessCard(true);
     }
-  };
+  }, [selectedStyle, saveStyleToFolder, folders]);
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
+    setSearchInput('');
     setSearchQuery('');
     setSelectedCategory('All');
     setSelectedTags([]);
-    setSearchResults([]);
-  };
+  }, []);
 
-  const renderStyleCard = ({ item }: { item: Style }) => (
+  // Handle text input changes
+  const handleTextInputChange = useCallback((text: string) => {
+    setSearchInput(text);
+  }, []);
+
+  const renderStyleCard = useCallback(({ item }: { item: Style }) => (
     <StyleCard
       style={item}
       onSave={handleSaveStyle}
       isSaved={isStyleSaved(item.id)}
     />
-  );
+  ), [handleSaveStyle, isStyleSaved]);
 
-  const renderSearchHeader = () => (
-    <View style={componentStyles.searchContainer}>
-      <View style={componentStyles.searchInputContainer}>
-        <Ionicons name="search" size={20} color="#999" style={componentStyles.searchIcon} />
-            <TextInput
-          style={componentStyles.searchInput}
-          placeholder="Search styles..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#999"
-            />
-            {searchQuery.length > 0 && (
-          <TouchableOpacity 
-            onPress={() => setSearchQuery('')}
-            style={componentStyles.clearButton}
-          >
-                <Ionicons name="close-circle" size={20} color="#999" />
-              </TouchableOpacity>
-            )}
-          </View>
-      
-      {(selectedCategory !== 'All' || selectedTags.length > 0) && (
-        <TouchableOpacity 
-          style={componentStyles.clearFiltersButton}
-          onPress={clearAllFilters}
-        >
-          <Text style={componentStyles.clearFiltersText}>Clear Filters</Text>
-        </TouchableOpacity>
-      )}
-        </View>
-  );
-
-  const renderFilters = () => (
+  const renderFilters = useCallback(() => (
     <View style={componentStyles.filtersContainer}>
       {/* Categories */}
       <View style={componentStyles.filterSection}>
@@ -234,25 +222,28 @@ export default function SearchScreen() {
           showsHorizontalScrollIndicator={false}
           style={componentStyles.filterScrollView}
         >
-          {categoryOptions.map((category) => (
+          {categoryOptions.map((category) => {
+            const isActive = selectedCategory === category;
+            return (
               <TouchableOpacity
                 key={category}
                 style={[
-                componentStyles.filterChip,
-                selectedCategory === category && componentStyles.filterChipActive
+                  componentStyles.filterChip,
+                  isActive && componentStyles.filterChipActive
                 ]}
-                onPress={() => setSelectedCategory(category)}
+                onPress={() => handleCategorySelect(category)}
               >
                 <Text style={[
-                componentStyles.filterChipText,
-                selectedCategory === category && componentStyles.filterChipTextActive
+                  componentStyles.filterChipText,
+                  isActive && componentStyles.filterChipTextActive
                 ]}>
                   {category}
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Tags */}
       <View style={componentStyles.filterSection}>
@@ -262,93 +253,51 @@ export default function SearchScreen() {
           showsHorizontalScrollIndicator={false}
           style={componentStyles.filterScrollView}
         >
-          {tags.map((tag) => (
+          {tags.map((tag) => {
+            const isActive = selectedTags.includes(tag) || (tag === 'All' && selectedTags.length === 0);
+            return (
               <TouchableOpacity
                 key={tag}
                 style={[
-                componentStyles.filterChip,
-                (selectedTags.includes(tag) || (tag === 'All' && selectedTags.length === 0)) && componentStyles.filterChipActive
+                  componentStyles.filterChip,
+                  isActive && componentStyles.filterChipActive
                 ]}
                 onPress={() => handleTagToggle(tag)}
               >
                 <Text style={[
-                componentStyles.filterChipText,
-                (selectedTags.includes(tag) || (tag === 'All' && selectedTags.length === 0)) && componentStyles.filterChipTextActive
+                  componentStyles.filterChipText,
+                  isActive && componentStyles.filterChipTextActive
                 ]}>
                   #{tag}
                 </Text>
               </TouchableOpacity>
-            ))}
+            );
+          })}
         </ScrollView>
       </View>
     </View>
-  );
+  ), [selectedCategory, selectedTags, categoryOptions, handleTagToggle, handleCategorySelect]);
 
-  const renderContent = () => {
-    if (loading && allStyles.length === 0) {
-      return (
-        <View style={componentStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={componentStyles.loadingText}>Loading styles...</Text>
-          </View>
-      );
-    }
-
-    if (isSearching) {
-      return (
-        <View style={componentStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={componentStyles.loadingText}>Searching...</Text>
-        </View>
-      );
-    }
-
-    if (filteredStyles.length === 0) {
-      const isFiltered = searchQuery.trim() || selectedCategory !== 'All' || selectedTags.length > 0;
-      return (
-        <View style={componentStyles.emptyContainer}>
-          <EmptyState
-            icon={isFiltered ? "search-outline" : "shirt-outline"}
-            title={isFiltered ? "No Styles Found" : "No Styles Available"}
-            description={isFiltered ? "Try adjusting your search or filters" : "Check back later for new styles"}
-            actionText={isFiltered ? "Clear Filters" : "Refresh"}
-            onActionPress={isFiltered ? clearAllFilters : undefined}
-          />
-        </View>
-      );
-    }
-
-    // Return null for FlatList to handle the data
-    return null;
-  };
-
-  const renderListHeader = () => (
+  const renderFiltersAndResults = useCallback(() => (
     <View>
-      {renderSearchHeader()}
       {renderFilters()}
       <View style={componentStyles.resultsContainer}>
         <Text style={componentStyles.resultsTitle}>
-          {searchQuery.trim() ? `Search Results (${filteredStyles.length})` : `All Styles (${filteredStyles.length})`}
-              </Text>
-            </View>
+          {searchQuery.trim() ? 
+            `Search Results for "${searchQuery}" (${filteredStyles.length})` : 
+            `All Styles (${filteredStyles.length})`
+          }
+        </Text>
+      </View>
     </View>
-  );
+  ), [filteredStyles, searchQuery, renderFilters]);
 
-  const renderEmptyComponent = () => {
+  const renderEmptyComponent = useCallback(() => {
     if (loading && allStyles.length === 0) {
       return (
         <View style={componentStyles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={componentStyles.loadingText}>Loading styles...</Text>
-        </View>
-      );
-    }
-
-    if (isSearching) {
-      return (
-        <View style={componentStyles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={componentStyles.loadingText}>Searching...</Text>
         </View>
       );
     }
@@ -365,7 +314,7 @@ export default function SearchScreen() {
         />
       </View>
     );
-  };
+  }, [loading, allStyles, searchQuery, selectedCategory, selectedTags, clearAllFilters]);
 
   return (
     <SafeAreaView style={componentStyles.container}>
@@ -376,13 +325,58 @@ export default function SearchScreen() {
         onClose={() => setShowSuccessCard(false)}
       />
       
+      {/* Search Header - Outside FlatList to prevent keyboard dismissal */}
+      <View style={componentStyles.searchContainer}>
+        <View style={componentStyles.searchInputContainer}>
+          <Ionicons name="search" size={20} color="#999" style={componentStyles.searchIcon} />
+          <TextInput
+            style={componentStyles.searchInput}
+            placeholder="Search styles... (Press Enter to search)"
+            value={searchInput}
+            onChangeText={handleTextInputChange}
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
+            placeholderTextColor="#999"
+          />
+          {searchInput.length > 0 && (
+            <TouchableOpacity 
+              onPress={handleClearSearch}
+              style={componentStyles.clearButton}
+            >
+              <Ionicons name="close-circle" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        {/* Show current active search query if different from input */}
+        {searchQuery && searchQuery !== searchInput && (
+          <View style={componentStyles.activeSearchContainer}>
+            <Text style={componentStyles.activeSearchText}>
+              Searching for: "{searchQuery}"
+            </Text>
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close" size={16} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
+        )}
+        
+        {(searchQuery || selectedCategory !== 'All' || selectedTags.length > 0) && (
+          <TouchableOpacity 
+            style={componentStyles.clearFiltersButton}
+            onPress={clearAllFilters}
+          >
+            <Text style={componentStyles.clearFiltersText}>Clear All</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      
       <FlatList
         data={filteredStyles}
         renderItem={renderStyleCard}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={componentStyles.row}
-        ListHeaderComponent={renderListHeader}
+        ListHeaderComponent={renderFiltersAndResults}
         ListEmptyComponent={renderEmptyComponent}
         contentContainerStyle={componentStyles.flatListContent}
         showsVerticalScrollIndicator={false}
@@ -415,7 +409,7 @@ export default function SearchScreen() {
               data={folders}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-              <TouchableOpacity
+                <TouchableOpacity
                   style={componentStyles.folderItem}
                   onPress={() => handleFolderSelect(item.id)}
                 >
@@ -423,8 +417,8 @@ export default function SearchScreen() {
                     <Ionicons name="folder" size={24} color={Colors.primary} />
                   </View>
                   <Text style={componentStyles.folderName}>{item.name}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#999" />
-              </TouchableOpacity>
+                  <Ionicons name="chevron-forward" size={20} color="#999" />
+                </TouchableOpacity>
               )}
               ItemSeparatorComponent={() => <View style={componentStyles.separator} />}
               ListEmptyComponent={() => (
@@ -634,5 +628,22 @@ const componentStyles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
     textAlign: 'center',
+  },
+  activeSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
+  activeSearchText: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+    fontWeight: '500',
   },
 });

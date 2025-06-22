@@ -196,10 +196,14 @@ export const shareStyle = async (style: SavedStyle) => {
     if (await Sharing.isAvailableAsync()) {
       const message = `Check out this style: ${style.title}\n\nCategory: ${style.category}\nTags: ${style.tags.map(tag => `#${tag}`).join(' ')}\n\nShared from MyStyleMag`;
       
-      await Sharing.shareAsync(style.image, {
-        mimeType: 'image/jpeg',
-        dialogTitle: `Share ${style.title}`,
-      });
+      if (typeof style.image === 'string') {
+        await Sharing.shareAsync(style.image, {
+          mimeType: 'image/jpeg',
+          dialogTitle: `Share ${style.title}`,
+        });
+      } else {
+        console.error('Invalid image type for sharing');
+      }
     } else {
       console.log('Sharing is not available on this platform');
     }
