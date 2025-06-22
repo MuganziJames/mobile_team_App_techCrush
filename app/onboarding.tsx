@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Dimensions, FlatList, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, ImageBackground, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
@@ -81,15 +81,16 @@ export default function OnboardingScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      {/* Skip button positioned at top right - no background overlay */}
-      <SafeAreaView style={[styles.topContainer, { paddingTop: insets.top + 16 }]}>
+      
+      {/* Skip button positioned at top right */}
+      <View style={styles.topContainer}>
         <View style={styles.backButton} />
         <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
 
       <FlatList
         ref={flatListRef}
@@ -103,10 +104,11 @@ export default function OnboardingScreen() {
           setCurrentIndex(index);
         }}
         keyExtractor={(item) => item.id}
+        style={styles.flatList}
       />
 
-      {/* Bottom controls positioned over the gradient */}
-      <View style={[styles.bottomContainer, { paddingBottom: Math.max(insets.bottom, 20) + 30 }]}>
+      {/* Bottom controls */}
+      <View style={styles.bottomContainer}>
         <View style={styles.paginationContainer}>
           <PaginationDots
             count={onboardingData.length}
@@ -134,7 +136,7 @@ export default function OnboardingScreen() {
           />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -143,15 +145,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  flatList: {
+    flex: 1,
+  },
   topContainer: {
     position: 'absolute',
-    top: 0,
+    top: Platform.OS === 'ios' ? 60 : 40, // More reliable top positioning
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
     zIndex: 10,
   },
   backButton: {
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     position: 'absolute',
-    bottom: 180,
+    bottom: Platform.OS === 'ios' ? 200 : 180, // Adjust for different platforms
     left: 24,
     right: 24,
     zIndex: 2,
@@ -220,6 +225,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 30, // Platform-specific bottom padding
     alignItems: 'center',
     zIndex: 2,
     backgroundColor: 'rgba(255, 255, 255, 0.02)',
@@ -265,4 +271,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});
+
+ 

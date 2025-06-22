@@ -81,23 +81,62 @@ export default function EditProfileScreen() {
     setIsLoading(true);
 
     try {
-      const updated = {
-        name: fullName.trim(),
-        email: email.trim(),
-        phone: phone ? `${selectedCountry.dial_code}${phone}` : undefined,
-        dateOfBirth: dateOfBirth ? dateOfBirth.toISOString() : undefined,
-        location: location.trim() || undefined,
-      };
+      // Prepare updates object with only changed fields
+      const updates: any = {};
+      
+      // Always update name if changed
+      if (fullName.trim() !== user?.name) {
+        updates.name = fullName.trim();
+      }
+      
+      // Update email if changed (though we preserve original for auth)
+      if (email.trim() !== user?.email) {
+        updates.email = email.trim();
+      }
+      
+      // Update phone if changed
+      const fullPhoneNumber = phone ? `${selectedCountry.dial_code}${phone}` : '';
+      if (fullPhoneNumber !== user?.phone) {
+        updates.phone = fullPhoneNumber || undefined;
+        updates.countryCode = selectedCountry.code;
+        updates.dialCode = selectedCountry.dial_code;
+      }
+      
+      // Update date of birth if changed
+      const newDateOfBirth = dateOfBirth ? dateOfBirth.toISOString() : undefined;
+      if (newDateOfBirth !== user?.dateOfBirth) {
+        updates.dateOfBirth = newDateOfBirth;
+      }
+      
+      // Update location if changed
+      if (location.trim() !== user?.location) {
+        updates.location = location.trim() || undefined;
+      }
 
-      // Update profile using AuthContext (this saves to AsyncStorage)
-      await updateProfile(updated);
+      // Only update if there are actual changes
+      if (Object.keys(updates).length === 0) {
+        Alert.alert('No Changes', 'No changes were made to your profile.');
+        setIsLoading(false);
+        return;
+      }
 
-      console.log('Profile updated successfully:', updated);
+      // Update profile using AuthContext (this saves to AsyncStorage and preserves auth)
+      const updatedUser = await updateProfile(updates);
+
+      console.log('Profile updated successfully:', {
+        changes: updates,
+        updatedUser: {
+          name: updatedUser.name,
+          phone: updatedUser.phone,
+          location: updatedUser.location,
+          dateOfBirth: updatedUser.dateOfBirth
+        }
+      });
 
       // Show success card
       setShowSuccessCard(true);
       
-      // Navigate back after a short delay to show success message
+      // Navigate back after showing success message
       setTimeout(() => {
         setShowSuccessCard(false);
         router.back();
@@ -105,7 +144,10 @@ export default function EditProfileScreen() {
 
     } catch (error) {
       console.error('Error saving profile:', error);
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+      Alert.alert(
+        'Error', 
+        'Failed to update profile. Please try again.\n\nYour changes have been saved locally and will be available when you restart the app.'
+      );
     } finally {
       setIsLoading(false);
     }

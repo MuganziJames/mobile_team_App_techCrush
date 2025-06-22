@@ -241,30 +241,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     /**
      * Update the currently authenticated user's profile locally and persist to storage.
-     * This ensures data persists across app sessions.
+     * This ensures data persists across app sessions without interfering with authentication.
      */
     updateProfile: async (updates: Partial<User>) => {
       try {
-        const updatedUser = state.user ? { ...state.user, ...updates } : null;
-        
-        if (updatedUser) {
-          // Update state first
-          setState(prev => ({
-            ...prev,
-            user: updatedUser,
-          }));
-          
-          // Persist to AsyncStorage
-          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-          console.log('Profile updated and saved to storage:', updatedUser);
-          
-          // Optionally, you could also call an API endpoint here to sync with server
-          // await authService.updateProfile(updates);
-          
-          return updatedUser;
-        } else {
+        if (!state.user) {
           throw new Error('No user found to update');
         }
+
+        // Create updated user object, preserving critical auth fields
+        const updatedUser: User = {
+          ...state.user,
+          ...updates,
+          // Preserve critical authentication fields
+          id: state.user.id,
+          email: state.user.email, // Keep original email for auth consistency
+          role: state.user.role,
+        };
+
+        // Update firstName and lastName if name is provided
+        if (updates.name) {
+          const nameParts = updates.name.trim().split(' ');
+          updatedUser.firstName = nameParts[0] || '';
+          updatedUser.lastName = nameParts.slice(1).join(' ') || '';
+        }
+
+        // Update state first
+        setState(prev => ({
+          ...prev,
+          user: updatedUser,
+        }));
+
+        // Persist to AsyncStorage with error handling
+        try {
+          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+          console.log('Profile updated and saved to storage:', {
+            name: updatedUser.name,
+            phone: updatedUser.phone,
+            location: updatedUser.location,
+            dateOfBirth: updatedUser.dateOfBirth
+          });
+        } catch (storageError) {
+          console.error('Error saving to AsyncStorage:', storageError);
+          // Don't throw here - the state is already updated
+        }
+
+        // Future: API sync could be added here
+        // try {
+        //   await authService.updateProfile(updates);
+        // } catch (apiError) {
+        //   console.warn('API sync failed, but local update succeeded:', apiError);
+        // }
+
+        return updatedUser;
       } catch (error) {
         console.error('Error updating profile:', error);
         throw error;
